@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import { User, AccountTier, LoginForm, RegisterForm, ApiResponse } from '@/types';
-import { authService } from '@/services/authService';
+import { User, AccountTier, LoginForm, RegisterForm, ApiResponse } from '../types';
+import { authService } from '../services/authService';
 
 interface AuthState {
   user: User | null;

@@ -166,7 +166,7 @@ class AuthService {
       const response = await apiClient.post(`${this.baseUrl}/2fa/enable`);
       return {
         success: true,
-        data: response.data,
+        data: response.data as { qrCode: string; backupCodes: string[] },
         message: 'Twee-factor authenticatie ingeschakeld'
       };
     } catch (error: any) {

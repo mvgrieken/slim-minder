@@ -24,6 +24,8 @@ root.render(
 reportWebVitals(console.log);
 
 // Hot Module Replacement for development
+// @ts-ignore
 if (module.hot) {
+  // @ts-ignore
   module.hot.accept();
 } 
