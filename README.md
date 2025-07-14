@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Slim Minder MVP - React Web Application
 
 Een modern fintech platform voor schuldpreventie en gedragsverandering in persoonlijke financiën, gebouwd met React en TypeScript.
@@ -254,3 +255,7 @@ Voor vragen of support:
 - Icons van Lucide React
 - Gebaseerd op React best practices
 - Accessibility guidelines van WCAG 2.1 
+=======
+# slim-minder
+Slim Minder app - voor financiele gezondheid
+>>>>>>> ad5b45df1116bcca838b53e2dcd5145b6fa1d4ec
