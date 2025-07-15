@@ -249,6 +249,12 @@ const ActionButton = styled.button`
   }
 `;
 
+interface Alert {
+  type: 'warning' | 'success' | 'info';
+  message: string;
+  icon: React.ComponentType<{ size: number }>;
+}
+
 const DashboardPage: React.FC = () => {
   const [dashboardData] = useState({
     totalIncome: 3200,
@@ -265,7 +271,7 @@ const DashboardPage: React.FC = () => {
       { type: 'warning' as const, message: 'Je boodschappenbudget is bijna op (90%)', icon: AlertTriangle },
       { type: 'success' as const, message: 'Je hebt deze maand €150 meer gespaard dan vorige maand', icon: CheckCircle },
       { type: 'info' as const, message: 'Nieuwe spaartip: Overweeg automatisch sparen', icon: Target }
-    ]
+    ] as Alert[]
   });
 
   return (
