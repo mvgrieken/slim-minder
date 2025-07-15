@@ -1,119 +1,102 @@
-import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
 import { toast } from 'react-hot-toast';
 
 // API base URL - in production this would come from environment variables
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
+interface ApiResponse<T = any> {
+  data: T;
+  status: number;
+  statusText: string;
+  headers: Headers;
+}
+
+interface ApiError {
+  message: string;
+  status: number;
+  data?: any;
+}
+
 class ApiClient {
-  private client: AxiosInstance;
+  private baseURL: string;
 
   constructor() {
-    this.client = axios.create({
-      baseURL: API_BASE_URL,
-      timeout: 10000,
+    this.baseURL = API_BASE_URL;
+  }
+
+  private async request<T>(
+    url: string,
+    options: RequestInit = {}
+  ): Promise<ApiResponse<T>> {
+    const token = localStorage.getItem('auth_token');
+    
+    const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+        ...options.headers,
       },
-    });
+      ...options,
+    };
 
-    this.setupInterceptors();
-  }
-
-  private setupInterceptors() {
-    // Request interceptor to add auth token
-    this.client.interceptors.request.use(
-      (config) => {
-        const token = localStorage.getItem('auth_token');
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-      },
-      (error) => {
-        return Promise.reject(error);
-      }
-    );
-
-    // Response interceptor for error handling and token refresh
-    this.client.interceptors.response.use(
-      (response) => response,
-      async (error: AxiosError) => {
-        const originalRequest = error.config as any;
-
+    try {
+      const response = await fetch(`${this.baseURL}${url}`, config);
+      
+      if (!response.ok) {
         // Handle 401 unauthorized errors
-        if (error.response?.status === 401 && !originalRequest._retry) {
-          originalRequest._retry = true;
-
-          try {
-            // Try to refresh token
-            const refreshToken = localStorage.getItem('refresh_token');
-            if (refreshToken) {
-              const response = await this.client.post('/auth/refresh', {
-                refreshToken,
-              });
-
-              const { token, refreshToken: newRefreshToken } = response.data;
-              localStorage.setItem('auth_token', token);
-              if (newRefreshToken) {
-                localStorage.setItem('refresh_token', newRefreshToken);
-              }
-
-              // Retry original request with new token
-              originalRequest.headers.Authorization = `Bearer ${token}`;
-              return this.client(originalRequest);
-            }
-          } catch (refreshError) {
-            // Refresh failed, redirect to login
-            this.handleAuthError();
-            return Promise.reject(refreshError);
-          }
+        if (response.status === 401) {
+          await this.handleAuthError();
         }
-
-        // Handle other errors
-        this.handleError(error);
-        return Promise.reject(error);
+        
+        const errorData = await response.json().catch(() => ({}));
+        const error = new Error(errorData.message || 'Er ging iets mis') as any;
+        error.status = response.status;
+        error.data = errorData;
+        throw error;
       }
-    );
-  }
 
-  private handleError(error: AxiosError) {
-    if (error.response) {
-      // Server responded with error status
-      const status = error.response.status;
-      const message = (error.response.data as any)?.message || 'Er ging iets mis';
-
-      switch (status) {
-        case 400:
-          toast.error(`Ongeldige aanvraag: ${message}`);
-          break;
-        case 401:
-          this.handleAuthError();
-          break;
-        case 403:
-          toast.error('Je hebt geen toegang tot deze functionaliteit');
-          break;
-        case 404:
-          toast.error('De gevraagde resource werd niet gevonden');
-          break;
-        case 429:
-          toast.error('Te veel aanvragen. Probeer het later opnieuw.');
-          break;
-        case 500:
-          toast.error('Server fout. Probeer het later opnieuw.');
-          break;
-        default:
-          toast.error(message);
-      }
-    } else if (error.request) {
-      // Network error
-      toast.error('Netwerkfout. Controleer je internetverbinding.');
-    } else {
-      // Other error
-      toast.error('Er ging iets mis. Probeer het opnieuw.');
+      const data = await response.json().catch(() => null);
+      
+      return {
+        data,
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers,
+      };
+    } catch (error) {
+      this.handleError(error as ApiError);
+      throw error;
     }
   }
 
-  private handleAuthError() {
+  private handleError(error: ApiError) {
+    const status = error.status;
+    const message = error.message || 'Er ging iets mis';
+
+    switch (status) {
+      case 400:
+        toast.error(`Ongeldige aanvraag: ${message}`);
+        break;
+      case 401:
+        this.handleAuthError();
+        break;
+      case 403:
+        toast.error('Je hebt geen toegang tot deze functionaliteit');
+        break;
+      case 404:
+        toast.error('De gevraagde resource werd niet gevonden');
+        break;
+      case 429:
+        toast.error('Te veel aanvragen. Probeer het later opnieuw.');
+        break;
+      case 500:
+        toast.error('Server fout. Probeer het later opnieuw.');
+        break;
+      default:
+        toast.error(message);
+    }
+  }
+
+  private async handleAuthError() {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('refresh_token');
     
@@ -125,52 +108,88 @@ class ApiClient {
   }
 
   // HTTP Methods
-  async get<T>(url: string, config?: any): Promise<AxiosResponse<T>> {
-    return this.client.get(url, config);
+  async get<T>(url: string, config?: RequestInit): Promise<ApiResponse<T>> {
+    return this.request<T>(url, { method: 'GET', ...config });
   }
 
-  async post<T>(url: string, data?: any, config?: any): Promise<AxiosResponse<T>> {
-    return this.client.post(url, data, config);
+  async post<T>(url: string, data?: any, config?: RequestInit): Promise<ApiResponse<T>> {
+    return this.request<T>(url, {
+      method: 'POST',
+      body: JSON.stringify(data),
+      ...config,
+    });
   }
 
-  async put<T>(url: string, data?: any, config?: any): Promise<AxiosResponse<T>> {
-    return this.client.put(url, data, config);
+  async put<T>(url: string, data?: any, config?: RequestInit): Promise<ApiResponse<T>> {
+    return this.request<T>(url, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+      ...config,
+    });
   }
 
-  async patch<T>(url: string, data?: any, config?: any): Promise<AxiosResponse<T>> {
-    return this.client.patch(url, data, config);
+  async patch<T>(url: string, data?: any, config?: RequestInit): Promise<ApiResponse<T>> {
+    return this.request<T>(url, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+      ...config,
+    });
   }
 
-  async delete<T>(url: string, config?: any): Promise<AxiosResponse<T>> {
-    return this.client.delete(url, config);
+  async delete<T>(url: string, config?: RequestInit): Promise<ApiResponse<T>> {
+    return this.request<T>(url, { method: 'DELETE', ...config });
   }
 
   // File upload method
-  async uploadFile<T>(url: string, file: File, onProgress?: (progress: number) => void): Promise<AxiosResponse<T>> {
+  async uploadFile<T>(
+    url: string,
+    file: File,
+    onProgress?: (progress: number) => void
+  ): Promise<ApiResponse<T>> {
     const formData = new FormData();
     formData.append('file', file);
 
-    return this.client.post(url, formData, {
+    const token = localStorage.getItem('auth_token');
+    
+    const response = await fetch(`${this.baseURL}${url}`, {
+      method: 'POST',
       headers: {
-        'Content-Type': 'multipart/form-data',
+        ...(token && { Authorization: `Bearer ${token}` }),
       },
-      onUploadProgress: (progressEvent) => {
-        if (onProgress && progressEvent.total) {
-          const progress = (progressEvent.loaded / progressEvent.total) * 100;
-          onProgress(progress);
-        }
-      },
+      body: formData,
     });
+
+    if (!response.ok) {
+      const error = new Error('Upload mislukt') as any;
+      error.status = response.status;
+      throw error;
+    }
+
+    const data = await response.json();
+    return {
+      data,
+      status: response.status,
+      statusText: response.statusText,
+      headers: response.headers,
+    };
   }
 
   // Download file method
   async downloadFile(url: string, filename?: string): Promise<void> {
     try {
-      const response = await this.client.get(url, {
-        responseType: 'blob',
+      const token = localStorage.getItem('auth_token');
+      
+      const response = await fetch(`${this.baseURL}${url}`, {
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
       });
 
-      const blob = new Blob([response.data]);
+      if (!response.ok) {
+        throw new Error('Download mislukt');
+      }
+
+      const blob = await response.blob();
       const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = downloadUrl;
@@ -210,4 +229,4 @@ class ApiClient {
 export const apiClient = new ApiClient();
 
 // Export types for use in other services
-export type { AxiosResponse, AxiosError }; 
+export type { ApiResponse, ApiError }; 

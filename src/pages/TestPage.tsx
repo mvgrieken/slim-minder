@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { supabase } from '../lib/supabase';
 
@@ -142,14 +142,14 @@ const TestPage: React.FC = () => {
   const [tests, setTests] = useState<TestResult[]>([]);
   const [isRunning, setIsRunning] = useState(false);
 
-  const initialTests: Omit<TestResult, 'status' | 'message' | 'duration'>[] = [
+  const initialTests = useMemo((): Omit<TestResult, 'status' | 'message' | 'duration'>[] => [
     { name: 'Omgevingsvariabelen' },
     { name: 'Supabase Connectie' },
     { name: 'Database Schema' },
     { name: 'Authenticatie Service' },
     { name: 'API Endpoints' },
     { name: 'Browser Compatibiliteit' },
-  ];
+  ], []);
 
   const testEnvironmentVariables = async (): Promise<TestResult> => {
     const startTime = Date.now();
@@ -382,23 +382,23 @@ const TestPage: React.FC = () => {
           return await testAPIEndpoints();
         case 'Browser Compatibiliteit':
           return await testBrowserCompatibility();
-        default:
-          return {
-            name: testName,
-            status: 'error',
-            message: 'Onbekende test',
-            duration: Date.now() - startTime
-          };
-              }
-      } catch (error) {
-        return {
-          name: testName,
-          status: 'error',
-          message: `Test gefaald: ${error instanceof Error ? error.message : 'Onbekende fout'}`,
-          duration: Date.now() - startTime
-        };
       }
-    }, []);
+    } catch (error) {
+      return {
+        name: testName,
+        status: 'error',
+        message: `Test gefaald: ${error instanceof Error ? error.message : 'Onbekende fout'}`,
+        duration: Date.now() - startTime
+      };
+    }
+    // Fallback voor TypeScript: zou nooit bereikt moeten worden
+    return {
+      name: testName,
+      status: 'error',
+      message: 'Onbekende test',
+      duration: Date.now() - startTime
+    };
+  }, []);
 
   const runAllTests = useCallback(async () => {
     setIsRunning(true);
@@ -417,7 +417,7 @@ const TestPage: React.FC = () => {
     }
 
     setIsRunning(false);
-  }, [initialTests]);
+  }, [initialTests, runTest]);
 
   useEffect(() => {
     runAllTests();
