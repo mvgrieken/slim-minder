@@ -289,7 +289,7 @@ const TestPage: React.FC = () => {
         name: 'API Endpoints',
         status: 'success',
         message: 'API endpoints bereikbaar',
-        details: `API response succesvol`,
+        details: 'API response succesvol',
         duration: Date.now() - startTime
       };
     } catch (error) {
@@ -310,8 +310,8 @@ const TestPage: React.FC = () => {
         localStorage: typeof window !== 'undefined' && typeof window.localStorage !== 'undefined',
         fetch: typeof fetch !== 'undefined',
         promise: typeof Promise !== 'undefined',
-        arrow: (() => { try { return true; } catch { return false; } })(),
-        modules: (() => { try { return typeof document !== 'undefined' && 'noModule' in document.createElement('script'); } catch { return false; } })()
+        arrow: true,
+        modules: typeof document !== 'undefined' && 'noModule' in document.createElement('script')
       };
       const supported = Object.keys(features).filter((key) => features[key]);
       const unsupported = Object.keys(features).filter((key) => !features[key]);
@@ -358,14 +358,14 @@ const TestPage: React.FC = () => {
           return await testAPIEndpoints();
         case 'Browser Compatibiliteit':
           return await testBrowserCompatibility();
+        default:
+          return {
+            name: testName,
+            status: 'error',
+            message: 'Onbekende test',
+            duration: Date.now() - startTime
+          };
       }
-      // fallback voor typescript
-      return {
-        name: testName,
-        status: 'error',
-        message: 'Onbekende test',
-        duration: Date.now() - startTime
-      };
     } catch (error) {
       return {
         name: testName,
