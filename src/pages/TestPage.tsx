@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 
 interface TestResult {
@@ -147,14 +147,14 @@ const TestPage: React.FC = () => {
   const [tests, setTests] = useState<TestResult[]>([]);
   const [isRunning, setIsRunning] = useState(false);
 
-  const initialTests = [
+  const initialTests = useMemo(() => [
     { name: 'Omgevingsvariabelen', status: 'pending' as const, message: 'Test wordt uitgevoerd...' },
     { name: 'Supabase Connectie', status: 'pending' as const, message: 'Test wordt uitgevoerd...' },
     { name: 'Database Schema', status: 'pending' as const, message: 'Test wordt uitgevoerd...' },
     { name: 'Authenticatie Service', status: 'pending' as const, message: 'Test wordt uitgevoerd...' },
     { name: 'API Endpoints', status: 'pending' as const, message: 'Test wordt uitgevoerd...' },
     { name: 'Browser Compatibiliteit', status: 'pending' as const, message: 'Test wordt uitgevoerd...' }
-  ];
+  ], []);
 
   const testEnvironmentVariables = async (): Promise<TestResult> => {
     const startTime = Date.now();
