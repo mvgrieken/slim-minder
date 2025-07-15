@@ -331,6 +331,7 @@ const HomePageComponent: React.FC = () => {
           <NavLink to="#features">Functies</NavLink>
           <NavLink to="#benefits">Voordelen</NavLink>
           <NavLink to="#pricing">Tarieven</NavLink>
+          <NavLink to="/test">🔧 Test</NavLink>
         </Nav>
         
         <AuthButtons>
