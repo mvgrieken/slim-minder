@@ -216,7 +216,7 @@ const TestPage: React.FC = () => {
     
     try {
       // Test basic connection
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('transaction_categories')
         .select('count', { count: 'exact', head: true });
 
@@ -364,7 +364,7 @@ const TestPage: React.FC = () => {
         localStorage: typeof Storage !== 'undefined',
         fetch: typeof fetch !== 'undefined',
         promise: typeof Promise !== 'undefined',
-        arrow: (() => { try { eval('() => {}'); return true; } catch { return false; } })(),
+        arrow: (() => { try { return Function('return () => {}')(); } catch { return false; } })(),
         modules: (() => { try { return typeof document !== 'undefined' && 'noModule' in document.createElement('script'); } catch { return false; } })()
       };
 
@@ -421,7 +421,7 @@ const TestPage: React.FC = () => {
 
   useEffect(() => {
     runAllTests();
-  }, []);
+  }, [runAllTests]);
 
   const allTestsComplete = tests.length > 0 && tests.every(test => test.status !== 'pending');
   const allTestsPassed = tests.every(test => test.status === 'success');
