@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { TrendingUp, TrendingDown, DollarSign, Target, AlertTriangle, CheckCircle } from 'lucide-react';
+import { useApp } from '../contexts/AppContext';
+import { useAuth } from '../contexts/AuthContext';
+import { ApiService } from '../services/api';
 
 const DashboardContainer = styled.div`
   max-width: 1200px;
@@ -252,27 +255,111 @@ const ActionButton = styled.button`
 interface Alert {
   type: 'warning' | 'success' | 'info';
   message: string;
-  icon: React.ComponentType<{ size: number }>;
+  icon: React.ComponentType<{ size?: string | number }>;
 }
 
 const DashboardPage: React.FC = () => {
-  const [dashboardData] = useState({
-    totalIncome: 3200,
-    totalExpenses: 1850,
-    totalSavings: 1350,
+  const { user } = useAuth();
+  const { loading, error } = useApp();
+  const [dashboardData, setDashboardData] = useState({
+    totalIncome: 0,
+    totalExpenses: 0,
+    totalSavings: 0,
     budgetStatus: 'on-track',
-    topCategories: [
-      { name: 'Boodschappen', amount: 450, budget: 500, percentage: 90 },
-      { name: 'Vervoer', amount: 320, budget: 400, percentage: 80 },
-      { name: 'Vrije tijd', amount: 280, budget: 300, percentage: 93 },
-      { name: 'Wonen', amount: 800, budget: 800, percentage: 100 }
-    ],
-    alerts: [
-      { type: 'warning' as const, message: 'Je boodschappenbudget is bijna op (90%)', icon: AlertTriangle },
-      { type: 'success' as const, message: 'Je hebt deze maand €150 meer gespaard dan vorige maand', icon: CheckCircle },
-      { type: 'info' as const, message: 'Nieuwe spaartip: Overweeg automatisch sparen', icon: Target }
-    ] as Alert[]
+    topCategories: [] as Array<{ name: string; amount: number; budget: number; percentage: number }>,
+    alerts: [] as Array<{ type: 'warning' | 'success' | 'info'; message: string; icon: React.ComponentType<{ size?: string | number }> }>
   });
+
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      if (!user) return;
+      
+      try {
+        const stats = await ApiService.getDashboardStats(user.id);
+        
+        // Calculate top categories with budget comparison
+        const categoryData = Object.entries(stats.categorySpending).map(([category, amount]) => {
+          const budget = stats.budgets.find(b => b.category === category);
+          const budgetAmount = budget?.amount || 0;
+          const percentage = budgetAmount > 0 ? Math.round((Number(amount) / budgetAmount) * 100) : 0;
+          
+          return {
+            name: category,
+            amount: Math.round(Number(amount)),
+            budget: budgetAmount,
+            percentage: Math.min(percentage, 100)
+          };
+        }).sort((a, b) => b.amount - a.amount).slice(0, 4);
+
+        // Generate alerts based on data
+        const alerts = [];
+        
+        // Budget alerts
+        categoryData.forEach(category => {
+          if (category.percentage >= 90) {
+            alerts.push({
+              type: 'warning' as const,
+              message: `Je ${category.name.toLowerCase()}budget is bijna op (${category.percentage}%)`,
+              icon: AlertTriangle
+            });
+          }
+        });
+
+        // Savings alert
+        if (stats.totalSavings > 0) {
+          alerts.push({
+            type: 'success' as const,
+            message: `Je hebt deze maand €${Math.round(stats.totalSavings)} gespaard`,
+            icon: CheckCircle
+          });
+        }
+
+        // Info alert
+        if (alerts.length === 0) {
+          alerts.push({
+            type: 'info' as const,
+            message: 'Nieuwe spaartip: Overweeg automatisch sparen',
+            icon: Target
+          });
+        }
+
+        setDashboardData({
+          totalIncome: Math.round(stats.totalIncome),
+          totalExpenses: Math.round(stats.totalExpenses),
+          totalSavings: Math.round(stats.totalSavings),
+          budgetStatus: 'on-track',
+          topCategories: categoryData,
+          alerts
+        });
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+      }
+    };
+
+    loadDashboardData();
+  }, [user]);
+
+  if (loading) {
+    return (
+      <DashboardContainer>
+        <DashboardHeader>
+          <DashboardTitle>Laden...</DashboardTitle>
+          <DashboardSubtitle>Je financiële gegevens worden geladen</DashboardSubtitle>
+        </DashboardHeader>
+      </DashboardContainer>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardContainer>
+        <DashboardHeader>
+          <DashboardTitle>Fout opgetreden</DashboardTitle>
+          <DashboardSubtitle>{error}</DashboardSubtitle>
+        </DashboardHeader>
+      </DashboardContainer>
+    );
+  }
 
   return (
     <DashboardContainer>
