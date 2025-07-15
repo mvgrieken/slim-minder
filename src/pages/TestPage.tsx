@@ -365,7 +365,7 @@ const TestPage: React.FC = () => {
         fetch: typeof fetch !== 'undefined',
         promise: typeof Promise !== 'undefined',
         arrow: (() => { try { eval('() => {}'); return true; } catch { return false; } })(),
-        modules: typeof import !== 'undefined'
+        modules: (() => { try { return typeof document !== 'undefined' && 'noModule' in document.createElement('script'); } catch { return false; } })()
       };
 
       const supportedFeatures = Object.entries(features).filter(([, supported]) => supported);
