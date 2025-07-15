@@ -1,6 +1,14 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
-import { supabase } from '../lib/supabase';
+
+// Import supabase with error handling
+let supabase: any = null;
+try {
+  const { supabase: supabaseClient } = require('../lib/supabase');
+  supabase = supabaseClient;
+} catch (error) {
+  console.warn('Supabase client not available:', error);
+}
 
 interface TestResult {
   name: string;
@@ -11,7 +19,7 @@ interface TestResult {
 }
 
 const GlobalStyle = styled.div`
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
   padding: 20px;
@@ -21,7 +29,7 @@ const TestContainer = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   background: white;
-  border-radius: 16px;
+  border-radius: 20px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 `;
@@ -34,14 +42,14 @@ const TestHeader = styled.div`
 `;
 
 const TestTitle = styled.h1`
-  margin: 0 0 10px 0;
+  margin: 0;
   font-size: 2.5rem;
   font-weight: 700;
 `;
 
 const TestSubtitle = styled.p`
-  margin: 0;
-  font-size: 1.1rem;
+  margin: 10px 0 0 0;
+  font-size: 1.2rem;
   opacity: 0.9;
 `;
 
@@ -50,8 +58,8 @@ const OverallStatus = styled.div<{ allPassed: boolean }>`
   color: ${props => props.allPassed ? '#155724' : '#721c24'};
   padding: 20px;
   text-align: center;
-  font-weight: 600;
   font-size: 1.1rem;
+  font-weight: 600;
   border-bottom: 1px solid ${props => props.allPassed ? '#c3e6cb' : '#f5c6cb'};
 `;
 
@@ -72,14 +80,14 @@ const TestCard = styled.div<{ status: string }>`
       default: return '#e9ecef';
     }
   }};
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
-
+  
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
   }
 `;
 
@@ -87,8 +95,8 @@ const TestName = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
+  font-size: 1.2rem;
   font-weight: 600;
-  font-size: 1.1rem;
   margin-bottom: 10px;
 `;
 
@@ -107,26 +115,29 @@ const StatusIndicator = styled.div<{ status: string }>`
 `;
 
 const TestDuration = styled.span`
-  margin-left: auto;
-  font-size: 0.9rem;
+  background: #f8f9fa;
   color: #6c757d;
-  font-weight: normal;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-left: auto;
 `;
 
 const TestMessage = styled.div`
   font-size: 1rem;
-  margin-bottom: 10px;
   color: #495057;
+  margin-bottom: 10px;
 `;
 
 const TestDetails = styled.div`
   font-size: 0.9rem;
   color: #6c757d;
-  white-space: pre-line;
   background: #f8f9fa;
-  padding: 10px;
-  border-radius: 6px;
-  border-left: 4px solid #dee2e6;
+  padding: 15px;
+  border-radius: 8px;
+  white-space: pre-line;
+  font-family: 'Courier New', monospace;
 `;
 
 const RefreshButton = styled.button`
@@ -134,19 +145,19 @@ const RefreshButton = styled.button`
   color: white;
   border: none;
   padding: 15px 30px;
-  border-radius: 8px;
-  font-size: 1rem;
+  border-radius: 25px;
+  font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   margin: 0 30px 30px 30px;
   width: calc(100% - 60px);
-
+  
   &:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
   }
-
+  
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -157,14 +168,14 @@ const TestPage: React.FC = () => {
   const [tests, setTests] = useState<TestResult[]>([]);
   const [isRunning, setIsRunning] = useState(false);
 
-  const initialTests = useMemo((): Omit<TestResult, 'status' | 'message' | 'duration'>[] => [
+  const initialTests: Omit<TestResult, 'status' | 'message' | 'details' | 'duration'>[] = [
     { name: 'Omgevingsvariabelen' },
     { name: 'Supabase Connectie' },
     { name: 'Database Schema' },
     { name: 'Authenticatie Service' },
     { name: 'API Endpoints' },
-    { name: 'Browser Compatibiliteit' },
-  ], []);
+    { name: 'Browser Compatibiliteit' }
+  ];
 
   const testEnvironmentVariables = async (): Promise<TestResult> => {
     const startTime = Date.now();
@@ -173,28 +184,31 @@ const TestPage: React.FC = () => {
         'REACT_APP_SUPABASE_URL',
         'REACT_APP_SUPABASE_ANON_KEY'
       ];
+      
       const missingVars = requiredVars.filter(varName => !process.env[varName]);
+      
       if (missingVars.length > 0) {
         return {
           name: 'Omgevingsvariabelen',
           status: 'error',
-          message: `${missingVars.length} variabelen ontbreken`,
-          details: `Ontbrekend: ${missingVars.join(', ')}\nControleer je .env.local bestand`,
+          message: 'Sommige omgevingsvariabelen ontbreken',
+          details: `Ontbrekende variabelen: ${missingVars.join(', ')}`,
           duration: Date.now() - startTime
         };
       }
+      
       return {
         name: 'Omgevingsvariabelen',
         status: 'success',
-        message: 'Alle vereiste variabelen aanwezig',
-        details: `Supabase URL: ${process.env.REACT_APP_SUPABASE_URL?.substring(0, 20)}...\nAnon Key: ${process.env.REACT_APP_SUPABASE_ANON_KEY?.substring(0, 20)}...`,
+        message: 'Alle omgevingsvariabelen zijn geconfigureerd',
+        details: `Supabase URL: ${process.env.REACT_APP_SUPABASE_URL?.substring(0, 30)}...\nAnon Key: ${process.env.REACT_APP_SUPABASE_ANON_KEY?.substring(0, 20)}...`,
         duration: Date.now() - startTime
       };
     } catch (error) {
       return {
         name: 'Omgevingsvariabelen',
         status: 'error',
-        message: 'Fout bij controleren variabelen',
+        message: 'Fout bij controleren omgevingsvariabelen',
         details: error instanceof Error ? error.message : 'Onbekende fout',
         duration: Date.now() - startTime
       };
@@ -204,23 +218,31 @@ const TestPage: React.FC = () => {
   const testSupabaseConnection = async (): Promise<TestResult> => {
     const startTime = Date.now();
     try {
-      const { error } = await supabase
-        .from('transaction_categories')
-        .select('count')
-        .limit(1);
+      if (!supabase) {
+        return {
+          name: 'Supabase Connectie',
+          status: 'error',
+          message: 'Supabase client niet beschikbaar',
+          details: 'Omgevingsvariabelen REACT_APP_SUPABASE_URL en REACT_APP_SUPABASE_ANON_KEY zijn niet geconfigureerd',
+          duration: Date.now() - startTime
+        };
+      }
+      
+      const { data, error } = await supabase.from('transaction_categories').select('count').limit(1);
       if (error) throw error;
+      
       return {
         name: 'Supabase Connectie',
         status: 'success',
-        message: 'Database connectie succesvol',
-        details: 'Supabase client werkt correct\nDatabase queries mogelijk',
+        message: 'Supabase connectie succesvol',
+        details: 'Database connectie werkt correct\nQuery response ontvangen',
         duration: Date.now() - startTime
       };
     } catch (error) {
       return {
         name: 'Supabase Connectie',
         status: 'error',
-        message: 'Database connectie gefaald',
+        message: 'Supabase connectie gefaald',
         details: error instanceof Error ? error.message : 'Onbekende fout',
         duration: Date.now() - startTime
       };
@@ -230,11 +252,23 @@ const TestPage: React.FC = () => {
   const testDatabaseSchema = async (): Promise<TestResult> => {
     const startTime = Date.now();
     try {
-      const { error } = await supabase
+      if (!supabase) {
+        return {
+          name: 'Database Schema',
+          status: 'error',
+          message: 'Database schema niet toegankelijk',
+          details: 'Supabase client niet beschikbaar - configureer omgevingsvariabelen',
+          duration: Date.now() - startTime
+        };
+      }
+      
+      const { data, error } = await supabase
         .from('transaction_categories')
         .select('id, name, type')
         .limit(1);
+      
       if (error) throw error;
+      
       return {
         name: 'Database Schema',
         status: 'success',
@@ -256,9 +290,20 @@ const TestPage: React.FC = () => {
   const testAuthenticationService = async (): Promise<TestResult> => {
     const startTime = Date.now();
     try {
+      if (!supabase) {
+        return {
+          name: 'Authenticatie Service',
+          status: 'error',
+          message: 'Authenticatie service niet beschikbaar',
+          details: 'Supabase client niet beschikbaar - configureer omgevingsvariabelen',
+          duration: Date.now() - startTime
+        };
+      }
+      
       const { data: { session }, error } = await supabase.auth.getSession();
       if (error) throw error;
       const isLoggedIn = !!session;
+      
       return {
         name: 'Authenticatie Service',
         status: 'success',
@@ -280,11 +325,23 @@ const TestPage: React.FC = () => {
   const testAPIEndpoints = async (): Promise<TestResult> => {
     const startTime = Date.now();
     try {
+      if (!supabase) {
+        return {
+          name: 'API Endpoints',
+          status: 'error',
+          message: 'API endpoints niet bereikbaar',
+          details: 'Supabase client niet beschikbaar - configureer omgevingsvariabelen',
+          duration: Date.now() - startTime
+        };
+      }
+      
       const { error } = await supabase
         .from('transaction_categories')
         .select('id, name, type')
         .limit(5);
+      
       if (error) throw error;
+      
       return {
         name: 'API Endpoints',
         status: 'success',
@@ -306,15 +363,17 @@ const TestPage: React.FC = () => {
   const testBrowserCompatibility = async (): Promise<TestResult> => {
     const startTime = Date.now();
     try {
-      const features: { [key: string]: boolean } = {
+      const features = {
         localStorage: typeof window !== 'undefined' && typeof window.localStorage !== 'undefined',
         fetch: typeof fetch !== 'undefined',
         promise: typeof Promise !== 'undefined',
         arrow: true,
         modules: typeof document !== 'undefined' && 'noModule' in document.createElement('script')
       };
-      const supported = Object.keys(features).filter((key) => features[key]);
-      const unsupported = Object.keys(features).filter((key) => !features[key]);
+      
+      const supported = Object.keys(features).filter(key => features[key as keyof typeof features]);
+      const unsupported = Object.keys(features).filter(key => !features[key as keyof typeof features]);
+      
       if (unsupported.length > 0) {
         return {
           name: 'Browser Compatibiliteit',
@@ -324,6 +383,7 @@ const TestPage: React.FC = () => {
           duration: Date.now() - startTime
         };
       }
+      
       return {
         name: 'Browser Compatibiliteit',
         status: 'success',
@@ -379,6 +439,7 @@ const TestPage: React.FC = () => {
   const runAllTests = useCallback(async () => {
     setIsRunning(true);
     setTests(initialTests.map(test => ({ ...test, status: 'pending' as const, message: 'Test wordt uitgevoerd...' })));
+    
     for (let i = 0; i < initialTests.length; i++) {
       const testResult = await runTest(initialTests[i].name);
       setTests(prevTests => 
@@ -388,6 +449,7 @@ const TestPage: React.FC = () => {
       );
       await new Promise(resolve => setTimeout(resolve, 300));
     }
+    
     setIsRunning(false);
   }, [initialTests, runTest]);
 
@@ -405,6 +467,7 @@ const TestPage: React.FC = () => {
           <TestTitle>🔧 Slim Minder System Test</TestTitle>
           <TestSubtitle>Controleer alle systeem connecties en configuraties</TestSubtitle>
         </TestHeader>
+        
         {allTestsComplete && (
           <OverallStatus allPassed={allTestsPassed}>
             {allTestsPassed 
@@ -413,6 +476,7 @@ const TestPage: React.FC = () => {
             }
           </OverallStatus>
         )}
+        
         <TestGrid>
           {tests.map((test, index) => (
             <TestCard key={index} status={test.status}>
@@ -426,6 +490,7 @@ const TestPage: React.FC = () => {
             </TestCard>
           ))}
         </TestGrid>
+        
         <RefreshButton 
           onClick={runAllTests} 
           disabled={isRunning}
