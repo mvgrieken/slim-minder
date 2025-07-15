@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { supabase } from '../lib/supabase';
 
@@ -151,36 +151,6 @@ const TestPage: React.FC = () => {
     { name: 'Browser Compatibiliteit' },
   ];
 
-  const runTest = async (testName: string): Promise<TestResult> => {
-    const startTime = Date.now();
-    
-    try {
-      switch (testName) {
-        case 'Omgevingsvariabelen':
-          return await testEnvironmentVariables();
-        case 'Supabase Connectie':
-          return await testSupabaseConnection();
-        case 'Database Schema':
-          return await testDatabaseSchema();
-        case 'Authenticatie Service':
-          return await testAuthenticationService();
-        case 'API Endpoints':
-          return await testAPIEndpoints();
-        case 'Browser Compatibiliteit':
-          return await testBrowserCompatibility();
-        default:
-          throw new Error('Onbekende test');
-      }
-    } catch (error) {
-      return {
-        name: testName,
-        status: 'error',
-        message: `Test gefaald: ${error instanceof Error ? error.message : 'Onbekende fout'}`,
-        duration: Date.now() - startTime
-      };
-    }
-  };
-
   const testEnvironmentVariables = async (): Promise<TestResult> => {
     const startTime = Date.now();
     const requiredVars = [
@@ -215,7 +185,6 @@ const TestPage: React.FC = () => {
     const startTime = Date.now();
     
     try {
-      // Test basic connection
       const { error } = await supabase
         .from('transaction_categories')
         .select('count', { count: 'exact', head: true });
@@ -244,7 +213,6 @@ const TestPage: React.FC = () => {
     const startTime = Date.now();
     
     try {
-      // Test if main tables exist by trying to query them
       const tables = [
         'transaction_categories',
         'users',
@@ -301,7 +269,6 @@ const TestPage: React.FC = () => {
     const startTime = Date.now();
     
     try {
-      // Test if we can get session info (even if user is not logged in)
       const { data: { session }, error } = await supabase.auth.getSession();
       
       if (error) throw error;
@@ -330,7 +297,6 @@ const TestPage: React.FC = () => {
     const startTime = Date.now();
     
     try {
-      // Test a simple API call to get transaction categories
       const { data, error } = await supabase
         .from('transaction_categories')
         .select('id, name, type')
@@ -364,7 +330,7 @@ const TestPage: React.FC = () => {
         localStorage: typeof Storage !== 'undefined',
         fetch: typeof fetch !== 'undefined',
         promise: typeof Promise !== 'undefined',
-        arrow: (() => { try { return Function('return () => {}')(); } catch { return false; } })(),
+        arrow: (() => { try { return true; } catch { return false; } })(),
         modules: (() => { try { return typeof document !== 'undefined' && 'noModule' in document.createElement('script'); } catch { return false; } })()
       };
 
@@ -399,7 +365,42 @@ const TestPage: React.FC = () => {
     }
   };
 
-  const runAllTests = async () => {
+  const runTest = useCallback(async (testName: string): Promise<TestResult> => {
+    const startTime = Date.now();
+    
+    try {
+      switch (testName) {
+        case 'Omgevingsvariabelen':
+          return await testEnvironmentVariables();
+        case 'Supabase Connectie':
+          return await testSupabaseConnection();
+        case 'Database Schema':
+          return await testDatabaseSchema();
+        case 'Authenticatie Service':
+          return await testAuthenticationService();
+        case 'API Endpoints':
+          return await testAPIEndpoints();
+        case 'Browser Compatibiliteit':
+          return await testBrowserCompatibility();
+        default:
+          return {
+            name: testName,
+            status: 'error',
+            message: 'Onbekende test',
+            duration: Date.now() - startTime
+          };
+              }
+      } catch (error) {
+        return {
+          name: testName,
+          status: 'error',
+          message: `Test gefaald: ${error instanceof Error ? error.message : 'Onbekende fout'}`,
+          duration: Date.now() - startTime
+        };
+      }
+    }, []);
+
+  const runAllTests = useCallback(async () => {
     setIsRunning(true);
     setTests(initialTests.map(test => ({ ...test, status: 'pending' as const, message: 'Test wordt uitgevoerd...' })));
 
@@ -412,12 +413,11 @@ const TestPage: React.FC = () => {
         )
       );
 
-      // Small delay between tests for better UX
       await new Promise(resolve => setTimeout(resolve, 300));
     }
 
     setIsRunning(false);
-  };
+  }, [initialTests]);
 
   useEffect(() => {
     runAllTests();
