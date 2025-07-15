@@ -415,6 +415,98 @@ const HomePageComponent: React.FC = () => {
             <ArrowRight size={16} />
           </CTAButton>
         </CTASection>
+
+        <FeaturesSection>
+          <SectionTitle>
+            Ontdek de Slim Minder app
+          </SectionTitle>
+          
+          <FeaturesGrid>
+            <FeatureCard>
+              <FeatureIcon color="#0ea5e9">
+                <TrendingUp />
+              </FeatureIcon>
+              <FeatureTitle>Dashboard</FeatureTitle>
+              <FeatureDescription>
+                Overzicht van je financiën met inkomsten, uitgaven en spaargeld.
+              </FeatureDescription>
+              <Button variant="primary" to="/dashboard" style={{ marginTop: '1rem' }}>
+                Bekijk dashboard
+                <ArrowRight size={16} />
+              </Button>
+            </FeatureCard>
+
+            <FeatureCard>
+              <FeatureIcon color="#22c55e">
+                <Target />
+              </FeatureIcon>
+              <FeatureTitle>Transacties</FeatureTitle>
+              <FeatureDescription>
+                Bekijk en categoriseer al je banktransacties automatisch.
+              </FeatureDescription>
+              <Button variant="primary" to="/transactions" style={{ marginTop: '1rem' }}>
+                Bekijk transacties
+                <ArrowRight size={16} />
+              </Button>
+            </FeatureCard>
+
+            <FeatureCard>
+              <FeatureIcon color="#8b5cf6">
+                <Shield />
+              </FeatureIcon>
+              <FeatureTitle>Budgetten</FeatureTitle>
+              <FeatureDescription>
+                Stel budgetten in per categorie en houd je uitgaven onder controle.
+              </FeatureDescription>
+              <Button variant="primary" to="/budgets" style={{ marginTop: '1rem' }}>
+                Bekijk budgetten
+                <ArrowRight size={16} />
+              </Button>
+            </FeatureCard>
+
+            <FeatureCard>
+              <FeatureIcon color="#f59e0b">
+                <Award />
+              </FeatureIcon>
+              <FeatureTitle>Spaardoelen</FeatureTitle>
+              <FeatureDescription>
+                Plan en bereik je financiële doelen met voortgangsindicatoren.
+              </FeatureDescription>
+              <Button variant="primary" to="/savings" style={{ marginTop: '1rem' }}>
+                Bekijk spaardoelen
+                <ArrowRight size={16} />
+              </Button>
+            </FeatureCard>
+
+            <FeatureCard>
+              <FeatureIcon color="#ef4444">
+                <MessageCircle />
+              </FeatureIcon>
+              <FeatureTitle>AI Coach</FeatureTitle>
+              <FeatureDescription>
+                Stel vragen en krijg persoonlijk financieel advies van onze AI.
+              </FeatureDescription>
+              <Button variant="primary" to="/coach" style={{ marginTop: '1rem' }}>
+                Chat met coach
+                <ArrowRight size={16} />
+              </Button>
+            </FeatureCard>
+
+            <FeatureCard>
+              <FeatureIcon color="#6366f1">
+                <Smartphone />
+              </FeatureIcon>
+              <FeatureTitle>Systeem Test</FeatureTitle>
+              <FeatureDescription>
+                Test alle systeem connecties en configuraties van Slim Minder.
+              </FeatureDescription>
+              <Button variant="primary" to="/test" style={{ marginTop: '1rem' }}>
+                Start test
+                <ArrowRight size={16} />
+              </Button>
+            </FeatureCard>
+          </FeaturesGrid>
+        </FeaturesSection>
       </Main>
     </HomePage>
   );

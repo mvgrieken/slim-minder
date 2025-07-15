@@ -17,6 +17,11 @@ import HomePage from './pages/HomePage';
 import TestPage from './pages/TestPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import DashboardPage from './pages/DashboardPage';
+import TransactionsPage from './pages/TransactionsPage';
+import BudgetsPage from './pages/BudgetsPage';
+import SavingsGoalsPage from './pages/SavingsGoalsPage';
+import AICoachPage from './pages/AICoachPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 const App: React.FC = () => {
@@ -31,6 +36,11 @@ const App: React.FC = () => {
               <Route path="/test" element={<TestPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/transactions" element={<TransactionsPage />} />
+              <Route path="/budgets" element={<BudgetsPage />} />
+              <Route path="/savings" element={<SavingsGoalsPage />} />
+              <Route path="/coach" element={<AICoachPage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </Router>
