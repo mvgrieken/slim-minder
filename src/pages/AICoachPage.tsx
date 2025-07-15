@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import { Send, Bot, User, Lightbulb, TrendingUp, Target, DollarSign } from 'lucide-react';
+import { Send, Bot, User } from 'lucide-react';
 
 const CoachContainer = styled.div`
   max-width: 1000px;
@@ -234,7 +234,7 @@ const TypingDots = styled.div`
   }
 `;
 
-interface Message {
+interface ChatMessage {
   id: string;
   text: string;
   isUser: boolean;
@@ -258,7 +258,7 @@ const mockAIResponses = {
 };
 
 const AICoachPage: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([
+  const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
       text: 'Hallo! Ik ben je persoonlijke financiële coach. Ik kan je helpen met budgetteren, sparen, en al je geldvragen. Wat wil je weten?',
@@ -282,7 +282,7 @@ const AICoachPage: React.FC = () => {
     e.preventDefault();
     if (!inputValue.trim()) return;
 
-    const userMessage: Message = {
+    const userMessage: ChatMessage = {
       id: Date.now().toString(),
       text: inputValue,
       isUser: true,
@@ -307,7 +307,7 @@ const AICoachPage: React.FC = () => {
         }
       }
 
-      const aiMessage: Message = {
+      const aiMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         text: aiResponse,
         isUser: false,

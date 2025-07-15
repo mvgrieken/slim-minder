@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { TrendingUp, TrendingDown, DollarSign, Target, AlertTriangle, CheckCircle } from 'lucide-react';
 
@@ -250,7 +250,7 @@ const ActionButton = styled.button`
 `;
 
 const DashboardPage: React.FC = () => {
-  const [dashboardData, setDashboardData] = useState({
+  const [dashboardData] = useState({
     totalIncome: 3200,
     totalExpenses: 1850,
     totalSavings: 1350,
@@ -262,9 +262,9 @@ const DashboardPage: React.FC = () => {
       { name: 'Wonen', amount: 800, budget: 800, percentage: 100 }
     ],
     alerts: [
-      { type: 'warning', message: 'Je boodschappenbudget is bijna op (90%)', icon: AlertTriangle },
-      { type: 'success', message: 'Je hebt deze maand €150 meer gespaard dan vorige maand', icon: CheckCircle },
-      { type: 'info', message: 'Nieuwe spaartip: Overweeg automatisch sparen', icon: Target }
+      { type: 'warning' as const, message: 'Je boodschappenbudget is bijna op (90%)', icon: AlertTriangle },
+      { type: 'success' as const, message: 'Je hebt deze maand €150 meer gespaard dan vorige maand', icon: CheckCircle },
+      { type: 'info' as const, message: 'Nieuwe spaartip: Overweeg automatisch sparen', icon: Target }
     ]
   });
 
