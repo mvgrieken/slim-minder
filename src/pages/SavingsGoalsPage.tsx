@@ -523,8 +523,8 @@ const calculateMonthlyAmount = (target: number, saved: number, deadline: string)
 };
 
 const SavingsGoalsPage: React.FC = () => {
-  const { savingsGoals, loading, error, createSavingsGoal, updateSavingsGoal, deleteSavingsGoal } = useApp();
-  const { user } = useAuth();
+  const { savingsGoals, loading, error, createSavingsGoal, updateSavingsGoal, deleteSavingsGoal, user } = useApp();
+  const { isAuthenticated } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);

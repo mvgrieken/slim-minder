@@ -481,8 +481,8 @@ const categories = [
 ];
 
 const BudgetsPage: React.FC = () => {
-  const { budgets, loading, error, createBudget, updateBudget, deleteBudget } = useApp();
-  const { user } = useAuth();
+  const { budgets, loading, error, createBudget, updateBudget, deleteBudget, user } = useApp();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBudget, setEditingBudget] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -492,6 +492,16 @@ const BudgetsPage: React.FC = () => {
     budget: '',
     period: 'monthly' as 'monthly' | 'weekly' | 'yearly'
   });
+
+  // Debug logging
+  useEffect(() => {
+    console.log('🔍 BudgetsPage Debug Info:');
+    console.log('👤 User from AppContext:', user);
+    console.log('🔐 Is Authenticated:', isAuthenticated);
+    console.log('⏳ Auth Loading:', authLoading);
+    console.log('📊 Budgets Loading:', loading);
+    console.log('❌ Error:', error);
+  }, [user, isAuthenticated, authLoading, loading, error]);
 
   const openModal = (budget?: any) => {
     if (budget) {
@@ -540,10 +550,19 @@ const BudgetsPage: React.FC = () => {
     try {
       console.log('🔄 Starting budget save...');
       console.log('📝 Form data:', formData);
-      console.log('👤 User:', user);
+      console.log('👤 User object:', user);
+      console.log('🔐 Is Authenticated:', isAuthenticated);
+      console.log('⏳ Auth Loading:', authLoading);
+      console.log('🆔 User ID:', user?.id);
+      console.log('📧 User Email:', user?.email);
       
       // Check if user is authenticated
       if (!user || !user.id) {
+        console.error('❌ Authentication check failed:');
+        console.error('  - User object:', user);
+        console.error('  - User ID:', user?.id);
+        console.error('  - Is Authenticated:', isAuthenticated);
+        console.error('  - Auth Loading:', authLoading);
         throw new Error('Je moet ingelogd zijn om een budget op te slaan');
       }
       
