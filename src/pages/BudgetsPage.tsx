@@ -536,6 +536,10 @@ const BudgetsPage: React.FC = () => {
     setIsSubmitting(true);
 
     try {
+      console.log('🔄 Starting budget save...');
+      console.log('📝 Form data:', formData);
+      console.log('👤 User:', user);
+      
       const budgetData = {
         name: formData.name,
         category: formData.category,
@@ -544,15 +548,22 @@ const BudgetsPage: React.FC = () => {
         user_id: user?.id || ''
       };
 
+      console.log('💾 Budget data to save:', budgetData);
+
       if (editingBudget) {
+        console.log('✏️ Updating existing budget:', editingBudget.id);
         await updateBudget(editingBudget.id, budgetData);
+        console.log('✅ Budget updated successfully');
       } else {
+        console.log('➕ Creating new budget');
         await createBudget(budgetData);
+        console.log('✅ Budget created successfully');
       }
 
       closeModal();
     } catch (error) {
-      console.error('Error saving budget:', error);
+      console.error('❌ Error saving budget:', error);
+      alert(`Fout bij het opslaan van budget: ${error}`);
     } finally {
       setIsSubmitting(false);
     }
