@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Plus, Edit3, Target, TrendingUp, AlertTriangle, CheckCircle, X, Save, Trash2 } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
+import { useAuth } from '../contexts/AuthContext';
 
 const BudgetsContainer = styled.div`
   max-width: 1200px;
@@ -480,7 +481,8 @@ const categories = [
 ];
 
 const BudgetsPage: React.FC = () => {
-  const { budgets, loading, error, createBudget, updateBudget, deleteBudget, user } = useApp();
+  const { budgets, loading, error, createBudget, updateBudget, deleteBudget } = useApp();
+  const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBudget, setEditingBudget] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -540,12 +542,17 @@ const BudgetsPage: React.FC = () => {
       console.log('📝 Form data:', formData);
       console.log('👤 User:', user);
       
+      // Check if user is authenticated
+      if (!user || !user.id) {
+        throw new Error('Je moet ingelogd zijn om een budget op te slaan');
+      }
+      
       const budgetData = {
         name: formData.name,
         category: formData.category,
         budget: parseFloat(formData.budget),
         period: formData.period,
-        user_id: user?.id || ''
+        user_id: user.id
       };
 
       console.log('💾 Budget data to save:', budgetData);

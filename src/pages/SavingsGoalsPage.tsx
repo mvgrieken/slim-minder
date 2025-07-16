@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Plus, Edit3, Target, TrendingUp, Calendar, DollarSign, Award, X, Save, Trash2 } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
+import { useAuth } from '../contexts/AuthContext';
 
 const SavingsContainer = styled.div`
   max-width: 1200px;
@@ -522,7 +523,8 @@ const calculateMonthlyAmount = (target: number, saved: number, deadline: string)
 };
 
 const SavingsGoalsPage: React.FC = () => {
-  const { savingsGoals, loading, error, createSavingsGoal, updateSavingsGoal, deleteSavingsGoal, user } = useApp();
+  const { savingsGoals, loading, error, createSavingsGoal, updateSavingsGoal, deleteSavingsGoal } = useApp();
+  const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -586,6 +588,11 @@ const SavingsGoalsPage: React.FC = () => {
     setIsSubmitting(true);
 
     try {
+      // Check if user is authenticated
+      if (!user || !user.id) {
+        throw new Error('Je moet ingelogd zijn om een spaardoel op te slaan');
+      }
+      
       const goalData = {
         name: formData.name,
         category: formData.category,
@@ -593,7 +600,7 @@ const SavingsGoalsPage: React.FC = () => {
         current_amount: parseFloat(formData.current_amount),
         deadline: formData.deadline ? new Date(formData.deadline).toISOString() : undefined,
         description: formData.description,
-        user_id: user?.id || ''
+        user_id: user.id
       };
 
       if (editingGoal) {
@@ -605,6 +612,7 @@ const SavingsGoalsPage: React.FC = () => {
       closeModal();
     } catch (error) {
       console.error('Error saving savings goal:', error);
+      alert(`Fout bij het opslaan van spaardoel: ${error}`);
     } finally {
       setIsSubmitting(false);
     }
