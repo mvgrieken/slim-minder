@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { TrendingUp, TrendingDown, DollarSign, Target, AlertTriangle, CheckCircle } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Target, AlertTriangle, CheckCircle, Plus, BarChart3, PiggyBank, Receipt } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import { useAuth } from '../contexts/AuthContext';
 import { ApiService } from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
 const DashboardContainer = styled.div`
   max-width: 1200px;
@@ -245,10 +246,20 @@ const ActionButton = styled.button`
   border-radius: 8px;
   font-weight: bold;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.9rem;
   
   &:hover {
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  }
+  
+  &:active {
+    transform: translateY(0);
   }
 `;
 
@@ -261,6 +272,7 @@ interface Alert {
 const DashboardPage: React.FC = () => {
   const { user } = useAuth();
   const { loading, error } = useApp();
+  const navigate = useNavigate();
   const [dashboardData, setDashboardData] = useState({
     totalIncome: 0,
     totalExpenses: 0,
@@ -269,6 +281,26 @@ const DashboardPage: React.FC = () => {
     topCategories: [] as Array<{ name: string; amount: number; budget: number; percentage: number }>,
     alerts: [] as Array<{ type: 'warning' | 'success' | 'info'; message: string; icon: React.ComponentType<{ size?: string | number }> }>
   });
+
+  // Quick action handlers
+  const handleQuickAction = (action: string) => {
+    switch (action) {
+      case 'budget':
+        navigate('/budgets');
+        break;
+      case 'savings':
+        navigate('/savings-goals');
+        break;
+      case 'transaction':
+        navigate('/transactions');
+        break;
+      case 'report':
+        navigate('/ai-coach');
+        break;
+      default:
+        break;
+    }
+  };
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -463,10 +495,22 @@ const DashboardPage: React.FC = () => {
           <Section>
             <SectionTitle>Snelle acties</SectionTitle>
             <QuickActions>
-              <ActionButton>Budget aanpassen</ActionButton>
-              <ActionButton>Spaardoel toevoegen</ActionButton>
-              <ActionButton>Transactie toevoegen</ActionButton>
-              <ActionButton>Rapport bekijken</ActionButton>
+              <ActionButton onClick={() => handleQuickAction('budget')}>
+                <Target size={16} />
+                Budget aanpassen
+              </ActionButton>
+              <ActionButton onClick={() => handleQuickAction('savings')}>
+                <PiggyBank size={16} />
+                Spaardoel toevoegen
+              </ActionButton>
+              <ActionButton onClick={() => handleQuickAction('transaction')}>
+                <Receipt size={16} />
+                Transactie toevoegen
+              </ActionButton>
+              <ActionButton onClick={() => handleQuickAction('report')}>
+                <BarChart3 size={16} />
+                Rapport bekijken
+              </ActionButton>
             </QuickActions>
           </Section>
         </Sidebar>
