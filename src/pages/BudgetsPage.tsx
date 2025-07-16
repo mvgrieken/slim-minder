@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { Plus, Edit3, Target, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Plus, Edit3, Target, TrendingUp, AlertTriangle, CheckCircle, X, Save, Trash2 } from 'lucide-react';
+import { useApp } from '../contexts/AppContext';
 
 const BudgetsContainer = styled.div`
   max-width: 1200px;
@@ -290,6 +291,164 @@ const SummaryLabel = styled.div`
   color: #6c757d;
 `;
 
+const Modal = styled.div<{ isOpen: boolean }>`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: ${({ isOpen }) => isOpen ? 'flex' : 'none'};
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+`;
+
+const ModalHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+`;
+
+const ModalTitle = styled.h2`
+  margin: 0;
+  color: #333;
+`;
+
+const CloseButton = styled.button`
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #6c757d;
+  
+  &:hover {
+    color: #333;
+  }
+`;
+
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+`;
+
+const FormGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const Label = styled.label`
+  font-weight: 500;
+  color: #333;
+`;
+
+const Input = styled.input`
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  
+  &:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+`;
+
+const Select = styled.select`
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  
+  &:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+`;
+
+const FormActions = styled.div`
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+`;
+
+const Button = styled.button<{ variant?: 'primary' | 'secondary' | 'danger' }>`
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  ${({ variant }) => {
+    switch (variant) {
+      case 'primary':
+        return `
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+        `;
+      case 'secondary':
+        return `
+          background: #6c757d;
+          color: white;
+        `;
+      case 'danger':
+        return `
+          background: #dc3545;
+          color: white;
+        `;
+      default:
+        return `
+          background: #f8f9fa;
+          color: #333;
+          border: 1px solid #ddd;
+        `;
+    }
+  }}
+  
+  &:hover {
+    transform: translateY(-1px);
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+`;
+
+const LoadingSpinner = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  color: #667eea;
+`;
+
+const ErrorMessage = styled.div`
+  background: #f8d7da;
+  color: #721c24;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+`;
+
 const getCategoryIcon = (category: string) => {
   const icons: { [key: string]: string } = {
     'boodschappen': '🛒',
@@ -310,65 +469,111 @@ const getBudgetStatus = (spent: number, budget: number): 'on-track' | 'warning' 
   return 'on-track';
 };
 
-const mockBudgets = [
-  {
-    id: 1,
-    name: 'Boodschappen',
-    category: 'boodschappen',
-    budget: 500,
-    spent: 450,
-    remaining: 50,
-    percentage: 90
-  },
-  {
-    id: 2,
-    name: 'Vervoer',
-    category: 'vervoer',
-    budget: 400,
-    spent: 320,
-    remaining: 80,
-    percentage: 80
-  },
-  {
-    id: 3,
-    name: 'Vrije tijd',
-    category: 'vrije-tijd',
-    budget: 300,
-    spent: 280,
-    remaining: 20,
-    percentage: 93
-  },
-  {
-    id: 4,
-    name: 'Wonen',
-    category: 'wonen',
-    budget: 800,
-    spent: 800,
-    remaining: 0,
-    percentage: 100
-  },
-  {
-    id: 5,
-    name: 'Gezondheid',
-    category: 'gezondheid',
-    budget: 200,
-    spent: 150,
-    remaining: 50,
-    percentage: 75
-  },
-  {
-    id: 6,
-    name: 'Kleding',
-    category: 'kleding',
-    budget: 150,
-    spent: 180,
-    remaining: -30,
-    percentage: 120
-  }
+const categories = [
+  { value: 'boodschappen', label: 'Boodschappen' },
+  { value: 'vervoer', label: 'Vervoer' },
+  { value: 'vrije-tijd', label: 'Vrije tijd' },
+  { value: 'wonen', label: 'Wonen' },
+  { value: 'gezondheid', label: 'Gezondheid' },
+  { value: 'kleding', label: 'Kleding' },
+  { value: 'onderwijs', label: 'Onderwijs' }
 ];
 
 const BudgetsPage: React.FC = () => {
-  const [budgets] = useState(mockBudgets);
+  const { budgets, loading, error, createBudget, updateBudget, deleteBudget } = useApp();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingBudget, setEditingBudget] = useState<any>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    category: 'boodschappen',
+    budget: '',
+    period: 'monthly' as 'monthly' | 'weekly' | 'yearly'
+  });
+
+  const openModal = (budget?: any) => {
+    if (budget) {
+      setEditingBudget(budget);
+      setFormData({
+        name: budget.name,
+        category: budget.category,
+        budget: budget.budget.toString(),
+        period: budget.period
+      });
+    } else {
+      setEditingBudget(null);
+      setFormData({
+        name: '',
+        category: 'boodschappen',
+        budget: '',
+        period: 'monthly' as 'monthly' | 'weekly' | 'yearly'
+      });
+    }
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingBudget(null);
+    setFormData({
+      name: '',
+      category: 'boodschappen',
+      budget: '',
+      period: 'monthly' as 'monthly' | 'weekly' | 'yearly'
+    });
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const budgetData = {
+        name: formData.name,
+        category: formData.category,
+        budget: parseFloat(formData.budget),
+        period: formData.period
+      };
+
+      if (editingBudget) {
+        await updateBudget(editingBudget.id, budgetData);
+      } else {
+        await createBudget(budgetData);
+      }
+
+      closeModal();
+    } catch (error) {
+      console.error('Error saving budget:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (budgetId: number) => {
+    if (window.confirm('Weet je zeker dat je dit budget wilt verwijderen?')) {
+      try {
+        await deleteBudget(budgetId);
+      } catch (error) {
+        console.error('Error deleting budget:', error);
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <BudgetsContainer>
+        <LoadingSpinner>Budgetten laden...</LoadingSpinner>
+      </BudgetsContainer>
+    );
+  }
 
   const totalBudget = budgets.reduce((sum, budget) => sum + budget.budget, 0);
   const totalSpent = budgets.reduce((sum, budget) => sum + budget.spent, 0);
@@ -384,8 +589,10 @@ const BudgetsPage: React.FC = () => {
         <PageSubtitle>Beheer je uitgaven per categorie</PageSubtitle>
       </PageHeader>
 
+      {error && <ErrorMessage>Fout bij het laden van budgetten: {error}</ErrorMessage>}
+
       <HeaderActions>
-        <AddButton>
+        <AddButton onClick={() => openModal()}>
           <Plus size={16} />
           Nieuw budget
         </AddButton>
@@ -406,30 +613,30 @@ const BudgetsPage: React.FC = () => {
                   <BudgetName>{budget.name}</BudgetName>
                 </BudgetTitle>
                 <BudgetActions>
-                  <ActionButton title="Bewerken">
+                  <ActionButton title="Bewerken" onClick={() => openModal(budget)}>
                     <Edit3 size={16} />
                   </ActionButton>
-                  <ActionButton title="Instellingen">
-                    <Target size={16} />
+                  <ActionButton title="Verwijderen" onClick={() => handleDelete(budget.id)}>
+                    <Trash2 size={16} />
                   </ActionButton>
                 </BudgetActions>
               </BudgetHeader>
 
               <BudgetProgress>
                 <ProgressHeader>
-                  <ProgressAmount>€{budget.spent} van €{budget.budget}</ProgressAmount>
-                  <ProgressPercentage status={status}>{budget.percentage}%</ProgressPercentage>
+                  <ProgressAmount>€{budget.spent.toFixed(2)} van €{budget.budget.toFixed(2)}</ProgressAmount>
+                  <ProgressPercentage status={status}>{((budget.spent / budget.budget) * 100).toFixed(1)}%</ProgressPercentage>
                 </ProgressHeader>
-                <ProgressBar percentage={budget.percentage} status={status} />
+                <ProgressBar percentage={(budget.spent / budget.budget) * 100} status={status} />
               </BudgetProgress>
 
               <BudgetDetails>
                 <DetailItem>
-                  <DetailValue>€{budget.remaining}</DetailValue>
+                  <DetailValue>€{budget.remaining.toFixed(2)}</DetailValue>
                   <DetailLabel>Resterend</DetailLabel>
                 </DetailItem>
                 <DetailItem>
-                  <DetailValue>€{budget.spent}</DetailValue>
+                  <DetailValue>€{budget.spent.toFixed(2)}</DetailValue>
                   <DetailLabel>Uitgegeven</DetailLabel>
                 </DetailItem>
               </BudgetDetails>
@@ -476,6 +683,99 @@ const BudgetsPage: React.FC = () => {
           </SummaryCard>
         </SummaryGrid>
       </SummarySection>
+
+      <Modal isOpen={isModalOpen}>
+        <ModalContent>
+          <ModalHeader>
+            <ModalTitle>
+              {editingBudget ? 'Budget bewerken' : 'Nieuw budget'}
+            </ModalTitle>
+            <CloseButton onClick={closeModal}>
+              <X size={20} />
+            </CloseButton>
+          </ModalHeader>
+
+          <Form onSubmit={handleSubmit}>
+            <FormGroup>
+              <Label htmlFor="name">Naam</Label>
+              <Input
+                id="name"
+                name="name"
+                type="text"
+                value={formData.name}
+                onChange={handleInputChange}
+                required
+                placeholder="Bijv. Boodschappen"
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <Label htmlFor="category">Categorie</Label>
+              <Select
+                id="category"
+                name="category"
+                value={formData.category}
+                onChange={handleInputChange}
+                required
+              >
+                {categories.map(category => (
+                  <option key={category.value} value={category.value}>
+                    {category.label}
+                  </option>
+                ))}
+              </Select>
+            </FormGroup>
+
+            <FormGroup>
+              <Label htmlFor="budget">Budget bedrag (€)</Label>
+              <Input
+                id="budget"
+                name="budget"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.budget}
+                onChange={handleInputChange}
+                required
+                placeholder="500.00"
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <Label htmlFor="period">Periode</Label>
+              <Select
+                id="period"
+                name="period"
+                value={formData.period}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="monthly">Maandelijks</option>
+                <option value="weekly">Wekelijks</option>
+                <option value="yearly">Jaarlijks</option>
+              </Select>
+            </FormGroup>
+
+            <FormActions>
+              <Button type="button" variant="secondary" onClick={closeModal}>
+                Annuleren
+              </Button>
+              <Button type="submit" variant="primary" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <div>Opslaan...</div>
+                  </>
+                ) : (
+                  <>
+                    <Save size={16} />
+                    {editingBudget ? 'Bijwerken' : 'Toevoegen'}
+                  </>
+                )}
+              </Button>
+            </FormActions>
+          </Form>
+        </ModalContent>
+      </Modal>
     </BudgetsContainer>
   );
 };

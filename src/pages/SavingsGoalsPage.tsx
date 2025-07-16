@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { Plus, Edit3, Target, TrendingUp, Calendar, DollarSign, Award } from 'lucide-react';
+import { Plus, Edit3, Target, TrendingUp, Calendar, DollarSign, Award, X, Save, Trash2 } from 'lucide-react';
+import { useApp } from '../contexts/AppContext';
 
 const SavingsContainer = styled.div`
   max-width: 1200px;
@@ -104,7 +105,9 @@ const GoalIcon = styled.div<{ category: string }>`
       'grote-aankoop': '#fff3cd',
       'onderwijs': '#d1ecf1',
       'pensioen': '#e2e3e5',
-      'feest': '#f8d7da'
+      'feest': '#f8d7da',
+      'huis': '#e2e3e5',
+      'auto': '#d1ecf1'
     };
     return colors[category] || '#e9ecef';
   }};
@@ -115,7 +118,9 @@ const GoalIcon = styled.div<{ category: string }>`
       'grote-aankoop': '#856404',
       'onderwijs': '#17a2b8',
       'pensioen': '#6c757d',
-      'feest': '#dc3545'
+      'feest': '#dc3545',
+      'huis': '#6c757d',
+      'auto': '#17a2b8'
     };
     return colors[category] || '#6c757d';
   }};
@@ -296,17 +301,202 @@ const SummaryLabel = styled.div`
   color: #6c757d;
 `;
 
+const Modal = styled.div<{ isOpen: boolean }>`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: ${({ isOpen }) => isOpen ? 'flex' : 'none'};
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+`;
+
+const ModalHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+`;
+
+const ModalTitle = styled.h2`
+  margin: 0;
+  color: #333;
+`;
+
+const CloseButton = styled.button`
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #6c757d;
+  
+  &:hover {
+    color: #333;
+  }
+`;
+
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+`;
+
+const FormGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const Label = styled.label`
+  font-weight: 500;
+  color: #333;
+`;
+
+const Input = styled.input`
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  
+  &:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+`;
+
+const Select = styled.select`
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  
+  &:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+`;
+
+const TextArea = styled.textarea`
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  resize: vertical;
+  min-height: 80px;
+  
+  &:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+`;
+
+const FormActions = styled.div`
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+`;
+
+const Button = styled.button<{ variant?: 'primary' | 'secondary' | 'danger' }>`
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  ${({ variant }) => {
+    switch (variant) {
+      case 'primary':
+        return `
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+        `;
+      case 'secondary':
+        return `
+          background: #6c757d;
+          color: white;
+        `;
+      case 'danger':
+        return `
+          background: #dc3545;
+          color: white;
+        `;
+      default:
+        return `
+          background: #f8f9fa;
+          color: #333;
+          border: 1px solid #ddd;
+        `;
+    }
+  }}
+  
+  &:hover {
+    transform: translateY(-1px);
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+`;
+
+const LoadingSpinner = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  color: #667eea;
+`;
+
+const ErrorMessage = styled.div`
+  background: #f8d7da;
+  color: #721c24;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+`;
+
 const getCategoryIcon = (category: string) => {
   const icons: { [key: string]: string } = {
     'vakantie': '🏖️',
     'noodfonds': '🛡️',
     'grote-aankoop': '🛒',
     'onderwijs': '📚',
-    'pensioen': '👴',
-    'feest': '🎉'
+    'pensioen': '💰',
+    'feest': '🎉',
+    'huis': '🏠',
+    'auto': '🚗'
   };
   return icons[category] || '💰';
 };
+
+const categories = [
+  { value: 'vakantie', label: 'Vakantie' },
+  { value: 'noodfonds', label: 'Noodfonds' },
+  { value: 'grote-aankoop', label: 'Grote aankoop' },
+  { value: 'onderwijs', label: 'Onderwijs' },
+  { value: 'pensioen', label: 'Pensioen' },
+  { value: 'feest', label: 'Feest' },
+  { value: 'huis', label: 'Huis' },
+  { value: 'auto', label: 'Auto' }
+];
 
 const getGoalStatus = (saved: number, target: number, deadline: string): 'active' | 'completed' | 'overdue' => {
   if (saved >= target) return 'completed';
@@ -331,63 +521,118 @@ const calculateMonthlyAmount = (target: number, saved: number, deadline: string)
   return Math.ceil((target - saved) / monthsLeft);
 };
 
-const mockGoals = [
-  {
-    id: 1,
-    name: 'Vakantie naar Bali',
-    category: 'vakantie',
-    target: 2500,
-    saved: 1800,
-    deadline: '2024-06-15',
-    description: 'Droomvakantie naar Indonesië'
-  },
-  {
-    id: 2,
-    name: 'Noodfonds',
-    category: 'noodfonds',
-    target: 5000,
-    saved: 3200,
-    deadline: '2024-12-31',
-    description: 'Veiligheidsnet voor onverwachte uitgaven'
-  },
-  {
-    id: 3,
-    name: 'Nieuwe laptop',
-    category: 'grote-aankoop',
-    target: 1200,
-    saved: 800,
-    deadline: '2024-03-01',
-    description: 'MacBook voor werk en studie'
-  },
-  {
-    id: 4,
-    name: 'Cursus Spaans',
-    category: 'onderwijs',
-    target: 800,
-    saved: 600,
-    deadline: '2024-04-01',
-    description: 'Online cursus voor vakantie'
-  },
-  {
-    id: 5,
-    name: 'Verjaardagsfeest',
-    category: 'feest',
-    target: 300,
-    saved: 300,
-    deadline: '2024-02-15',
-    description: '30e verjaardag vieren'
-  }
-];
-
 const SavingsGoalsPage: React.FC = () => {
-  const [goals] = useState(mockGoals);
+  const { savingsGoals, loading, error, createSavingsGoal, updateSavingsGoal, deleteSavingsGoal } = useApp();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingGoal, setEditingGoal] = useState<any>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    category: 'vakantie',
+    target_amount: '',
+    current_amount: '',
+    deadline: '',
+    description: ''
+  });
 
-  const totalTarget = goals.reduce((sum, goal) => sum + goal.target, 0);
-  const totalSaved = goals.reduce((sum, goal) => sum + goal.saved, 0);
+  const openModal = (goal?: any) => {
+    if (goal) {
+      setEditingGoal(goal);
+      setFormData({
+        name: goal.name,
+        category: goal.category,
+        target_amount: goal.target_amount.toString(),
+        current_amount: goal.current_amount.toString(),
+        deadline: goal.deadline ? goal.deadline.split('T')[0] : '',
+        description: goal.description || ''
+      });
+    } else {
+      setEditingGoal(null);
+      setFormData({
+        name: '',
+        category: 'vakantie',
+        target_amount: '',
+        current_amount: '',
+        deadline: '',
+        description: ''
+      });
+    }
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingGoal(null);
+    setFormData({
+      name: '',
+      category: 'vakantie',
+      target_amount: '',
+      current_amount: '',
+      deadline: '',
+      description: ''
+    });
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const goalData = {
+        name: formData.name,
+        category: formData.category,
+        target_amount: parseFloat(formData.target_amount),
+        current_amount: parseFloat(formData.current_amount),
+        deadline: formData.deadline ? new Date(formData.deadline).toISOString() : null,
+        description: formData.description
+      };
+
+      if (editingGoal) {
+        await updateSavingsGoal(editingGoal.id, goalData);
+      } else {
+        await createSavingsGoal(goalData);
+      }
+
+      closeModal();
+    } catch (error) {
+      console.error('Error saving savings goal:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (goalId: string) => {
+    if (window.confirm('Weet je zeker dat je dit spaardoel wilt verwijderen?')) {
+      try {
+        await deleteSavingsGoal(goalId);
+      } catch (error) {
+        console.error('Error deleting savings goal:', error);
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <SavingsContainer>
+        <LoadingSpinner>Spaardoelen laden...</LoadingSpinner>
+      </SavingsContainer>
+    );
+  }
+
+  const totalTarget = savingsGoals.reduce((sum, goal) => sum + goal.target_amount, 0);
+  const totalSaved = savingsGoals.reduce((sum, goal) => sum + goal.current_amount, 0);
   const totalRemaining = totalTarget - totalSaved;
-  const activeCount = goals.filter(goal => getGoalStatus(goal.saved, goal.target, goal.deadline) === 'active').length;
-  const completedCount = goals.filter(goal => getGoalStatus(goal.saved, goal.target, goal.deadline) === 'completed').length;
-  const overdueCount = goals.filter(goal => getGoalStatus(goal.saved, goal.target, goal.deadline) === 'overdue').length;
+  const activeCount = savingsGoals.filter(goal => getGoalStatus(goal.current_amount, goal.target_amount, goal.deadline || '')).length;
+  const completedCount = savingsGoals.filter(goal => getGoalStatus(goal.current_amount, goal.target_amount, goal.deadline || '') === 'completed').length;
+  const overdueCount = savingsGoals.filter(goal => getGoalStatus(goal.current_amount, goal.target_amount, goal.deadline || '') === 'overdue').length;
 
   return (
     <SavingsContainer>
@@ -396,18 +641,20 @@ const SavingsGoalsPage: React.FC = () => {
         <PageSubtitle>Plan en bereik je financiële doelen</PageSubtitle>
       </PageHeader>
 
+      {error && <ErrorMessage>Fout bij het laden van spaardoelen: {error}</ErrorMessage>}
+
       <HeaderActions>
-        <AddButton>
+        <AddButton onClick={() => openModal()}>
           <Plus size={16} />
           Nieuw spaardoel
         </AddButton>
       </HeaderActions>
 
       <GoalsGrid>
-        {goals.map((goal) => {
-          const status = getGoalStatus(goal.saved, goal.target, goal.deadline);
-          const percentage = (goal.saved / goal.target) * 100;
-          const monthlyAmount = calculateMonthlyAmount(goal.target, goal.saved, goal.deadline);
+        {savingsGoals.map((goal) => {
+          const status = getGoalStatus(goal.current_amount, goal.target_amount, goal.deadline || '');
+          const percentage = (goal.current_amount / goal.target_amount) * 100;
+          const monthlyAmount = goal.deadline ? calculateMonthlyAmount(goal.target_amount, goal.current_amount, goal.deadline) : 0;
           const StatusIcon = status === 'active' ? Target : status === 'completed' ? Award : TrendingUp;
           
           return (
@@ -420,18 +667,18 @@ const SavingsGoalsPage: React.FC = () => {
                   <GoalName>{goal.name}</GoalName>
                 </GoalTitle>
                 <GoalActions>
-                  <ActionButton title="Bewerken">
+                  <ActionButton title="Bewerken" onClick={() => openModal(goal)}>
                     <Edit3 size={16} />
                   </ActionButton>
-                  <ActionButton title="Instellingen">
-                    <Target size={16} />
+                  <ActionButton title="Verwijderen" onClick={() => handleDelete(goal.id)}>
+                    <Trash2 size={16} />
                   </ActionButton>
                 </GoalActions>
               </GoalHeader>
 
               <GoalProgress>
                 <ProgressHeader>
-                  <ProgressAmount>€{goal.saved} van €{goal.target}</ProgressAmount>
+                  <ProgressAmount>€{goal.current_amount.toFixed(2)} van €{goal.target_amount.toFixed(2)}</ProgressAmount>
                   <ProgressPercentage status={status}>{percentage.toFixed(1)}%</ProgressPercentage>
                 </ProgressHeader>
                 <ProgressBar percentage={percentage} status={status} />
@@ -443,7 +690,9 @@ const SavingsGoalsPage: React.FC = () => {
                     <Calendar size={16} />
                   </DetailIcon>
                   <DetailInfo>
-                    <DetailValue>{formatDate(goal.deadline)}</DetailValue>
+                    <DetailValue>
+                      {goal.deadline ? formatDate(goal.deadline) : 'Geen deadline'}
+                    </DetailValue>
                     <DetailLabel>Deadline</DetailLabel>
                   </DetailInfo>
                 </DetailItem>
@@ -452,11 +701,19 @@ const SavingsGoalsPage: React.FC = () => {
                     <DollarSign size={16} />
                   </DetailIcon>
                   <DetailInfo>
-                    <DetailValue>€{monthlyAmount}/maand</DetailValue>
+                    <DetailValue>
+                      {goal.deadline ? `€${monthlyAmount}/maand` : 'Geen deadline'}
+                    </DetailValue>
                     <DetailLabel>Nodig</DetailLabel>
                   </DetailInfo>
                 </DetailItem>
               </GoalDetails>
+
+              {goal.description && (
+                <div style={{ marginBottom: '15px', fontSize: '0.9rem', color: '#6c757d' }}>
+                  {goal.description}
+                </div>
+              )}
 
               <GoalStatus status={status}>
                 <StatusIcon size={16} />
@@ -500,6 +757,121 @@ const SavingsGoalsPage: React.FC = () => {
           </SummaryCard>
         </SummaryGrid>
       </SummarySection>
+
+      <Modal isOpen={isModalOpen}>
+        <ModalContent>
+          <ModalHeader>
+            <ModalTitle>
+              {editingGoal ? 'Spaardoel bewerken' : 'Nieuw spaardoel'}
+            </ModalTitle>
+            <CloseButton onClick={closeModal}>
+              <X size={20} />
+            </CloseButton>
+          </ModalHeader>
+
+          <Form onSubmit={handleSubmit}>
+            <FormGroup>
+              <Label htmlFor="name">Naam</Label>
+              <Input
+                id="name"
+                name="name"
+                type="text"
+                value={formData.name}
+                onChange={handleInputChange}
+                required
+                placeholder="Bijv. Vakantie naar Bali"
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <Label htmlFor="category">Categorie</Label>
+              <Select
+                id="category"
+                name="category"
+                value={formData.category}
+                onChange={handleInputChange}
+                required
+              >
+                {categories.map(category => (
+                  <option key={category.value} value={category.value}>
+                    {category.label}
+                  </option>
+                ))}
+              </Select>
+            </FormGroup>
+
+            <FormGroup>
+              <Label htmlFor="target_amount">Doelbedrag (€)</Label>
+              <Input
+                id="target_amount"
+                name="target_amount"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.target_amount}
+                onChange={handleInputChange}
+                required
+                placeholder="2500.00"
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <Label htmlFor="current_amount">Huidig bedrag (€)</Label>
+              <Input
+                id="current_amount"
+                name="current_amount"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.current_amount}
+                onChange={handleInputChange}
+                required
+                placeholder="0.00"
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <Label htmlFor="deadline">Deadline (optioneel)</Label>
+              <Input
+                id="deadline"
+                name="deadline"
+                type="date"
+                value={formData.deadline}
+                onChange={handleInputChange}
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <Label htmlFor="description">Beschrijving (optioneel)</Label>
+              <TextArea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                placeholder="Beschrijf je spaardoel..."
+              />
+            </FormGroup>
+
+            <FormActions>
+              <Button type="button" variant="secondary" onClick={closeModal}>
+                Annuleren
+              </Button>
+              <Button type="submit" variant="primary" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <div>Opslaan...</div>
+                  </>
+                ) : (
+                  <>
+                    <Save size={16} />
+                    {editingGoal ? 'Bijwerken' : 'Toevoegen'}
+                  </>
+                )}
+              </Button>
+            </FormActions>
+          </Form>
+        </ModalContent>
+      </Modal>
     </SavingsContainer>
   );
 };

@@ -22,8 +22,11 @@ export interface Transaction {
 export interface Budget {
   id: string;
   user_id: string;
+  name: string;
   category: string;
-  amount: number;
+  budget: number;
+  spent: number;
+  remaining: number;
   period: 'monthly' | 'weekly' | 'yearly';
   created_at: string;
 }
@@ -32,9 +35,11 @@ export interface SavingsGoal {
   id: string;
   user_id: string;
   name: string;
+  category: string;
   target_amount: number;
   current_amount: number;
   deadline?: string;
+  description?: string;
   created_at: string;
 }
 
@@ -127,30 +132,92 @@ export class ApiService {
       .order('category');
     
     if (error) throw error;
-    return data as Budget[];
+    
+    // Calculate spent amounts from transactions for each budget
+    const budgetsWithSpent = await Promise.all(
+      (data as any[]).map(async (budget) => {
+        const currentMonth = new Date().toISOString().slice(0, 7);
+        const { data: transactions } = await supabase
+          .from('transactions')
+          .select('amount')
+          .eq('user_id', userId)
+          .eq('category', budget.category)
+          .gte('transaction_date', `${currentMonth}-01`)
+          .lte('transaction_date', `${currentMonth}-31`)
+          .lt('amount', 0); // Only expenses (negative amounts)
+        
+        const spent = transactions?.reduce((sum, tx) => sum + Math.abs(tx.amount), 0) || 0;
+        const remaining = budget.budget - spent;
+        
+        return {
+          ...budget,
+          spent,
+          remaining
+        };
+      })
+    );
+    
+    return budgetsWithSpent as Budget[];
   }
 
-  static async createBudget(budget: Omit<Budget, 'id' | 'created_at'>) {
+  static async createBudget(budget: Omit<Budget, 'id' | 'created_at' | 'spent' | 'remaining'>) {
     const { data, error } = await supabase
       .from('budgets')
-      .insert(budget)
+      .insert({
+        user_id: budget.user_id,
+        name: budget.name,
+        category: budget.category,
+        budget: budget.budget,
+        period: budget.period || 'monthly'
+      })
       .select()
       .single();
     
     if (error) throw error;
-    return data as Budget;
+    
+    // Return with calculated spent and remaining
+    return {
+      ...data,
+      spent: 0,
+      remaining: budget.budget
+    } as Budget;
   }
 
   static async updateBudget(id: string, updates: Partial<Budget>) {
+    // Only update the fields that are actually stored in the database
     const { data, error } = await supabase
       .from('budgets')
-      .update(updates)
+      .update({
+        name: updates.name,
+        category: updates.category,
+        budget: updates.budget,
+        period: updates.period
+      })
       .eq('id', id)
       .select()
       .single();
     
     if (error) throw error;
-    return data as Budget;
+    
+    // Recalculate spent and remaining
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const { data: transactions } = await supabase
+      .from('transactions')
+      .select('amount')
+      .eq('user_id', data.user_id)
+      .eq('category', data.category)
+      .gte('transaction_date', `${currentMonth}-01`)
+      .lte('transaction_date', `${currentMonth}-31`)
+      .lt('amount', 0);
+    
+    const spent = transactions?.reduce((sum, tx) => sum + Math.abs(tx.amount), 0) || 0;
+    const remaining = data.budget - spent;
+    
+    return {
+      ...data,
+      spent,
+      remaining
+    } as Budget;
   }
 
   static async deleteBudget(id: string) {

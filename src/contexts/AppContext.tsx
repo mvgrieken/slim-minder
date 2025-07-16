@@ -106,7 +106,7 @@ interface AppContextType extends AppState {
   createTransaction: (transaction: Omit<Transaction, 'id' | 'created_at'>) => Promise<void>;
   updateTransaction: (id: string, updates: Partial<Transaction>) => Promise<void>;
   deleteTransaction: (id: string) => Promise<void>;
-  createBudget: (budget: Omit<Budget, 'id' | 'created_at'>) => Promise<void>;
+  createBudget: (budget: Omit<Budget, 'id' | 'created_at' | 'spent' | 'remaining'>) => Promise<void>;
   updateBudget: (id: string, updates: Partial<Budget>) => Promise<void>;
   deleteBudget: (id: string) => Promise<void>;
   createSavingsGoal: (goal: Omit<SavingsGoal, 'id' | 'created_at'>) => Promise<void>;
@@ -186,7 +186,7 @@ export function AppProvider({ children }: AppProviderProps) {
   };
 
   // Budget actions
-  const createBudget = async (budget: Omit<Budget, 'id' | 'created_at'>) => {
+  const createBudget = async (budget: Omit<Budget, 'id' | 'created_at' | 'spent' | 'remaining'>) => {
     if (!user) throw new Error('User not authenticated');
     
     try {

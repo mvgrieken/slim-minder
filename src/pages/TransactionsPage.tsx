@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { Search, Filter, Download, Plus, Edit3, Tag } from 'lucide-react';
+import { Search, Filter, Download, Plus, Edit3, Tag, Trash2, X, Save } from 'lucide-react';
+import { useApp } from '../contexts/AppContext';
+import { useAuth } from '../contexts/AuthContext';
+import { Transaction } from '../services/api';
 
 const TransactionsContainer = styled.div`
   max-width: 1200px;
@@ -246,56 +249,192 @@ const SummaryLabel = styled.div`
   color: #6c757d;
 `;
 
-const mockTransactions = [
-  {
-    id: 1,
-    description: 'Albert Heijn',
-    amount: -45.67,
-    date: '2024-01-15',
-    category: 'boodschappen',
-    type: 'expense' as const
-  },
-  {
-    id: 2,
-    description: 'Salaris ING Bank',
-    amount: 3200.00,
-    date: '2024-01-01',
-    category: 'inkomsten',
-    type: 'income' as const
-  },
-  {
-    id: 3,
-    description: 'NS Reizen',
-    amount: -89.50,
-    date: '2024-01-14',
-    category: 'vervoer',
-    type: 'expense' as const
-  },
-  {
-    id: 4,
-    description: 'Bioscoop Pathé',
-    amount: -12.50,
-    date: '2024-01-13',
-    category: 'vrije-tijd',
-    type: 'expense' as const
-  },
-  {
-    id: 5,
-    description: 'Huur appartement',
-    amount: -800.00,
-    date: '2024-01-01',
-    category: 'wonen',
-    type: 'expense' as const
-  },
-  {
-    id: 6,
-    description: 'Apotheek Centrum',
-    amount: -23.45,
-    date: '2024-01-12',
-    category: 'gezondheid',
-    type: 'expense' as const
+// Modal styles
+const Modal = styled.div<{ isOpen: boolean }>`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: ${({ isOpen }) => isOpen ? 'flex' : 'none'};
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+`;
+
+const ModalHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+`;
+
+const ModalTitle = styled.h2`
+  margin: 0;
+  color: #333;
+`;
+
+const CloseButton = styled.button`
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #6c757d;
+  
+  &:hover {
+    color: #333;
   }
+`;
+
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+`;
+
+const FormGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const Label = styled.label`
+  font-weight: 500;
+  color: #333;
+`;
+
+const Input = styled.input`
+  padding: 12px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 1rem;
+  
+  &:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+`;
+
+const Select = styled.select`
+  padding: 12px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: white;
+  
+  &:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+`;
+
+const TextArea = styled.textarea`
+  padding: 12px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 1rem;
+  resize: vertical;
+  min-height: 80px;
+  
+  &:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+`;
+
+const FormActions = styled.div`
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end;
+  margin-top: 20px;
+`;
+
+const Button = styled.button<{ variant?: 'primary' | 'secondary' | 'danger' }>`
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  ${({ variant }) => {
+    switch (variant) {
+      case 'primary':
+        return `
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          &:hover { transform: translateY(-1px); }
+        `;
+      case 'secondary':
+        return `
+          background: #f8f9fa;
+          color: #333;
+          border: 2px solid #e9ecef;
+          &:hover { background: #e9ecef; }
+        `;
+      case 'danger':
+        return `
+          background: #dc3545;
+          color: white;
+          &:hover { background: #c82333; }
+        `;
+      default:
+        return `
+          background: #6c757d;
+          color: white;
+          &:hover { background: #5a6268; }
+        `;
+    }
+  }}
+`;
+
+const LoadingSpinner = styled.div`
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+
+// Predefined categories
+const categories = [
+  'Boodschappen',
+  'Vervoer', 
+  'Vrije tijd',
+  'Wonen',
+  'Gezondheid',
+  'Inkomen',
+  'Salaris',
+  'Overig'
 ];
+
+// Transaction form interface
+interface TransactionForm {
+  description: string;
+  amount: string;
+  category: string;
+  transaction_date: string;
+}
 
 const getCategoryIcon = (category: string) => {
   const icons: { [key: string]: string } = {
@@ -310,23 +449,117 @@ const getCategoryIcon = (category: string) => {
 };
 
 const TransactionsPage: React.FC = () => {
+  const { user } = useAuth();
+  const { transactions, loading, error, createTransaction, updateTransaction, deleteTransaction } = useApp();
+  
+  // Local state
   const [searchTerm, setSearchTerm] = useState('');
-  const [transactions] = useState(mockTransactions);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState<TransactionForm>({
+    description: '',
+    amount: '',
+    category: '',
+    transaction_date: new Date().toISOString().split('T')[0]
+  });
 
+  // Filter transactions
   const filteredTransactions = transactions.filter(transaction =>
     transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
     transaction.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Calculate totals
   const totalIncome = transactions
-    .filter(t => t.type === 'income')
+    .filter(t => t.amount > 0)
     .reduce((sum, t) => sum + t.amount, 0);
 
   const totalExpenses = transactions
-    .filter(t => t.type === 'expense')
+    .filter(t => t.amount < 0)
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
   const netAmount = totalIncome - totalExpenses;
+
+  // Form handlers
+  const handleInputChange = (field: keyof TransactionForm, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const resetForm = () => {
+    setFormData({
+      description: '',
+      amount: '',
+      category: '',
+      transaction_date: new Date().toISOString().split('T')[0]
+    });
+    setEditingTransaction(null);
+  };
+
+  const openModal = (transaction?: Transaction) => {
+    if (transaction) {
+      setEditingTransaction(transaction);
+      setFormData({
+        description: transaction.description,
+        amount: Math.abs(transaction.amount).toString(),
+        category: transaction.category,
+        transaction_date: transaction.transaction_date
+      });
+    } else {
+      resetForm();
+    }
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    resetForm();
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+
+    setIsSubmitting(true);
+    try {
+      const amount = parseFloat(formData.amount);
+      if (isNaN(amount)) throw new Error('Ongeldig bedrag');
+
+      const transactionData = {
+        user_id: user.id,
+        description: formData.description,
+        amount: editingTransaction ? 
+          (editingTransaction.amount > 0 ? amount : -amount) : 
+          (amount > 0 ? amount : -amount),
+        category: formData.category,
+        transaction_date: formData.transaction_date
+      };
+
+      if (editingTransaction) {
+        await updateTransaction(editingTransaction.id, transactionData);
+      } else {
+        await createTransaction(transactionData);
+      }
+
+      closeModal();
+    } catch (error) {
+      console.error('Error saving transaction:', error);
+      alert('Er ging iets mis bij het opslaan van de transactie');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (transactionId: string) => {
+    if (!window.confirm('Weet je zeker dat je deze transactie wilt verwijderen?')) return;
+
+    try {
+      await deleteTransaction(transactionId);
+    } catch (error) {
+      console.error('Error deleting transaction:', error);
+      alert('Er ging iets mis bij het verwijderen van de transactie');
+    }
+  };
 
   return (
     <TransactionsContainer>
@@ -359,7 +592,7 @@ const TransactionsPage: React.FC = () => {
             Export
           </ActionButton>
           
-          <ActionButton>
+          <ActionButton onClick={() => openModal()}>
             <Plus size={16} />
             Toevoegen
           </ActionButton>
@@ -367,36 +600,55 @@ const TransactionsPage: React.FC = () => {
       </ControlsSection>
 
       <TransactionsList>
-        {filteredTransactions.map((transaction) => (
-          <TransactionItem key={transaction.id} type={transaction.type}>
-            <TransactionIcon category={transaction.category}>
-              {getCategoryIcon(transaction.category)}
-            </TransactionIcon>
-            
-            <TransactionInfo>
-              <TransactionDescription>{transaction.description}</TransactionDescription>
-              <TransactionDate>{new Date(transaction.date).toLocaleDateString('nl-NL')}</TransactionDate>
-            </TransactionInfo>
-            
-            <TransactionCategory>
-              <Tag size={14} />
-              {transaction.category.charAt(0).toUpperCase() + transaction.category.slice(1)}
-            </TransactionCategory>
-            
-            <TransactionAmount type={transaction.type}>
-              {transaction.type === 'income' ? '+' : '-'}€{Math.abs(transaction.amount).toFixed(2)}
-            </TransactionAmount>
-            
-            <TransactionActions>
-              <ActionIcon title="Bewerken">
-                <Edit3 size={16} />
-              </ActionIcon>
-              <ActionIcon title="Categorie wijzigen">
-                <Tag size={16} />
-              </ActionIcon>
-            </TransactionActions>
-          </TransactionItem>
-        ))}
+        {loading ? (
+          <div style={{ padding: '40px', textAlign: 'center' }}>
+            <LoadingSpinner />
+            <p>Transacties laden...</p>
+          </div>
+        ) : error ? (
+          <div style={{ padding: '40px', textAlign: 'center', color: '#dc3545' }}>
+            <p>Fout bij het laden van transacties: {error}</p>
+          </div>
+        ) : filteredTransactions.length === 0 ? (
+          <div style={{ padding: '40px', textAlign: 'center', color: '#6c757d' }}>
+            <p>Geen transacties gevonden</p>
+            <ActionButton onClick={() => openModal()} style={{ marginTop: '20px' }}>
+              <Plus size={16} />
+              Eerste transactie toevoegen
+            </ActionButton>
+          </div>
+        ) : (
+          filteredTransactions.map((transaction) => (
+            <TransactionItem key={transaction.id} type={transaction.amount > 0 ? 'income' : 'expense'}>
+              <TransactionIcon category={transaction.category}>
+                {getCategoryIcon(transaction.category)}
+              </TransactionIcon>
+              
+              <TransactionInfo>
+                <TransactionDescription>{transaction.description}</TransactionDescription>
+                <TransactionDate>{new Date(transaction.transaction_date).toLocaleDateString('nl-NL')}</TransactionDate>
+              </TransactionInfo>
+              
+              <TransactionCategory>
+                <Tag size={14} />
+                {transaction.category}
+              </TransactionCategory>
+              
+              <TransactionAmount type={transaction.amount > 0 ? 'income' : 'expense'}>
+                {transaction.amount > 0 ? '+' : '-'}€{Math.abs(transaction.amount).toFixed(2)}
+              </TransactionAmount>
+              
+              <TransactionActions>
+                <ActionIcon title="Bewerken" onClick={() => openModal(transaction)}>
+                  <Edit3 size={16} />
+                </ActionIcon>
+                <ActionIcon title="Verwijderen" onClick={() => handleDelete(transaction.id)}>
+                  <Trash2 size={16} />
+                </ActionIcon>
+              </TransactionActions>
+            </TransactionItem>
+          ))
+        )}
       </TransactionsList>
 
       <SummarySection>
@@ -421,6 +673,90 @@ const TransactionsPage: React.FC = () => {
           </SummaryCard>
         </SummaryGrid>
       </SummarySection>
+
+      {/* Transaction Modal */}
+      <Modal isOpen={isModalOpen}>
+        <ModalContent>
+          <ModalHeader>
+            <ModalTitle>
+              {editingTransaction ? 'Transactie bewerken' : 'Nieuwe transactie'}
+            </ModalTitle>
+            <CloseButton onClick={closeModal}>
+              <X size={24} />
+            </CloseButton>
+          </ModalHeader>
+
+          <Form onSubmit={handleSubmit}>
+            <FormGroup>
+              <Label>Beschrijving</Label>
+              <Input
+                type="text"
+                value={formData.description}
+                onChange={(e) => handleInputChange('description', e.target.value)}
+                placeholder="Bijv. Albert Heijn boodschappen"
+                required
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <Label>Bedrag</Label>
+              <Input
+                type="number"
+                step="0.01"
+                value={formData.amount}
+                onChange={(e) => handleInputChange('amount', e.target.value)}
+                placeholder="0.00"
+                required
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <Label>Categorie</Label>
+              <Select
+                value={formData.category}
+                onChange={(e) => handleInputChange('category', e.target.value)}
+                required
+              >
+                <option value="">Selecteer categorie</option>
+                {categories.map(category => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </Select>
+            </FormGroup>
+
+            <FormGroup>
+              <Label>Datum</Label>
+              <Input
+                type="date"
+                value={formData.transaction_date}
+                onChange={(e) => handleInputChange('transaction_date', e.target.value)}
+                required
+              />
+            </FormGroup>
+
+            <FormActions>
+              <Button type="button" variant="secondary" onClick={closeModal}>
+                Annuleren
+              </Button>
+              <Button type="submit" variant="primary" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <LoadingSpinner />
+                    Opslaan...
+                  </>
+                ) : (
+                  <>
+                    <Save size={16} />
+                    {editingTransaction ? 'Bijwerken' : 'Toevoegen'}
+                  </>
+                )}
+              </Button>
+            </FormActions>
+          </Form>
+        </ModalContent>
+      </Modal>
     </TransactionsContainer>
   );
 };

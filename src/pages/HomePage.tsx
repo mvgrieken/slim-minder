@@ -11,6 +11,7 @@ import {
   ArrowRight,
   CheckCircle
 } from 'lucide-react';
+import NotificationBadge from '../components/NotificationBadge';
 
 // Styled components
 const HomePage = styled.div`
@@ -47,6 +48,9 @@ const Nav = styled.nav`
 `;
 
 const NavLink = styled(Link)`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[1]};
   font-weight: ${({ theme }) => theme.typography.fontWeight.medium};
   color: ${({ theme }) => theme.colors.text.secondary};
   text-decoration: none;
@@ -332,6 +336,12 @@ const HomePageComponent: React.FC = () => {
           <NavLink to="#benefits">Voordelen</NavLink>
           <NavLink to="#pricing">Tarieven</NavLink>
           <NavLink to="/test">🔧 Test</NavLink>
+          <NavLink to="/gamification">Gamification</NavLink>
+          <NavLink to="/bank-connection">Bankkoppeling</NavLink>
+          <NavLink to="/notifications">
+            <NotificationBadge size="sm" showCount={false} />
+            Notificaties
+          </NavLink>
         </Nav>
         
         <AuthButtons>
