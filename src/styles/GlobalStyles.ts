@@ -1,191 +1,178 @@
 import { createGlobalStyle } from 'styled-components';
-import { Theme } from './theme';
+import { theme } from './theme';
 
-export const GlobalStyles = createGlobalStyle<{ theme: Theme }>`
-  /* CSS Reset */
-  *,
-  *::before,
-  *::after {
+export const GlobalStyles = createGlobalStyle`
+  * {
     box-sizing: border-box;
-    margin: 0;
-    padding: 0;
   }
 
-  /* HTML and Body */
   html {
     font-size: 16px;
     scroll-behavior: smooth;
-    height: 100%;
   }
 
   body {
-    font-family: ${({ theme }) => theme.typography.fontFamily.primary};
-    font-size: ${({ theme }) => theme.typography.fontSize.base};
-    font-weight: ${({ theme }) => theme.typography.fontWeight.normal};
-    line-height: ${({ theme }) => theme.typography.lineHeight.normal};
-    color: ${({ theme }) => theme.colors.text.primary};
-    background-color: ${({ theme }) => theme.colors.background};
-    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    font-family: ${theme.fonts.primary};
+    font-size: ${theme.fontSizes.base};
+    font-weight: ${theme.fontWeights.normal};
+    line-height: ${theme.lineHeights.normal};
+    color: ${theme.colors.textPrimary};
+    background-color: ${theme.colors.background};
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
 
-  #root {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* Typography */
   h1, h2, h3, h4, h5, h6 {
-    font-weight: ${({ theme }) => theme.typography.fontWeight.semibold};
-    line-height: ${({ theme }) => theme.typography.lineHeight.tight};
-    color: ${({ theme }) => theme.colors.text.primary};
-    margin-bottom: ${({ theme }) => theme.spacing[4]};
+    margin: 0 0 ${theme.spacing.md} 0;
+    font-family: ${theme.fonts.secondary};
+    font-weight: ${theme.fontWeights.bold};
+    line-height: ${theme.lineHeights.tight};
+    color: ${theme.colors.textPrimary};
   }
 
   h1 {
-    font-size: ${({ theme }) => theme.typography.fontSize['3xl']};
-    font-weight: ${({ theme }) => theme.typography.fontWeight.bold};
+    font-size: ${theme.fontSizes['4xl']};
+    font-weight: ${theme.fontWeights.extrabold};
   }
 
   h2 {
-    font-size: ${({ theme }) => theme.typography.fontSize['2xl']};
+    font-size: ${theme.fontSizes['3xl']};
+    font-weight: ${theme.fontWeights.bold};
   }
 
   h3 {
-    font-size: ${({ theme }) => theme.typography.fontSize.xl};
+    font-size: ${theme.fontSizes['2xl']};
+    font-weight: ${theme.fontWeights.semibold};
   }
 
   h4 {
-    font-size: ${({ theme }) => theme.typography.fontSize.lg};
+    font-size: ${theme.fontSizes.xl};
+    font-weight: ${theme.fontWeights.semibold};
   }
 
   h5 {
-    font-size: ${({ theme }) => theme.typography.fontSize.base};
+    font-size: ${theme.fontSizes.lg};
+    font-weight: ${theme.fontWeights.medium};
   }
 
   h6 {
-    font-size: ${({ theme }) => theme.typography.fontSize.sm};
+    font-size: ${theme.fontSizes.base};
+    font-weight: ${theme.fontWeights.medium};
   }
 
   p {
-    margin-bottom: ${({ theme }) => theme.spacing[4]};
-    color: ${({ theme }) => theme.colors.text.secondary};
+    margin: 0 0 ${theme.spacing.md} 0;
+    line-height: ${theme.lineHeights.relaxed};
   }
 
-  /* Links */
   a {
-    color: ${({ theme }) => theme.colors.primary[600]};
+    color: ${theme.colors.primary};
     text-decoration: none;
-    transition: color ${({ theme }) => theme.transitions.duration.fast} ${({ theme }) => theme.transitions.easing.easeOut};
-
+    transition: color ${theme.transitions.fast};
+    
     &:hover {
-      color: ${({ theme }) => theme.colors.primary[700]};
-      text-decoration: underline;
+      color: ${theme.colors.primaryHover};
     }
-
+    
     &:focus {
-      outline: 2px solid ${({ theme }) => theme.colors.primary[500]};
+      outline: 2px solid ${theme.colors.primary};
       outline-offset: 2px;
-      border-radius: ${({ theme }) => theme.borderRadius.sm};
     }
-  }
-
-  /* Lists */
-  ul, ol {
-    margin-left: ${({ theme }) => theme.spacing[6]};
-    margin-bottom: ${({ theme }) => theme.spacing[4]};
-  }
-
-  li {
-    margin-bottom: ${({ theme }) => theme.spacing[1]};
-  }
-
-  /* Images */
-  img {
-    max-width: 100%;
-    height: auto;
-    display: block;
-  }
-
-  /* Form Elements */
-  button, input, select, textarea {
-    font-family: inherit;
-    font-size: inherit;
   }
 
   button {
-    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
     border: none;
     background: none;
-    padding: 0;
+    cursor: pointer;
+    transition: all ${theme.transitions.fast};
+    
+    &:focus {
+      outline: 2px solid ${theme.colors.primary};
+      outline-offset: 2px;
+    }
+    
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
   }
 
-  input, select, textarea {
-    appearance: none;
-    border: 1px solid ${({ theme }) => theme.colors.gray[300]};
-    border-radius: ${({ theme }) => theme.borderRadius.md};
-    padding: ${({ theme }) => theme.components.input.padding};
-    font-size: ${({ theme }) => theme.typography.fontSize.base};
-    transition: border-color ${({ theme }) => theme.transitions.duration.fast} ${({ theme }) => theme.transitions.easing.easeOut};
-
+  input, textarea, select {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    border: 1px solid ${theme.colors.border};
+    border-radius: ${theme.borderRadius.md};
+    padding: ${theme.spacing.sm} ${theme.spacing.md};
+    background-color: ${theme.colors.surface};
+    transition: all ${theme.transitions.fast};
+    
     &:focus {
       outline: none;
-      border-color: ${({ theme }) => theme.colors.primary[500]};
-      box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary[100]};
+      border-color: ${theme.colors.primary};
+      box-shadow: 0 0 0 3px ${theme.colors.primary}20;
     }
-
+    
     &::placeholder {
-      color: ${({ theme }) => theme.colors.text.tertiary};
-    }
-
-    &:disabled {
-      background-color: ${({ theme }) => theme.colors.gray[100]};
-      color: ${({ theme }) => theme.colors.text.tertiary};
-      cursor: not-allowed;
+      color: ${theme.colors.textTertiary};
     }
   }
 
-  /* Scrollbar Styling */
+  ul, ol {
+    margin: 0 0 ${theme.spacing.md} 0;
+    padding-left: ${theme.spacing.xl};
+  }
+
+  li {
+    margin-bottom: ${theme.spacing.xs};
+    line-height: ${theme.lineHeights.relaxed};
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
   }
 
   ::-webkit-scrollbar-track {
-    background: ${({ theme }) => theme.colors.gray[100]};
-    border-radius: ${({ theme }) => theme.borderRadius.base};
+    background: ${theme.colors.gray100};
+    border-radius: ${theme.borderRadius.full};
   }
 
   ::-webkit-scrollbar-thumb {
-    background: ${({ theme }) => theme.colors.gray[400]};
-    border-radius: ${({ theme }) => theme.borderRadius.base};
-
-    &:hover {
-      background: ${({ theme }) => theme.colors.gray[500]};
-    }
+    background: ${theme.colors.gray400};
+    border-radius: ${theme.borderRadius.full};
+    transition: background ${theme.transitions.fast};
   }
 
-  /* Selection */
+  ::-webkit-scrollbar-thumb:hover {
+    background: ${theme.colors.gray500};
+  }
+
+  /* Selection styles */
   ::selection {
-    background-color: ${({ theme }) => theme.colors.primary[200]};
-    color: ${({ theme }) => theme.colors.primary[900]};
+    background-color: ${theme.colors.primary}40;
+    color: ${theme.colors.textPrimary};
   }
 
-  /* Focus Styles for Accessibility */
-  :focus-visible {
-    outline: 2px solid ${({ theme }) => theme.colors.primary[500]};
+  /* Focus styles for accessibility */
+  *:focus-visible {
+    outline: 2px solid ${theme.colors.primary};
     outline-offset: 2px;
   }
 
-  /* Remove focus outline for mouse users */
-  :focus:not(:focus-visible) {
-    outline: none;
-  }
-
-  /* Utility Classes */
+  /* Utility classes */
   .sr-only {
     position: absolute;
     width: 1px;
@@ -198,167 +185,24 @@ export const GlobalStyles = createGlobalStyle<{ theme: Theme }>`
     border: 0;
   }
 
-  .visually-hidden {
-    position: absolute !important;
-    clip: rect(1px, 1px, 1px, 1px);
-    padding: 0 !important;
-    border: 0 !important;
-    height: 1px !important;
-    width: 1px !important;
-    overflow: hidden;
-  }
-
-  .skip-link {
-    position: absolute;
-    top: -40px;
-    left: 6px;
-    background: ${({ theme }) => theme.colors.primary[600]};
-    color: ${({ theme }) => theme.colors.white};
-    padding: 8px;
-    text-decoration: none;
-    border-radius: ${({ theme }) => theme.borderRadius.md};
-    z-index: ${({ theme }) => theme.zIndex.modal};
-
-    &:focus {
-      top: 6px;
-    }
-  }
-
-  /* High Contrast Mode Support */
-  @media (prefers-contrast: high) {
-    * {
-      border-color: ButtonText !important;
-    }
-
-    button {
-      border: 1px solid ButtonText !important;
-    }
-  }
-
-  /* Reduced Motion Support */
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
-    }
-  }
-
-  /* Dark Mode Support (for future use) */
-  @media (prefers-color-scheme: dark) {
-    /* Dark mode styles will be added here when implementing dark mode */
-  }
-
-  /* Print Styles */
-  @media print {
-    *,
-    *::before,
-    *::after {
-      background: transparent !important;
-      color: black !important;
-      box-shadow: none !important;
-      text-shadow: none !important;
-    }
-
-    a,
-    a:visited {
-      text-decoration: underline;
-    }
-
-    a[href]::after {
-      content: " (" attr(href) ")";
-    }
-
-    abbr[title]::after {
-      content: " (" attr(title) ")";
-    }
-
-    pre {
-      white-space: pre-wrap !important;
-    }
-
-    pre,
-    blockquote {
-      border: 1px solid #999;
-      page-break-inside: avoid;
-    }
-
-    thead {
-      display: table-header-group;
-    }
-
-    tr,
-    img {
-      page-break-inside: avoid;
-    }
-
-    p,
-    h2,
-    h3 {
-      orphans: 3;
-      widows: 3;
-    }
-
-    h2,
-    h3 {
-      page-break-after: avoid;
-    }
-  }
-
-  /* Component Animation Keyframes */
+  /* Animation keyframes */
   @keyframes fadeIn {
     from {
       opacity: 0;
+      transform: translateY(10px);
     }
     to {
       opacity: 1;
-    }
-  }
-
-  @keyframes slideInFromBottom {
-    from {
-      transform: translateY(100%);
-      opacity: 0;
-    }
-    to {
       transform: translateY(0);
-      opacity: 1;
     }
   }
 
-  @keyframes slideInFromTop {
-    from {
-      transform: translateY(-100%);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  }
-
-  @keyframes slideInFromLeft {
+  @keyframes slideIn {
     from {
       transform: translateX(-100%);
-      opacity: 0;
     }
     to {
       transform: translateX(0);
-      opacity: 1;
-    }
-  }
-
-  @keyframes slideInFromRight {
-    from {
-      transform: translateX(100%);
-      opacity: 0;
-    }
-    to {
-      transform: translateX(0);
-      opacity: 1;
     }
   }
 
@@ -372,25 +216,47 @@ export const GlobalStyles = createGlobalStyle<{ theme: Theme }>`
   }
 
   @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
     to {
       transform: rotate(360deg);
     }
   }
 
-  /* Loading Animation */
-  .loading {
+  /* Animation classes */
+  .fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .slide-in {
+    animation: slideIn 0.3s ease-out;
+  }
+
+  .pulse {
     animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 
-  .spinning {
+  .spin {
     animation: spin 1s linear infinite;
   }
 
-  /* Toast Container Positioning */
-  .toast-container {
-    position: fixed;
-    top: ${({ theme }) => theme.spacing[4]};
-    right: ${({ theme }) => theme.spacing[4]};
-    z-index: ${({ theme }) => theme.zIndex.toast};
+  /* Responsive utilities */
+  @media (max-width: ${theme.breakpoints.sm}) {
+    html {
+      font-size: 14px;
+    }
+    
+    h1 {
+      font-size: ${theme.fontSizes['3xl']};
+    }
+    
+    h2 {
+      font-size: ${theme.fontSizes['2xl']};
+    }
+    
+    h3 {
+      font-size: ${theme.fontSizes.xl};
+    }
   }
 `; 

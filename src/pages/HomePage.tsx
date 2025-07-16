@@ -1,541 +1,435 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 import { 
   TrendingUp, 
-  Shield, 
   Target, 
-  MessageCircle, 
-  Award, 
-  Smartphone,
+  Brain, 
+  Bell, 
+  Shield, 
+  BookOpen,
   ArrowRight,
-  CheckCircle,
-  BookOpen
-} from 'lucide-react';
-import NotificationBadge from '../components/NotificationBadge';
+  DollarSign,
+  PiggyBank,
+  BarChart3,
+  Users,
+  Award
+} from 'react-feather';
 
-// Styled components
-const HomePage = styled.div`
+const HomePage: React.FC = () => {
+  return (
+    <Container>
+      <HeroSection>
+        <HeroContent>
+          <HeroTitle>
+            Welkom bij <GoldText>Slim Minder</GoldText>
+          </HeroTitle>
+          <HeroSubtitle>
+            Neem controle over je financiën met slimme inzichten, persoonlijke coaching en gamification
+          </HeroSubtitle>
+          <HeroButtons>
+            <PrimaryButton to="/dashboard">
+              Start je reis
+              <ArrowRight size={20} />
+            </PrimaryButton>
+            <SecondaryButton to="/inspiration">
+              Ontdek meer
+            </SecondaryButton>
+          </HeroButtons>
+        </HeroContent>
+        <HeroVisual>
+          <VisualCard>
+            <VisualIcon>
+              <DollarSign size={48} />
+            </VisualIcon>
+            <VisualText>€2,450</VisualText>
+            <VisualLabel>Bespaard deze maand</VisualLabel>
+          </VisualCard>
+        </HeroVisual>
+      </HeroSection>
+
+      <FeaturesSection>
+        <SectionTitle>Waarom Slim Minder?</SectionTitle>
+        <FeaturesGrid>
+          <FeatureCard>
+            <FeatureIcon>
+              <Brain size={32} />
+            </FeatureIcon>
+            <FeatureTitle>AI Coach</FeatureTitle>
+            <FeatureDescription>
+              Persoonlijke financiële adviezen op basis van je uitgavenpatroon en doelen
+            </FeatureDescription>
+          </FeatureCard>
+
+          <FeatureCard>
+            <FeatureIcon>
+              <Target size={32} />
+            </FeatureIcon>
+            <FeatureTitle>Slimme Budgettering</FeatureTitle>
+            <FeatureDescription>
+              Automatische categorisering en real-time budget monitoring
+            </FeatureDescription>
+          </FeatureCard>
+
+          <FeatureCard>
+            <FeatureIcon>
+              <TrendingUp size={32} />
+            </FeatureIcon>
+            <FeatureTitle>Inzichten & Trends</FeatureTitle>
+            <FeatureDescription>
+              Visualiseer je financiële vooruitgang met gedetailleerde analyses
+            </FeatureDescription>
+          </FeatureCard>
+
+          <FeatureCard>
+            <FeatureIcon>
+              <Award size={32} />
+            </FeatureIcon>
+            <FeatureTitle>Gamification</FeatureTitle>
+            <FeatureDescription>
+              Verdien badges en behaal uitdagingen om gemotiveerd te blijven
+            </FeatureDescription>
+          </FeatureCard>
+
+          <FeatureCard>
+            <FeatureIcon>
+              <Shield size={32} />
+            </FeatureIcon>
+            <FeatureTitle>Veilige Bankkoppeling</FeatureTitle>
+            <FeatureDescription>
+              PSD2-compliant bankintegratie voor automatische transactiesynchronisatie
+            </FeatureDescription>
+          </FeatureCard>
+
+          <FeatureCard>
+            <FeatureIcon>
+              <Bell size={32} />
+            </FeatureIcon>
+            <FeatureTitle>Slimme Notificaties</FeatureTitle>
+            <FeatureDescription>
+              Ontvang tijdige waarschuwingen en herinneringen voor je financiële doelen
+            </FeatureDescription>
+          </FeatureCard>
+        </FeaturesGrid>
+      </FeaturesSection>
+
+      <StatsSection>
+        <StatsGrid>
+          <StatCard>
+            <StatNumber>€15,420</StatNumber>
+            <StatLabel>Gemiddeld bespaard per gebruiker</StatLabel>
+          </StatCard>
+          <StatCard>
+            <StatNumber>94%</StatNumber>
+            <StatLabel>Te tevreden gebruikers</StatLabel>
+          </StatCard>
+          <StatCard>
+            <StatNumber>€2.1M</StatNumber>
+            <StatLabel>Totaal bespaard door gebruikers</StatLabel>
+          </StatCard>
+        </StatsGrid>
+      </StatsSection>
+
+      <CTASection>
+        <CTAContent>
+          <CTATitle>Klaar om te beginnen?</CTATitle>
+          <CTADescription>
+            Sluit je aan bij duizenden gebruikers die al hun financiële doelen hebben bereikt
+          </CTADescription>
+          <CTAButton to="/register">
+            Gratis aanmelden
+            <ArrowRight size={20} />
+          </CTAButton>
+        </CTAContent>
+      </CTASection>
+    </Container>
+  );
+};
+
+const Container = styled.div`
   min-height: 100vh;
-  background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary[50]} 0%, ${({ theme }) => theme.colors.white} 100%);
-`;
-
-const Header = styled.header`
-  padding: ${({ theme }) => theme.spacing[4]} ${({ theme }) => theme.spacing[6]};
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 1200px;
-  margin: 0 auto;
-`;
-
-const Logo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[2]};
-  font-size: ${({ theme }) => theme.typography.fontSize.xl};
-  font-weight: ${({ theme }) => theme.typography.fontWeight.bold};
-  color: ${({ theme }) => theme.colors.primary[600]};
-`;
-
-const Nav = styled.nav`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing[6]};
-  align-items: center;
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
-    display: none;
-  }
-`;
-
-const NavLink = styled(Link)`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[1]};
-  font-weight: ${({ theme }) => theme.typography.fontWeight.medium};
-  color: ${({ theme }) => theme.colors.text.secondary};
-  text-decoration: none;
-  transition: color ${({ theme }) => theme.transitions.duration.fast};
-
-  &:hover {
-    color: ${({ theme }) => theme.colors.primary[600]};
-  }
-`;
-
-const AuthButtons = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing[3]};
-  align-items: center;
-`;
-
-const Button = styled(Link)<{ variant?: 'primary' | 'secondary' }>`
-  display: inline-flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing[2]};
-  padding: ${({ theme }) => theme.components.button.padding.md};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  font-size: ${({ theme }) => theme.typography.fontSize.sm};
-  font-weight: ${({ theme }) => theme.typography.fontWeight.medium};
-  text-decoration: none;
-  border: none;
-  cursor: pointer;
-  transition: all ${({ theme }) => theme.transitions.duration.fast} ${({ theme }) => theme.transitions.easing.easeOut};
-  
-  ${({ variant, theme }) =>
-    variant === 'primary'
-      ? `
-        background-color: ${theme.colors.primary[600]};
-        color: ${theme.colors.white};
-        
-        &:hover {
-          background-color: ${theme.colors.primary[700]};
-          transform: translateY(-1px);
-          box-shadow: ${theme.shadows.lg};
-        }
-      `
-      : `
-        background-color: transparent;
-        color: ${theme.colors.text.primary};
-        border: 1px solid ${theme.colors.gray[300]};
-        
-        &:hover {
-          background-color: ${theme.colors.gray[50]};
-        }
-      `}
-`;
-
-const Main = styled.main`
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 ${({ theme }) => theme.spacing[6]};
+  background: linear-gradient(135deg, ${({ theme }) => theme.colors.background} 0%, ${({ theme }) => theme.colors.gray50} 100%);
 `;
 
 const HeroSection = styled.section`
-  text-align: center;
-  padding: ${({ theme }) => theme.spacing[20]} 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: ${({ theme }) => theme.spacing['4xl']};
+  align-items: center;
+  padding: ${({ theme }) => theme.spacing['4xl']} ${({ theme }) => theme.spacing.xl};
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: 80vh;
 
-  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
-    padding: ${({ theme }) => theme.spacing[12]} 0;
+  @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: ${({ theme }) => theme.spacing['2xl']};
+    padding: ${({ theme }) => theme.spacing['2xl']} ${({ theme }) => theme.spacing.lg};
   }
 `;
 
+const HeroContent = styled.div``;
+
 const HeroTitle = styled.h1`
-  font-size: ${({ theme }) => theme.typography.fontSize['5xl']};
-  font-weight: ${({ theme }) => theme.typography.fontWeight.bold};
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin-bottom: ${({ theme }) => theme.spacing[6]};
-  line-height: ${({ theme }) => theme.typography.lineHeight.tight};
+  font-size: ${({ theme }) => theme.fontSizes['5xl']};
+  font-weight: ${({ theme }) => theme.fontWeights.extrabold};
+  line-height: 1.1;
+  margin-bottom: ${({ theme }) => theme.spacing.lg};
+  background: linear-gradient(135deg, ${({ theme }) => theme.colors.textPrimary} 0%, ${({ theme }) => theme.colors.textSecondary} 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
-    font-size: ${({ theme }) => theme.typography.fontSize['3xl']};
+    font-size: ${({ theme }) => theme.fontSizes['4xl']};
   }
+`;
+
+const GoldText = styled.span`
+  background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary} 0%, ${({ theme }) => theme.colors.primaryDark} 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 `;
 
 const HeroSubtitle = styled.p`
-  font-size: ${({ theme }) => theme.typography.fontSize.xl};
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin-bottom: ${({ theme }) => theme.spacing[8]};
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
-    font-size: ${({ theme }) => theme.typography.fontSize.lg};
-  }
+  font-size: ${({ theme }) => theme.fontSizes.xl};
+  color: ${({ theme }) => theme.colors.textSecondary};
+  margin-bottom: ${({ theme }) => theme.spacing['2xl']};
+  line-height: 1.6;
 `;
 
 const HeroButtons = styled.div`
   display: flex;
-  gap: ${({ theme }) => theme.spacing[4]};
-  justify-content: center;
-  margin-bottom: ${({ theme }) => theme.spacing[12]};
+  gap: ${({ theme }) => theme.spacing.lg};
+  flex-wrap: wrap;
 
-  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
-    flex-direction: column;
-    align-items: center;
+  @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    justify-content: center;
   }
 `;
 
+const PrimaryButton = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.sm};
+  padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.xl};
+  background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary} 0%, ${({ theme }) => theme.colors.primaryDark} 100%);
+  color: ${({ theme }) => theme.colors.white};
+  text-decoration: none;
+  border-radius: ${({ theme }) => theme.borderRadius.xl};
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
+  font-size: ${({ theme }) => theme.fontSizes.lg};
+  transition: all ${({ theme }) => theme.transitions.base};
+  box-shadow: ${({ theme }) => theme.shadows.lg};
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: ${({ theme }) => theme.shadows.xl};
+    color: ${({ theme }) => theme.colors.white};
+  }
+`;
+
+const SecondaryButton = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.sm};
+  padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.xl};
+  background: ${({ theme }) => theme.colors.surface};
+  color: ${({ theme }) => theme.colors.textPrimary};
+  text-decoration: none;
+  border: 2px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius.xl};
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
+  font-size: ${({ theme }) => theme.fontSizes.lg};
+  transition: all ${({ theme }) => theme.transitions.base};
+
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.primary};
+    color: ${({ theme }) => theme.colors.primary};
+    transform: translateY(-2px);
+  }
+`;
+
+const HeroVisual = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const VisualCard = styled.div`
+  background: linear-gradient(135deg, ${({ theme }) => theme.colors.surface} 0%, ${({ theme }) => theme.colors.gray50} 100%);
+  padding: ${({ theme }) => theme.spacing['2xl']};
+  border-radius: ${({ theme }) => theme.borderRadius['2xl']};
+  text-align: center;
+  box-shadow: ${({ theme }) => theme.shadows.xl};
+  border: 1px solid ${({ theme }) => theme.colors.borderLight};
+  min-width: 280px;
+`;
+
+const VisualIcon = styled.div`
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary} 0%, ${({ theme }) => theme.colors.primaryDark} 100%);
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto ${({ theme }) => theme.spacing.lg};
+  color: ${({ theme }) => theme.colors.white};
+`;
+
+const VisualText = styled.div`
+  font-size: ${({ theme }) => theme.fontSizes['3xl']};
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  color: ${({ theme }) => theme.colors.textPrimary};
+  margin-bottom: ${({ theme }) => theme.spacing.xs};
+`;
+
+const VisualLabel = styled.div`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
 const FeaturesSection = styled.section`
-  padding: ${({ theme }) => theme.spacing[20]} 0;
-  background-color: ${({ theme }) => theme.colors.white};
-  border-radius: ${({ theme }) => theme.borderRadius['3xl']};
-  margin-top: ${({ theme }) => theme.spacing[12]};
+  padding: ${({ theme }) => theme.spacing['4xl']} ${({ theme }) => theme.spacing.xl};
+  max-width: 1200px;
+  margin: 0 auto;
 `;
 
 const SectionTitle = styled.h2`
-  font-size: ${({ theme }) => theme.typography.fontSize['3xl']};
-  font-weight: ${({ theme }) => theme.typography.fontWeight.bold};
   text-align: center;
-  margin-bottom: ${({ theme }) => theme.spacing[12]};
-  color: ${({ theme }) => theme.colors.text.primary};
+  font-size: ${({ theme }) => theme.fontSizes['4xl']};
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  margin-bottom: ${({ theme }) => theme.spacing['3xl']};
+  color: ${({ theme }) => theme.colors.textPrimary};
 `;
 
 const FeaturesGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: ${({ theme }) => theme.spacing[8]};
-  margin-top: ${({ theme }) => theme.spacing[12]};
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: ${({ theme }) => theme.spacing.xl};
 `;
 
 const FeatureCard = styled.div`
+  background: ${({ theme }) => theme.colors.surface};
+  padding: ${({ theme }) => theme.spacing.xl};
+  border-radius: ${({ theme }) => theme.borderRadius.xl};
+  box-shadow: ${({ theme }) => theme.shadows.md};
+  border: 1px solid ${({ theme }) => theme.colors.borderLight};
+  transition: all ${({ theme }) => theme.transitions.base};
   text-align: center;
-  padding: ${({ theme }) => theme.spacing[6]};
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: ${({ theme }) => theme.shadows.lg};
+    border-color: ${({ theme }) => theme.colors.primary}40;
+  }
 `;
 
-const FeatureIcon = styled.div<{ color: string }>`
+const FeatureIcon = styled.div`
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary}20 0%, ${({ theme }) => theme.colors.primary}10 100%);
+  border-radius: ${({ theme }) => theme.borderRadius.xl};
   display: flex;
+  align-items: center;
   justify-content: center;
-  margin-bottom: ${({ theme }) => theme.spacing[4]};
-  
-  svg {
-    width: 48px;
-    height: 48px;
-    color: ${({ color }) => color};
-  }
+  margin: 0 auto ${({ theme }) => theme.spacing.lg};
+  color: ${({ theme }) => theme.colors.primary};
 `;
 
 const FeatureTitle = styled.h3`
-  font-size: ${({ theme }) => theme.typography.fontSize.xl};
-  font-weight: ${({ theme }) => theme.typography.fontWeight.semibold};
-  margin-bottom: ${({ theme }) => theme.spacing[3]};
-  color: ${({ theme }) => theme.colors.text.primary};
+  font-size: ${({ theme }) => theme.fontSizes.xl};
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
+  margin-bottom: ${({ theme }) => theme.spacing.md};
+  color: ${({ theme }) => theme.colors.textPrimary};
 `;
 
 const FeatureDescription = styled.p`
-  color: ${({ theme }) => theme.colors.text.secondary};
-  line-height: ${({ theme }) => theme.typography.lineHeight.relaxed};
+  color: ${({ theme }) => theme.colors.textSecondary};
+  line-height: 1.6;
 `;
 
-const BenefitsSection = styled.section`
-  padding: ${({ theme }) => theme.spacing[20]} 0;
-  text-align: center;
+const StatsSection = styled.section`
+  padding: ${({ theme }) => theme.spacing['4xl']} ${({ theme }) => theme.spacing.xl};
+  background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary}10 0%, ${({ theme }) => theme.colors.primary}05 100%);
 `;
 
-const BenefitsList = styled.div`
+const StatsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: ${({ theme }) => theme.spacing[6]};
-  margin-top: ${({ theme }) => theme.spacing[12]};
-  text-align: left;
+  gap: ${({ theme }) => theme.spacing.xl};
+  max-width: 1200px;
+  margin: 0 auto;
 `;
 
-const BenefitItem = styled.div`
-  display: flex;
-  align-items: flex-start;
-  gap: ${({ theme }) => theme.spacing[3]};
+const StatCard = styled.div`
+  background: ${({ theme }) => theme.colors.surface};
+  padding: ${({ theme }) => theme.spacing.xl};
+  border-radius: ${({ theme }) => theme.borderRadius.xl};
+  text-align: center;
+  box-shadow: ${({ theme }) => theme.shadows.md};
+  border: 1px solid ${({ theme }) => theme.colors.borderLight};
 `;
 
-const BenefitIcon = styled.div`
-  flex-shrink: 0;
-  margin-top: ${({ theme }) => theme.spacing[1]};
-  
-  svg {
-    width: 20px;
-    height: 20px;
-    color: ${({ theme }) => theme.colors.secondary[500]};
-  }
+const StatNumber = styled.div`
+  font-size: ${({ theme }) => theme.fontSizes['3xl']};
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  color: ${({ theme }) => theme.colors.primary};
+  margin-bottom: ${({ theme }) => theme.spacing.sm};
 `;
 
-const BenefitText = styled.span`
-  color: ${({ theme }) => theme.colors.text.secondary};
+const StatLabel = styled.div`
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
 `;
 
 const CTASection = styled.section`
-  background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary[600]} 0%, ${({ theme }) => theme.colors.primary[800]} 100%);
-  color: ${({ theme }) => theme.colors.white};
-  padding: ${({ theme }) => theme.spacing[20]} 0;
+  padding: ${({ theme }) => theme.spacing['4xl']} ${({ theme }) => theme.spacing.xl};
+  background: linear-gradient(135deg, ${({ theme }) => theme.colors.secondary} 0%, ${({ theme }) => theme.colors.secondaryDark} 100%);
   text-align: center;
-  border-radius: ${({ theme }) => theme.borderRadius['3xl']};
-  margin: ${({ theme }) => theme.spacing[12]} 0;
+`;
+
+const CTAContent = styled.div`
+  max-width: 600px;
+  margin: 0 auto;
 `;
 
 const CTATitle = styled.h2`
-  font-size: ${({ theme }) => theme.typography.fontSize['3xl']};
-  font-weight: ${({ theme }) => theme.typography.fontWeight.bold};
-  margin-bottom: ${({ theme }) => theme.spacing[4]};
+  font-size: ${({ theme }) => theme.fontSizes['3xl']};
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  color: ${({ theme }) => theme.colors.white};
+  margin-bottom: ${({ theme }) => theme.spacing.lg};
 `;
 
 const CTADescription = styled.p`
-  font-size: ${({ theme }) => theme.typography.fontSize.lg};
-  margin-bottom: ${({ theme }) => theme.spacing[8]};
-  opacity: 0.9;
+  font-size: ${({ theme }) => theme.fontSizes.lg};
+  color: ${({ theme }) => theme.colors.gray300};
+  margin-bottom: ${({ theme }) => theme.spacing['2xl']};
+  line-height: 1.6;
 `;
 
-const CTAButton = styled(Button)`
-  background-color: ${({ theme }) => theme.colors.white};
-  color: ${({ theme }) => theme.colors.primary[600]};
-  
+const CTAButton = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.sm};
+  padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.xl};
+  background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary} 0%, ${({ theme }) => theme.colors.primaryDark} 100%);
+  color: ${({ theme }) => theme.colors.white};
+  text-decoration: none;
+  border-radius: ${({ theme }) => theme.borderRadius.xl};
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
+  font-size: ${({ theme }) => theme.fontSizes.lg};
+  transition: all ${({ theme }) => theme.transitions.base};
+  box-shadow: ${({ theme }) => theme.shadows.lg};
+
   &:hover {
-    background-color: ${({ theme }) => theme.colors.gray[100]};
     transform: translateY(-2px);
     box-shadow: ${({ theme }) => theme.shadows.xl};
+    color: ${({ theme }) => theme.colors.white};
   }
 `;
 
-const HomePageComponent: React.FC = () => {
-  const features = [
-    {
-      icon: <TrendingUp />,
-      color: '#0ea5e9', // primary-500
-      title: 'Inzichtelijke overzichten',
-      description: 'Krijg direct inzicht in je inkomsten en uitgaven met automatische categorisatie en duidelijke grafieken.'
-    },
-    {
-      icon: <Target />,
-      color: '#22c55e', // secondary-500
-      title: 'Slimme budgetten',
-      description: 'Stel budgetten in per categorie en ontvang tijdige waarschuwingen voordat je over je limiet gaat.'
-    },
-    {
-      icon: <MessageCircle />,
-      color: '#8b5cf6', // purple
-      title: 'AI-coach',
-      description: 'Krijg persoonlijk financieel advies van onze intelligente coach die je uitgavenpatroon begrijpt.'
-    },
-    {
-      icon: <Award />,
-      color: '#f59e0b', // warning-500
-      title: 'Gamification',
-      description: 'Verdien badges en behaal uitdagingen terwijl je je financiële doelen realiseert.'
-    },
-    {
-      icon: <Shield />,
-      color: '#ef4444', // error-500
-      title: 'Bankbeveiliging',
-      description: 'Veilige bankkoppeling via PSD2 met hoogste beveiligingsstandaarden.'
-    },
-    {
-      icon: <Smartphone />,
-      color: '#6366f1', // indigo
-      title: 'Altijd bereikbaar',
-      description: 'Gebruik Slim Minder op web, iOS en Android. Jouw financiën altijd binnen handbereik.'
-    }
-  ];
-
-  const benefits = [
-    'Voorkom schulden voordat ze ontstaan',
-    'Krijg meer grip op je geld',
-    'Bespaar geld met slimme inzichten',
-    'Bereik je spaardoelen sneller',
-    'Leer betere financiële gewoonten',
-    'Ontvang tijdige waarschuwingen',
-    'Toegang tot Nederlandse toeslagen',
-    'Volledig Nederlands platform'
-  ];
-
-  return (
-    <HomePage>
-      <Header>
-        <Logo>
-          <TrendingUp />
-          Slim Minder
-        </Logo>
-        
-        <Nav>
-          <NavLink to="#features">Functies</NavLink>
-          <NavLink to="#benefits">Voordelen</NavLink>
-          <NavLink to="#pricing">Tarieven</NavLink>
-          <NavLink to="/inspiration">📚 Inspiratie</NavLink>
-          <NavLink to="/test">🔧 Test</NavLink>
-          <NavLink to="/gamification">Gamification</NavLink>
-          <NavLink to="/bank-connection">Bankkoppeling</NavLink>
-          <NavLink to="/notifications">
-            <NotificationBadge size="sm" showCount={false} />
-            Notificaties
-          </NavLink>
-        </Nav>
-        
-        <AuthButtons>
-          <Button variant="secondary" to="/login">
-            Inloggen
-          </Button>
-          <Button variant="primary" to="/register">
-            Gratis starten
-            <ArrowRight size={16} />
-          </Button>
-        </AuthButtons>
-      </Header>
-
-      <Main id="main-content">
-        <HeroSection>
-          <HeroTitle>
-            Meer grip op geld, <br />
-            minder geldzorgen
-          </HeroTitle>
-          
-          <HeroSubtitle>
-            Slim Minder helpt je financiële problemen te voorkomen met inzichtelijke budgetten, 
-            slimme waarschuwingen en persoonlijk advies van onze AI-coach.
-          </HeroSubtitle>
-          
-          <HeroButtons>
-            <Button variant="primary" to="/register">
-              Gratis proberen
-              <ArrowRight size={16} />
-            </Button>
-            <Button variant="secondary" to="#features">
-              Bekijk functies
-            </Button>
-          </HeroButtons>
-        </HeroSection>
-
-        <FeaturesSection id="features">
-          <SectionTitle>
-            Alles wat je nodig hebt voor financiële controle
-          </SectionTitle>
-          
-          <FeaturesGrid>
-            {features.map((feature, index) => (
-              <FeatureCard key={index}>
-                <FeatureIcon color={feature.color}>
-                  {feature.icon}
-                </FeatureIcon>
-                <FeatureTitle>{feature.title}</FeatureTitle>
-                <FeatureDescription>{feature.description}</FeatureDescription>
-              </FeatureCard>
-            ))}
-          </FeaturesGrid>
-        </FeaturesSection>
-
-        <BenefitsSection id="benefits">
-          <SectionTitle>
-            Waarom kiezen voor Slim Minder?
-          </SectionTitle>
-          
-          <BenefitsList>
-            {benefits.map((benefit, index) => (
-              <BenefitItem key={index}>
-                <BenefitIcon>
-                  <CheckCircle />
-                </BenefitIcon>
-                <BenefitText>{benefit}</BenefitText>
-              </BenefitItem>
-            ))}
-          </BenefitsList>
-        </BenefitsSection>
-
-        <CTASection>
-          <CTATitle>
-            Klaar om te beginnen?
-          </CTATitle>
-          <CTADescription>
-            Start vandaag nog gratis en krijg binnen enkele minuten inzicht in je financiën.
-          </CTADescription>
-          <CTAButton to="/register">
-            Gratis account aanmaken
-            <ArrowRight size={16} />
-          </CTAButton>
-        </CTASection>
-
-        <FeaturesSection>
-          <SectionTitle>
-            Ontdek de Slim Minder app
-          </SectionTitle>
-          
-          <FeaturesGrid>
-            <FeatureCard>
-              <FeatureIcon color="#0ea5e9">
-                <TrendingUp />
-              </FeatureIcon>
-              <FeatureTitle>Dashboard</FeatureTitle>
-              <FeatureDescription>
-                Overzicht van je financiën met inkomsten, uitgaven en spaargeld.
-              </FeatureDescription>
-              <Button variant="primary" to="/dashboard" style={{ marginTop: '1rem' }}>
-                Bekijk dashboard
-                <ArrowRight size={16} />
-              </Button>
-            </FeatureCard>
-
-            <FeatureCard>
-              <FeatureIcon color="#22c55e">
-                <Target />
-              </FeatureIcon>
-              <FeatureTitle>Transacties</FeatureTitle>
-              <FeatureDescription>
-                Bekijk en categoriseer al je banktransacties automatisch.
-              </FeatureDescription>
-              <Button variant="primary" to="/transactions" style={{ marginTop: '1rem' }}>
-                Bekijk transacties
-                <ArrowRight size={16} />
-              </Button>
-            </FeatureCard>
-
-            <FeatureCard>
-              <FeatureIcon color="#8b5cf6">
-                <Shield />
-              </FeatureIcon>
-              <FeatureTitle>Budgetten</FeatureTitle>
-              <FeatureDescription>
-                Stel budgetten in per categorie en houd je uitgaven onder controle.
-              </FeatureDescription>
-              <Button variant="primary" to="/budgets" style={{ marginTop: '1rem' }}>
-                Bekijk budgetten
-                <ArrowRight size={16} />
-              </Button>
-            </FeatureCard>
-
-            <FeatureCard>
-              <FeatureIcon color="#f59e0b">
-                <Award />
-              </FeatureIcon>
-              <FeatureTitle>Spaardoelen</FeatureTitle>
-              <FeatureDescription>
-                Plan en bereik je financiële doelen met voortgangsindicatoren.
-              </FeatureDescription>
-              <Button variant="primary" to="/savings" style={{ marginTop: '1rem' }}>
-                Bekijk spaardoelen
-                <ArrowRight size={16} />
-              </Button>
-            </FeatureCard>
-
-            <FeatureCard>
-              <FeatureIcon color="#ef4444">
-                <MessageCircle />
-              </FeatureIcon>
-              <FeatureTitle>AI Coach</FeatureTitle>
-              <FeatureDescription>
-                Stel vragen en krijg persoonlijk financieel advies van onze AI.
-              </FeatureDescription>
-              <Button variant="primary" to="/coach" style={{ marginTop: '1rem' }}>
-                Chat met coach
-                <ArrowRight size={16} />
-              </Button>
-            </FeatureCard>
-
-            <FeatureCard>
-              <FeatureIcon color="#6366f1">
-                <Smartphone />
-              </FeatureIcon>
-              <FeatureTitle>Systeem Test</FeatureTitle>
-              <FeatureDescription>
-                Test alle systeem connecties en configuraties van Slim Minder.
-              </FeatureDescription>
-              <Button variant="primary" to="/test" style={{ marginTop: '1rem' }}>
-                Start test
-                <ArrowRight size={16} />
-              </Button>
-            </FeatureCard>
-
-            <FeatureCard>
-              <FeatureIcon color="#10b981">
-                <BookOpen />
-              </FeatureIcon>
-              <FeatureTitle>Financiële Inspiratie</FeatureTitle>
-              <FeatureDescription>
-                Ontdek de tijdloze wijsheid van "De Rijkste Man van Babylon" en andere financiële lessen.
-              </FeatureDescription>
-              <Button variant="primary" to="/inspiration" style={{ marginTop: '1rem' }}>
-                Lees inspiratie
-                <ArrowRight size={16} />
-              </Button>
-            </FeatureCard>
-          </FeaturesGrid>
-        </FeaturesSection>
-      </Main>
-    </HomePage>
-  );
-};
-
-export default HomePageComponent; 
+export default HomePage; 
