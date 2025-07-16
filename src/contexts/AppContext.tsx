@@ -101,6 +101,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
 
 // Context
 interface AppContextType extends AppState {
+  user: any; // Add user property
   dispatch: React.Dispatch<AppAction>;
   loadUserData: () => Promise<void>;
   createTransaction: (transaction: Omit<Transaction, 'id' | 'created_at'>) => Promise<void>;
@@ -266,6 +267,7 @@ export function AppProvider({ children }: AppProviderProps) {
 
   const contextValue: AppContextType = {
     ...state,
+    user, // Add user to context value
     dispatch,
     loadUserData,
     createTransaction,

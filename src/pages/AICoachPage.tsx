@@ -630,11 +630,11 @@ const AICoachPage: React.FC = () => {
       advice += `**Mogelijkheden om meer te sparen:**\n`;
       
       const topCategories = Object.entries(insights.categorySpending)
-        .sort(([,a], [,b]) => b - a)
+        .sort(([,a], [,b]) => (b as number) - (a as number))
         .slice(0, 3);
       
       topCategories.forEach(([category, amount]) => {
-        advice += `• ${category}: €${amount.toFixed(2)} - probeer 20% te besparen\n`;
+        advice += `• ${category}: €${(amount as number).toFixed(2)} - probeer 20% te besparen\n`;
       });
       
       advice += `\n**Spaartip**: Begin met €50 extra per maand en bouw dit geleidelijk op.`;
@@ -671,11 +671,11 @@ const AICoachPage: React.FC = () => {
 
     advice += `\n\n**Top uitgavencategorieën deze maand:**\n`;
     const topCategories = Object.entries(insights.categorySpending)
-      .sort(([,a], [,b]) => b - a)
+      .sort(([,a], [,b]) => (b as number) - (a as number))
       .slice(0, 3);
     
     topCategories.forEach(([category, amount]) => {
-      advice += `• ${category}: €${amount.toFixed(2)}\n`;
+      advice += `• ${category}: €${(amount as number).toFixed(2)}\n`;
     });
 
     return advice;
@@ -736,10 +736,10 @@ const AICoachPage: React.FC = () => {
     
     advice += `**Je top categorieën deze maand:**\n`;
     Object.entries(insights.categorySpending)
-      .sort(([,a], [,b]) => b - a)
+      .sort(([,a], [,b]) => (b as number) - (a as number))
       .slice(0, 5)
       .forEach(([category, amount]) => {
-        advice += `• ${category}: €${amount.toFixed(2)}\n`;
+        advice += `• ${category}: €${(amount as number).toFixed(2)}\n`;
       });
 
     advice += `\n**Tips voor betere categorisatie:**\n`;

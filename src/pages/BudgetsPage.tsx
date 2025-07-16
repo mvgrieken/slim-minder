@@ -480,7 +480,7 @@ const categories = [
 ];
 
 const BudgetsPage: React.FC = () => {
-  const { budgets, loading, error, createBudget, updateBudget, deleteBudget } = useApp();
+  const { budgets, loading, error, createBudget, updateBudget, deleteBudget, user } = useApp();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBudget, setEditingBudget] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -540,7 +540,8 @@ const BudgetsPage: React.FC = () => {
         name: formData.name,
         category: formData.category,
         budget: parseFloat(formData.budget),
-        period: formData.period
+        period: formData.period,
+        user_id: user?.id || ''
       };
 
       if (editingBudget) {
@@ -560,7 +561,7 @@ const BudgetsPage: React.FC = () => {
   const handleDelete = async (budgetId: number) => {
     if (window.confirm('Weet je zeker dat je dit budget wilt verwijderen?')) {
       try {
-        await deleteBudget(budgetId);
+        await deleteBudget(budgetId.toString());
       } catch (error) {
         console.error('Error deleting budget:', error);
       }
@@ -616,7 +617,7 @@ const BudgetsPage: React.FC = () => {
                   <ActionButton title="Bewerken" onClick={() => openModal(budget)}>
                     <Edit3 size={16} />
                   </ActionButton>
-                  <ActionButton title="Verwijderen" onClick={() => handleDelete(budget.id)}>
+                  <ActionButton title="Verwijderen" onClick={() => handleDelete(parseInt(budget.id))}>
                     <Trash2 size={16} />
                   </ActionButton>
                 </BudgetActions>

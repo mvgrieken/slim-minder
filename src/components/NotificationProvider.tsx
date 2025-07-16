@@ -75,7 +75,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       const daysSinceLastReminder = 7; // Simplified for now
       
       if (daysSinceLastReminder >= 7 && goal.current_amount < goal.target_amount) {
-        const monthlyNeeded = goal.monthly_amount || 50; // Default to 50 if not set
+        const monthlyNeeded = 50; // Default to 50 if not set
         sendSavingsReminder(goal.name, monthlyNeeded);
       }
     });
@@ -100,12 +100,12 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       // Alert for transactions over €100 from new merchants
       if (amount > 100) {
         // Check if this is a new merchant (simplified logic)
-        const merchantTransactions = transactions.filter(t => 
-          t.merchant_name === transaction.merchant_name
+        const merchantTransactions = transactions.filter(t =>
+          t.description === transaction.description
         );
         
         if (merchantTransactions.length === 1) {
-          sendSpendingAlert(amount, transaction.merchant_name);
+          sendSpendingAlert(amount, transaction.description);
         }
       }
     });

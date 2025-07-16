@@ -522,7 +522,7 @@ const calculateMonthlyAmount = (target: number, saved: number, deadline: string)
 };
 
 const SavingsGoalsPage: React.FC = () => {
-  const { savingsGoals, loading, error, createSavingsGoal, updateSavingsGoal, deleteSavingsGoal } = useApp();
+  const { savingsGoals, loading, error, createSavingsGoal, updateSavingsGoal, deleteSavingsGoal, user } = useApp();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -591,8 +591,9 @@ const SavingsGoalsPage: React.FC = () => {
         category: formData.category,
         target_amount: parseFloat(formData.target_amount),
         current_amount: parseFloat(formData.current_amount),
-        deadline: formData.deadline ? new Date(formData.deadline).toISOString() : null,
-        description: formData.description
+        deadline: formData.deadline ? new Date(formData.deadline).toISOString() : undefined,
+        description: formData.description,
+        user_id: user?.id || ''
       };
 
       if (editingGoal) {
