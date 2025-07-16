@@ -25,6 +25,7 @@ import BudgetsPage from './pages/BudgetsPage';
 import SavingsGoalsPage from './pages/SavingsGoalsPage';
 import AICoachPage from './pages/AICoachPage';
 import GamificationPage from './pages/GamificationPage';
+import InspirationPage from './pages/InspirationPage';
 import NotFoundPage from './pages/NotFoundPage';
 import BankConnectionPage from './pages/BankConnectionPage';
 import NotificationsPage from './pages/NotificationsPage';
@@ -53,6 +54,7 @@ const App: React.FC = () => {
                   <Route path="/savings" element={<SavingsGoalsPage />} />
                   <Route path="/coach" element={<AICoachPage />} />
                   <Route path="/gamification" element={<GamificationPage />} />
+                  <Route path="/inspiration" element={<InspirationPage />} />
                   <Route path="/bank-connection" element={<BankConnectionPage />} />
                   <Route path="/notifications" element={<NotificationsPage />} />
                   <Route path="*" element={<NotFoundPage />} />

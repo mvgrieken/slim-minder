@@ -9,7 +9,8 @@ import {
   Award, 
   Smartphone,
   ArrowRight,
-  CheckCircle
+  CheckCircle,
+  BookOpen
 } from 'lucide-react';
 import NotificationBadge from '../components/NotificationBadge';
 
@@ -335,6 +336,7 @@ const HomePageComponent: React.FC = () => {
           <NavLink to="#features">Functies</NavLink>
           <NavLink to="#benefits">Voordelen</NavLink>
           <NavLink to="#pricing">Tarieven</NavLink>
+          <NavLink to="/inspiration">📚 Inspiratie</NavLink>
           <NavLink to="/test">🔧 Test</NavLink>
           <NavLink to="/gamification">Gamification</NavLink>
           <NavLink to="/bank-connection">Bankkoppeling</NavLink>
@@ -512,6 +514,20 @@ const HomePageComponent: React.FC = () => {
               </FeatureDescription>
               <Button variant="primary" to="/test" style={{ marginTop: '1rem' }}>
                 Start test
+                <ArrowRight size={16} />
+              </Button>
+            </FeatureCard>
+
+            <FeatureCard>
+              <FeatureIcon color="#10b981">
+                <BookOpen />
+              </FeatureIcon>
+              <FeatureTitle>Financiële Inspiratie</FeatureTitle>
+              <FeatureDescription>
+                Ontdek de tijdloze wijsheid van "De Rijkste Man van Babylon" en andere financiële lessen.
+              </FeatureDescription>
+              <Button variant="primary" to="/inspiration" style={{ marginTop: '1rem' }}>
+                Lees inspiratie
                 <ArrowRight size={16} />
               </Button>
             </FeatureCard>
