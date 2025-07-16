@@ -70,7 +70,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const checkAuthStatus = async () => {
     try {
-      const token = localStorage.getItem('auth_token');
+      // Check both localStorage and sessionStorage for tokens
+      const localToken = localStorage.getItem('auth_token');
+      const sessionToken = sessionStorage.getItem('auth_token');
+      const token = localToken || sessionToken;
+      
       if (!token) {
         dispatch({ type: 'SET_LOADING', payload: false });
         return;
@@ -80,11 +84,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (response.success && response.data) {
         dispatch({ type: 'SET_USER', payload: response.data });
       } else {
+        // Clear tokens from both storages
         localStorage.removeItem('auth_token');
+        localStorage.removeItem('refresh_token');
+        sessionStorage.removeItem('auth_token');
+        sessionStorage.removeItem('refresh_token');
         dispatch({ type: 'SET_LOADING', payload: false });
       }
     } catch (error) {
+      // Clear tokens from both storages
       localStorage.removeItem('auth_token');
+      localStorage.removeItem('refresh_token');
+      sessionStorage.removeItem('auth_token');
+      sessionStorage.removeItem('refresh_token');
       dispatch({ type: 'SET_LOADING', payload: false });
     }
   };
@@ -95,7 +107,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const response = await authService.login(credentials);
       
       if (response.success && response.data) {
-        localStorage.setItem('auth_token', response.data.token);
+        // Store tokens based on rememberMe preference
+        if (credentials.rememberMe) {
+          localStorage.setItem('auth_token', response.data.token);
+          if (response.data.refreshToken) {
+            localStorage.setItem('refresh_token', response.data.refreshToken);
+          }
+        } else {
+          sessionStorage.setItem('auth_token', response.data.token);
+          if (response.data.refreshToken) {
+            sessionStorage.setItem('refresh_token', response.data.refreshToken);
+          }
+        }
+        
         dispatch({ type: 'SET_USER', payload: response.data.user });
       } else {
         dispatch({ type: 'SET_ERROR', payload: response.message || 'Login mislukt' });
@@ -111,7 +135,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const response = await authService.register(data);
       
       if (response.success && response.data) {
+        // For registration, always use localStorage (rememberMe = true)
         localStorage.setItem('auth_token', response.data.token);
+        if (response.data.refreshToken) {
+          localStorage.setItem('refresh_token', response.data.refreshToken);
+        }
+        
         dispatch({ type: 'SET_USER', payload: response.data.user });
       } else {
         dispatch({ type: 'SET_ERROR', payload: response.message || 'Registratie mislukt' });
@@ -122,7 +151,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const logout = () => {
+    // Clear tokens from both storages
     localStorage.removeItem('auth_token');
+    localStorage.removeItem('refresh_token');
+    sessionStorage.removeItem('auth_token');
+    sessionStorage.removeItem('refresh_token');
+    
+    // Clear saved login credentials
+    localStorage.removeItem('slim_minder_saved_email');
+    localStorage.removeItem('slim_minder_remember_me');
+    
     authService.logout();
     dispatch({ type: 'LOGOUT' });
   };

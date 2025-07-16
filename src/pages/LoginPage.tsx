@@ -153,6 +153,41 @@ const RememberMeContainer = styled.div`
   align-items: center;
   gap: ${({ theme }) => theme.spacing[2]};
   margin-bottom: ${({ theme }) => theme.spacing[4]};
+  position: relative;
+`;
+
+const RememberMeTooltip = styled.div`
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: ${({ theme }) => theme.colors.gray[800]};
+  color: white;
+  padding: ${({ theme }) => theme.spacing[2]};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  font-size: ${({ theme }) => theme.typography.fontSize.xs};
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all ${({ theme }) => theme.transitions.duration.fast};
+  z-index: 10;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 20px;
+    border: 4px solid transparent;
+    border-top-color: ${({ theme }) => theme.colors.gray[800]};
+  }
+`;
+
+const RememberMeContainerWithTooltip = styled.div`
+  position: relative;
+  
+  &:hover ${RememberMeTooltip} {
+    opacity: 1;
+    visibility: visible;
+  }
 `;
 
 const Checkbox = styled.input`
@@ -239,6 +274,17 @@ const LoginPage: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  // Load saved credentials on component mount
+  React.useEffect(() => {
+    const savedEmail = localStorage.getItem('slim_minder_saved_email');
+    const savedRememberMe = localStorage.getItem('slim_minder_remember_me') === 'true';
+    
+    if (savedEmail && savedRememberMe) {
+      setEmail(savedEmail);
+      setRememberMe(true);
+    }
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -246,11 +292,33 @@ const LoginPage: React.FC = () => {
 
     try {
       await login({ email, password, rememberMe });
+      
+      // Save credentials if rememberMe is checked
+      if (rememberMe) {
+        localStorage.setItem('slim_minder_saved_email', email);
+        localStorage.setItem('slim_minder_remember_me', 'true');
+      } else {
+        // Clear saved credentials if rememberMe is unchecked
+        localStorage.removeItem('slim_minder_saved_email');
+        localStorage.removeItem('slim_minder_remember_me');
+      }
+      
       navigate('/dashboard');
     } catch (err) {
       setError('Er is een onverwachte fout opgetreden. Probeer het opnieuw.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleRememberMeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+    setRememberMe(checked);
+    
+    // If unchecking rememberMe, clear saved credentials
+    if (!checked) {
+      localStorage.removeItem('slim_minder_saved_email');
+      localStorage.removeItem('slim_minder_remember_me');
     }
   };
 
@@ -310,17 +378,22 @@ const LoginPage: React.FC = () => {
             </InputWrapper>
           </FormGroup>
 
-          <RememberMeContainer>
-            <Checkbox
-              type="checkbox"
-              id="rememberMe"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-            />
-            <RememberMeLabel htmlFor="rememberMe">
-              Onthoud mij
-            </RememberMeLabel>
-          </RememberMeContainer>
+          <RememberMeContainerWithTooltip>
+            <RememberMeContainer>
+              <Checkbox
+                type="checkbox"
+                id="rememberMe"
+                checked={rememberMe}
+                onChange={handleRememberMeChange}
+              />
+              <RememberMeLabel htmlFor="rememberMe">
+                Onthoud mij
+              </RememberMeLabel>
+            </RememberMeContainer>
+            <RememberMeTooltip>
+              Onthoud mij om je inloggegevens te onthouden voor de volgende keer.
+            </RememberMeTooltip>
+          </RememberMeContainerWithTooltip>
 
           <LoginButton type="submit" disabled={isLoading}>
             {isLoading ? 'Inloggen...' : 'Inloggen'}

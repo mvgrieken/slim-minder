@@ -210,7 +210,18 @@ class AuthService {
   // Refresh token handling
   async refreshToken(): Promise<ApiResponse<AuthResponse>> {
     try {
-      const refreshToken = localStorage.getItem('refresh_token');
+      // Check both storages for refresh token
+      const localRefreshToken = localStorage.getItem('refresh_token');
+      const sessionRefreshToken = sessionStorage.getItem('refresh_token');
+      const refreshToken = localRefreshToken || sessionRefreshToken;
+      
+      if (!refreshToken) {
+        return {
+          success: false,
+          message: 'Geen refresh token gevonden'
+        };
+      }
+      
       const response = await apiClient.post<AuthResponse>(`${this.baseUrl}/refresh`, {
         refreshToken
       });
@@ -228,23 +239,35 @@ class AuthService {
 
   // Utility methods
   isAuthenticated(): boolean {
-    return !!localStorage.getItem('auth_token');
+    // Check both storages for auth token
+    return !!(localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token'));
   }
 
   getToken(): string | null {
-    return localStorage.getItem('auth_token');
+    // Check both storages for auth token
+    return localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
   }
 
-  setTokens(authToken: string, refreshToken?: string): void {
-    localStorage.setItem('auth_token', authToken);
-    if (refreshToken) {
-      localStorage.setItem('refresh_token', refreshToken);
+  setTokens(authToken: string, refreshToken?: string, rememberMe: boolean = true): void {
+    if (rememberMe) {
+      localStorage.setItem('auth_token', authToken);
+      if (refreshToken) {
+        localStorage.setItem('refresh_token', refreshToken);
+      }
+    } else {
+      sessionStorage.setItem('auth_token', authToken);
+      if (refreshToken) {
+        sessionStorage.setItem('refresh_token', refreshToken);
+      }
     }
   }
 
   clearTokens(): void {
+    // Clear tokens from both storages
     localStorage.removeItem('auth_token');
     localStorage.removeItem('refresh_token');
+    sessionStorage.removeItem('auth_token');
+    sessionStorage.removeItem('refresh_token');
   }
 }
 
