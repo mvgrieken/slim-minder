@@ -283,7 +283,7 @@ const LoginPage: React.FC = () => {
       setEmail(savedEmail);
       setRememberMe(true);
     }
-  }, []);
+  }, []); // Remember me functionality - loads saved credentials on page load
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
