@@ -21,7 +21,7 @@ const LoginPage: React.FC = () => {
     setError('');
 
     try {
-      await login(email, password);
+      await login({ email, password, rememberMe });
       navigate('/dashboard');
     } catch (err) {
       setError('Inloggegevens zijn onjuist. Probeer het opnieuw.');

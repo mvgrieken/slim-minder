@@ -4,14 +4,12 @@ import { Link } from 'react-router-dom';
 import { 
   TrendingUp, 
   Target, 
-  Brain, 
   Bell, 
   Shield, 
   BookOpen,
   ArrowRight,
   DollarSign,
-  PiggyBank,
-  BarChart3,
+  BarChart,
   Users,
   Award
 } from 'react-feather';
@@ -53,7 +51,7 @@ const HomePage: React.FC = () => {
         <FeaturesGrid>
           <FeatureCard>
             <FeatureIcon>
-              <Brain size={32} />
+              <Target size={32} />
             </FeatureIcon>
             <FeatureTitle>AI Coach</FeatureTitle>
             <FeatureDescription>

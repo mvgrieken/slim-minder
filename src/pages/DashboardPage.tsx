@@ -8,8 +8,7 @@ import {
   AlertTriangle,
   CheckCircle,
   Clock,
-  BarChart3,
-  PiggyBank,
+  BarChart,
   CreditCard,
   Calendar,
   Plus
@@ -33,15 +32,15 @@ const DashboardPage: React.FC = () => {
 
   // Get recent transactions
   const recentTransactions = transactions
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 5);
 
   // Get budget alerts
   const budgetAlerts = budgets.filter(budget => {
     const spent = transactions
-      .filter(t => t.category.name === budget.name && t.amount < 0)
+      .filter(t => t.category === budget.category && t.amount < 0)
       .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-    return spent > budget.amount * 0.8; // Alert when 80% spent
+    return spent > budget.budget * 0.8; // Alert when 80% spent
   });
 
   return (
@@ -110,12 +109,12 @@ const DashboardPage: React.FC = () => {
 
         <SummaryCard>
           <SummaryIcon positive>
-            <PiggyBank size={24} />
+            <DollarSign size={24} />
           </SummaryIcon>
           <SummaryContent>
             <SummaryLabel>Spaargeld</SummaryLabel>
             <SummaryAmount>
-              €{savingsGoals.reduce((sum, goal) => sum + goal.currentAmount, 0).toLocaleString('nl-NL', { minimumFractionDigits: 2 })}
+              €{savingsGoals.reduce((sum, goal) => sum + goal.current_amount, 0).toLocaleString('nl-NL', { minimumFractionDigits: 2 })}
             </SummaryAmount>
             <SummaryChange positive>+€450 deze maand</SummaryChange>
           </SummaryContent>
@@ -137,13 +136,13 @@ const DashboardPage: React.FC = () => {
                   </TransactionIcon>
                   <TransactionDetails>
                     <TransactionTitle>{transaction.description}</TransactionTitle>
-                    <TransactionCategory>{transaction.category.name}</TransactionCategory>
+                    <TransactionCategory>{transaction.category}</TransactionCategory>
                   </TransactionDetails>
                   <TransactionAmount type={transaction.amount > 0 ? 'income' : 'expense'}>
                     {transaction.amount > 0 ? '+' : '-'}€{Math.abs(transaction.amount).toLocaleString('nl-NL', { minimumFractionDigits: 2 })}
                   </TransactionAmount>
                   <TransactionDate>
-                    {new Date(transaction.date).toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit' })}
+                    {new Date(transaction.created_at).toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit' })}
                   </TransactionDate>
                 </TransactionItem>
               ))}
@@ -158,9 +157,9 @@ const DashboardPage: React.FC = () => {
             <BudgetsGrid>
               {budgets.slice(0, 4).map((budget) => {
                 const spent = transactions
-                  .filter(t => t.category.name === budget.name && t.amount < 0)
+                  .filter(t => t.category === budget.category && t.amount < 0)
                   .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-                const percentage = (spent / budget.amount) * 100;
+                const percentage = (spent / budget.budget) * 100;
                 const isOverBudget = percentage > 100;
                 const isNearLimit = percentage > 80;
 
@@ -178,7 +177,7 @@ const DashboardPage: React.FC = () => {
                       </ProgressBar>
                       <BudgetAmounts>
                         <SpentAmount>€{spent.toLocaleString('nl-NL', { minimumFractionDigits: 2 })}</SpentAmount>
-                        <TotalAmount>/ €{budget.amount.toLocaleString('nl-NL', { minimumFractionDigits: 2 })}</TotalAmount>
+                        <TotalAmount>/ €{budget.budget.toLocaleString('nl-NL', { minimumFractionDigits: 2 })}</TotalAmount>
                       </BudgetAmounts>
                     </BudgetProgress>
                   </BudgetCard>
@@ -223,7 +222,7 @@ const DashboardPage: React.FC = () => {
             </SectionHeader>
             <SavingsList>
               {savingsGoals.slice(0, 3).map((goal) => {
-                const percentage = (goal.currentAmount / goal.targetAmount) * 100;
+                const percentage = (goal.current_amount / goal.target_amount) * 100;
                 return (
                   <SavingsItem key={goal.id}>
                     <SavingsIcon>
@@ -236,7 +235,7 @@ const DashboardPage: React.FC = () => {
                           <ProgressFill percentage={percentage} />
                         </ProgressBar>
                         <SavingsAmounts>
-                          €{goal.currentAmount.toLocaleString('nl-NL', { minimumFractionDigits: 2 })} / €{goal.targetAmount.toLocaleString('nl-NL', { minimumFractionDigits: 2 })}
+                          €{goal.current_amount.toLocaleString('nl-NL', { minimumFractionDigits: 2 })} / €{goal.target_amount.toLocaleString('nl-NL', { minimumFractionDigits: 2 })}
                         </SavingsAmounts>
                       </SavingsProgress>
                     </SavingsDetails>

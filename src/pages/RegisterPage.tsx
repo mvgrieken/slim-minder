@@ -45,7 +45,14 @@ const RegisterPage: React.FC = () => {
     }
 
     try {
-      await register(formData.email, formData.password);
+      await register({
+        firstName: formData.name.split(' ')[0] || '',
+        lastName: formData.name.split(' ').slice(1).join(' ') || '',
+        email: formData.email,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        acceptTerms
+      });
       navigate('/dashboard');
     } catch (err) {
       setError('Er is een fout opgetreden bij het aanmaken van je account');
