@@ -36,7 +36,7 @@ const HomePage: React.FC = () => {
           </HeroButtons>
         </HeroContent>
         <HeroVisual>
-          <VisualCard>
+          <VisualCard className="glass">
             <VisualIcon>
               <DollarSign size={48} />
             </VisualIcon>
@@ -49,7 +49,7 @@ const HomePage: React.FC = () => {
       <FeaturesSection>
         <SectionTitle>Waarom Slim Minder?</SectionTitle>
         <FeaturesGrid>
-          <FeatureCard>
+          <FeatureCard className="card">
             <FeatureIcon>
               <Target size={32} />
             </FeatureIcon>
@@ -59,7 +59,7 @@ const HomePage: React.FC = () => {
             </FeatureDescription>
           </FeatureCard>
 
-          <FeatureCard>
+          <FeatureCard className="card">
             <FeatureIcon>
               <Target size={32} />
             </FeatureIcon>
@@ -69,7 +69,7 @@ const HomePage: React.FC = () => {
             </FeatureDescription>
           </FeatureCard>
 
-          <FeatureCard>
+          <FeatureCard className="card">
             <FeatureIcon>
               <TrendingUp size={32} />
             </FeatureIcon>
@@ -79,7 +79,7 @@ const HomePage: React.FC = () => {
             </FeatureDescription>
           </FeatureCard>
 
-          <FeatureCard>
+          <FeatureCard className="card">
             <FeatureIcon>
               <Award size={32} />
             </FeatureIcon>
@@ -89,7 +89,7 @@ const HomePage: React.FC = () => {
             </FeatureDescription>
           </FeatureCard>
 
-          <FeatureCard>
+          <FeatureCard className="card">
             <FeatureIcon>
               <Shield size={32} />
             </FeatureIcon>
@@ -99,7 +99,7 @@ const HomePage: React.FC = () => {
             </FeatureDescription>
           </FeatureCard>
 
-          <FeatureCard>
+          <FeatureCard className="card">
             <FeatureIcon>
               <Bell size={32} />
             </FeatureIcon>
@@ -113,15 +113,15 @@ const HomePage: React.FC = () => {
 
       <StatsSection>
         <StatsGrid>
-          <StatCard>
+          <StatCard className="glass">
             <StatNumber>€15,420</StatNumber>
             <StatLabel>Gemiddeld bespaard per gebruiker</StatLabel>
           </StatCard>
-          <StatCard>
+          <StatCard className="glass">
             <StatNumber>94%</StatNumber>
             <StatLabel>Te tevreden gebruikers</StatLabel>
           </StatCard>
-          <StatCard>
+          <StatCard className="glass">
             <StatNumber>€2.1M</StatNumber>
             <StatLabel>Totaal bespaard door gebruikers</StatLabel>
           </StatCard>
@@ -134,7 +134,7 @@ const HomePage: React.FC = () => {
           <CTADescription>
             Sluit je aan bij duizenden gebruikers die al hun financiële doelen hebben bereikt
           </CTADescription>
-          <CTAButton to="/register">
+          <CTAButton to="/register" className="btn-primary">
             Gratis aanmelden
             <ArrowRight size={20} />
           </CTAButton>
@@ -146,7 +146,8 @@ const HomePage: React.FC = () => {
 
 const Container = styled.div`
   min-height: 100vh;
-  background: linear-gradient(135deg, ${({ theme }) => theme.colors.background} 0%, ${({ theme }) => theme.colors.gray50} 100%);
+  background: ${({ theme }) => theme.colors.gradientSecondary};
+  background-attachment: fixed;
 `;
 
 const HeroSection = styled.section`
@@ -174,10 +175,7 @@ const HeroTitle = styled.h1`
   font-weight: ${({ theme }) => theme.fontWeights.extrabold};
   line-height: 1.1;
   margin-bottom: ${({ theme }) => theme.spacing.lg};
-  background: linear-gradient(135deg, ${({ theme }) => theme.colors.textPrimary} 0%, ${({ theme }) => theme.colors.textSecondary} 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: ${({ theme }) => theme.colors.white};
 
   @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
     font-size: ${({ theme }) => theme.fontSizes['4xl']};
@@ -185,7 +183,7 @@ const HeroTitle = styled.h1`
 `;
 
 const GoldText = styled.span`
-  background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary} 0%, ${({ theme }) => theme.colors.primaryDark} 100%);
+  background: ${({ theme }) => theme.colors.gradientPrimary};
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -193,7 +191,7 @@ const GoldText = styled.span`
 
 const HeroSubtitle = styled.p`
   font-size: ${({ theme }) => theme.fontSizes.xl};
-  color: ${({ theme }) => theme.colors.textSecondary};
+  color: ${({ theme }) => theme.colors.gray300};
   margin-bottom: ${({ theme }) => theme.spacing['2xl']};
   line-height: 1.6;
 `;
@@ -203,50 +201,51 @@ const HeroButtons = styled.div`
   gap: ${({ theme }) => theme.spacing.lg};
   flex-wrap: wrap;
 
-  @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
     justify-content: center;
   }
 `;
 
 const PrimaryButton = styled(Link)`
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.spacing.sm};
-  padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.xl};
-  background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary} 0%, ${({ theme }) => theme.colors.primaryDark} 100%);
+  background: ${({ theme }) => theme.colors.gradientPrimary};
   color: ${({ theme }) => theme.colors.white};
-  text-decoration: none;
+  padding: ${({ theme }) => theme.spacing.lg} ${({ theme }) => theme.spacing.xl};
   border-radius: ${({ theme }) => theme.borderRadius.xl};
   font-weight: ${({ theme }) => theme.fontWeights.semibold};
   font-size: ${({ theme }) => theme.fontSizes.lg};
+  text-decoration: none;
   transition: all ${({ theme }) => theme.transitions.base};
   box-shadow: ${({ theme }) => theme.shadows.lg};
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: ${({ theme }) => theme.shadows.xl};
+    transform: translateY(-3px);
+    box-shadow: ${({ theme }) => theme.shadows['2xl']};
     color: ${({ theme }) => theme.colors.white};
   }
 `;
 
 const SecondaryButton = styled(Link)`
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.spacing.sm};
-  padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.xl};
-  background: ${({ theme }) => theme.colors.surface};
-  color: ${({ theme }) => theme.colors.textPrimary};
-  text-decoration: none;
-  border: 2px solid ${({ theme }) => theme.colors.border};
+  background: rgba(255, 255, 255, 0.1);
+  color: ${({ theme }) => theme.colors.white};
+  padding: ${({ theme }) => theme.spacing.lg} ${({ theme }) => theme.spacing.xl};
   border-radius: ${({ theme }) => theme.borderRadius.xl};
   font-weight: ${({ theme }) => theme.fontWeights.semibold};
   font-size: ${({ theme }) => theme.fontSizes.lg};
+  text-decoration: none;
   transition: all ${({ theme }) => theme.transitions.base};
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
 
   &:hover {
-    border-color: ${({ theme }) => theme.colors.primary};
-    color: ${({ theme }) => theme.colors.primary};
-    transform: translateY(-2px);
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.2);
+    color: ${({ theme }) => theme.colors.white};
   }
 `;
 
@@ -257,37 +256,36 @@ const HeroVisual = styled.div`
 `;
 
 const VisualCard = styled.div`
-  background: linear-gradient(135deg, ${({ theme }) => theme.colors.surface} 0%, ${({ theme }) => theme.colors.gray50} 100%);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: ${({ theme }) => theme.borderRadius['3xl']};
   padding: ${({ theme }) => theme.spacing['2xl']};
-  border-radius: ${({ theme }) => theme.borderRadius['2xl']};
   text-align: center;
-  box-shadow: ${({ theme }) => theme.shadows.xl};
-  border: 1px solid ${({ theme }) => theme.colors.borderLight};
-  min-width: 280px;
+  box-shadow: ${({ theme }) => theme.shadows['2xl']};
+  transition: all ${({ theme }) => theme.transitions.base};
+
+  &:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: ${({ theme }) => theme.shadows['2xl']}, 0 0 30px rgba(255, 215, 0, 0.3);
+  }
 `;
 
 const VisualIcon = styled.div`
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary} 0%, ${({ theme }) => theme.colors.primaryDark} 100%);
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto ${({ theme }) => theme.spacing.lg};
-  color: ${({ theme }) => theme.colors.white};
+  color: ${({ theme }) => theme.colors.primary};
+  margin-bottom: ${({ theme }) => theme.spacing.lg};
 `;
 
 const VisualText = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes['3xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.textPrimary};
-  margin-bottom: ${({ theme }) => theme.spacing.xs};
+  font-size: ${({ theme }) => theme.fontSizes['4xl']};
+  font-weight: ${({ theme }) => theme.fontWeights.extrabold};
+  color: ${({ theme }) => theme.colors.white};
+  margin-bottom: ${({ theme }) => theme.spacing.sm};
 `;
 
 const VisualLabel = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.textSecondary};
+  color: ${({ theme }) => theme.colors.gray300};
+  font-size: ${({ theme }) => theme.fontSizes.lg};
 `;
 
 const FeaturesSection = styled.section`
@@ -301,93 +299,104 @@ const SectionTitle = styled.h2`
   font-size: ${({ theme }) => theme.fontSizes['4xl']};
   font-weight: ${({ theme }) => theme.fontWeights.bold};
   margin-bottom: ${({ theme }) => theme.spacing['3xl']};
-  color: ${({ theme }) => theme.colors.textPrimary};
+  color: ${({ theme }) => theme.colors.white};
 `;
 
 const FeaturesGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: ${({ theme }) => theme.spacing.xl};
+  margin-bottom: ${({ theme }) => theme.spacing['3xl']};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    grid-template-columns: 1fr;
+    gap: ${({ theme }) => theme.spacing.lg};
+  }
 `;
 
 const FeatureCard = styled.div`
-  background: ${({ theme }) => theme.colors.surface};
-  padding: ${({ theme }) => theme.spacing.xl};
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: ${({ theme }) => theme.borderRadius.xl};
-  box-shadow: ${({ theme }) => theme.shadows.md};
-  border: 1px solid ${({ theme }) => theme.colors.borderLight};
-  transition: all ${({ theme }) => theme.transitions.base};
+  padding: ${({ theme }) => theme.spacing.xl};
   text-align: center;
+  transition: all ${({ theme }) => theme.transitions.base};
 
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: ${({ theme }) => theme.shadows.lg};
-    border-color: ${({ theme }) => theme.colors.primary}40;
+    transform: translateY(-8px);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: ${({ theme }) => theme.colors.primary};
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   }
 `;
 
 const FeatureIcon = styled.div`
-  width: 64px;
-  height: 64px;
-  background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary}20 0%, ${({ theme }) => theme.colors.primary}10 100%);
-  border-radius: ${({ theme }) => theme.borderRadius.xl};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto ${({ theme }) => theme.spacing.lg};
   color: ${({ theme }) => theme.colors.primary};
+  margin-bottom: ${({ theme }) => theme.spacing.lg};
 `;
 
 const FeatureTitle = styled.h3`
   font-size: ${({ theme }) => theme.fontSizes.xl};
   font-weight: ${({ theme }) => theme.fontWeights.semibold};
   margin-bottom: ${({ theme }) => theme.spacing.md};
-  color: ${({ theme }) => theme.colors.textPrimary};
+  color: ${({ theme }) => theme.colors.white};
 `;
 
 const FeatureDescription = styled.p`
-  color: ${({ theme }) => theme.colors.textSecondary};
+  color: ${({ theme }) => theme.colors.gray300};
   line-height: 1.6;
 `;
 
 const StatsSection = styled.section`
   padding: ${({ theme }) => theme.spacing['4xl']} ${({ theme }) => theme.spacing.xl};
-  background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary}10 0%, ${({ theme }) => theme.colors.primary}05 100%);
+  max-width: 1200px;
+  margin: 0 auto;
 `;
 
 const StatsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: ${({ theme }) => theme.spacing.xl};
-  max-width: 1200px;
-  margin: 0 auto;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const StatCard = styled.div`
-  background: ${({ theme }) => theme.colors.surface};
-  padding: ${({ theme }) => theme.spacing.xl};
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: ${({ theme }) => theme.borderRadius.xl};
+  padding: ${({ theme }) => theme.spacing.xl};
   text-align: center;
-  box-shadow: ${({ theme }) => theme.shadows.md};
-  border: 1px solid ${({ theme }) => theme.colors.borderLight};
+  transition: all ${({ theme }) => theme.transitions.base};
+
+  &:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+  }
 `;
 
 const StatNumber = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes['3xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  font-size: ${({ theme }) => theme.fontSizes['4xl']};
+  font-weight: ${({ theme }) => theme.fontWeights.extrabold};
   color: ${({ theme }) => theme.colors.primary};
   margin-bottom: ${({ theme }) => theme.spacing.sm};
 `;
 
 const StatLabel = styled.div`
-  color: ${({ theme }) => theme.colors.textSecondary};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.gray300};
+  font-size: ${({ theme }) => theme.fontSizes.lg};
 `;
 
 const CTASection = styled.section`
   padding: ${({ theme }) => theme.spacing['4xl']} ${({ theme }) => theme.spacing.xl};
-  background: linear-gradient(135deg, ${({ theme }) => theme.colors.secondary} 0%, ${({ theme }) => theme.colors.secondaryDark} 100%);
   text-align: center;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
 `;
 
 const CTAContent = styled.div`
@@ -396,10 +405,10 @@ const CTAContent = styled.div`
 `;
 
 const CTATitle = styled.h2`
-  font-size: ${({ theme }) => theme.fontSizes['3xl']};
+  font-size: ${({ theme }) => theme.fontSizes['4xl']};
   font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.white};
   margin-bottom: ${({ theme }) => theme.spacing.lg};
+  color: ${({ theme }) => theme.colors.white};
 `;
 
 const CTADescription = styled.p`
@@ -413,19 +422,19 @@ const CTAButton = styled(Link)`
   display: inline-flex;
   align-items: center;
   gap: ${({ theme }) => theme.spacing.sm};
-  padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.xl};
-  background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary} 0%, ${({ theme }) => theme.colors.primaryDark} 100%);
+  background: ${({ theme }) => theme.colors.gradientPrimary};
   color: ${({ theme }) => theme.colors.white};
-  text-decoration: none;
+  padding: ${({ theme }) => theme.spacing.lg} ${({ theme }) => theme.spacing.xl};
   border-radius: ${({ theme }) => theme.borderRadius.xl};
   font-weight: ${({ theme }) => theme.fontWeights.semibold};
   font-size: ${({ theme }) => theme.fontSizes.lg};
+  text-decoration: none;
   transition: all ${({ theme }) => theme.transitions.base};
   box-shadow: ${({ theme }) => theme.shadows.lg};
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: ${({ theme }) => theme.shadows.xl};
+    transform: translateY(-3px);
+    box-shadow: ${({ theme }) => theme.shadows['2xl']};
     color: ${({ theme }) => theme.colors.white};
   }
 `;

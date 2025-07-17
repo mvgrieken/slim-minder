@@ -19,7 +19,8 @@ export const GlobalStyles = createGlobalStyle`
     font-weight: ${theme.fontWeights.normal};
     line-height: ${theme.lineHeights.normal};
     color: ${theme.colors.textPrimary};
-    background-color: ${theme.colors.background};
+    background: ${theme.colors.gradientSecondary};
+    background-attachment: fixed;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
@@ -36,45 +37,57 @@ export const GlobalStyles = createGlobalStyle`
   h1 {
     font-size: ${theme.fontSizes['4xl']};
     font-weight: ${theme.fontWeights.extrabold};
+    background: ${theme.colors.gradientPrimary};
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   h2 {
     font-size: ${theme.fontSizes['3xl']};
     font-weight: ${theme.fontWeights.bold};
+    color: ${theme.colors.primary};
   }
 
   h3 {
     font-size: ${theme.fontSizes['2xl']};
     font-weight: ${theme.fontWeights.semibold};
+    color: ${theme.colors.textPrimary};
   }
 
   h4 {
     font-size: ${theme.fontSizes.xl};
     font-weight: ${theme.fontWeights.semibold};
+    color: ${theme.colors.textSecondary};
   }
 
   h5 {
     font-size: ${theme.fontSizes.lg};
     font-weight: ${theme.fontWeights.medium};
+    color: ${theme.colors.textSecondary};
   }
 
   h6 {
     font-size: ${theme.fontSizes.base};
     font-weight: ${theme.fontWeights.medium};
+    color: ${theme.colors.textTertiary};
   }
 
   p {
     margin: 0 0 ${theme.spacing.md} 0;
     line-height: ${theme.lineHeights.relaxed};
+    color: ${theme.colors.textSecondary};
   }
 
   a {
     color: ${theme.colors.primary};
     text-decoration: none;
-    transition: color ${theme.transitions.fast};
+    transition: all ${theme.transitions.fast};
+    position: relative;
     
     &:hover {
       color: ${theme.colors.primaryHover};
+      transform: translateY(-1px);
     }
     
     &:focus {
@@ -91,6 +104,7 @@ export const GlobalStyles = createGlobalStyle`
     background: none;
     cursor: pointer;
     transition: all ${theme.transitions.fast};
+    border-radius: ${theme.borderRadius.md};
     
     &:focus {
       outline: 2px solid ${theme.colors.primary};
@@ -101,26 +115,38 @@ export const GlobalStyles = createGlobalStyle`
       cursor: not-allowed;
       opacity: 0.6;
     }
+    
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: ${theme.shadows.md};
+    }
   }
 
   input, textarea, select {
     font-family: inherit;
     font-size: inherit;
     line-height: inherit;
-    border: 1px solid ${theme.colors.border};
-    border-radius: ${theme.borderRadius.md};
-    padding: ${theme.spacing.sm} ${theme.spacing.md};
+    border: 2px solid ${theme.colors.border};
+    border-radius: ${theme.borderRadius.lg};
+    padding: ${theme.spacing.md} ${theme.spacing.lg};
     background-color: ${theme.colors.surface};
     transition: all ${theme.transitions.fast};
+    box-shadow: ${theme.shadows.sm};
     
     &:focus {
       outline: none;
       border-color: ${theme.colors.primary};
-      box-shadow: 0 0 0 3px ${theme.colors.primary}20;
+      box-shadow: 0 0 0 3px ${theme.colors.primary}20, ${theme.shadows.md};
+      transform: translateY(-1px);
     }
     
     &::placeholder {
       color: ${theme.colors.textTertiary};
+    }
+    
+    &:hover {
+      border-color: ${theme.colors.borderDark};
+      box-shadow: ${theme.shadows.base};
     }
   }
 
@@ -132,38 +158,41 @@ export const GlobalStyles = createGlobalStyle`
   li {
     margin-bottom: ${theme.spacing.xs};
     line-height: ${theme.lineHeights.relaxed};
+    color: ${theme.colors.textSecondary};
   }
 
   img {
     max-width: 100%;
     height: auto;
+    border-radius: ${theme.borderRadius.md};
   }
 
   /* Custom scrollbar */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
   }
 
   ::-webkit-scrollbar-track {
-    background: ${theme.colors.gray100};
+    background: ${theme.colors.secondaryLight};
     border-radius: ${theme.borderRadius.full};
   }
 
   ::-webkit-scrollbar-thumb {
-    background: ${theme.colors.gray400};
+    background: ${theme.colors.gradientPrimary};
     border-radius: ${theme.borderRadius.full};
-    transition: background ${theme.transitions.fast};
+    transition: all ${theme.transitions.fast};
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: ${theme.colors.gray500};
+    background: ${theme.colors.primaryHover};
+    transform: scale(1.1);
   }
 
   /* Selection styles */
   ::selection {
-    background-color: ${theme.colors.primary}40;
-    color: ${theme.colors.textPrimary};
+    background: ${theme.colors.gradientPrimary};
+    color: ${theme.colors.white};
   }
 
   /* Focus styles for accessibility */
@@ -185,11 +214,11 @@ export const GlobalStyles = createGlobalStyle`
     border: 0;
   }
 
-  /* Animation keyframes */
+  /* Enhanced animation keyframes */
   @keyframes fadeIn {
     from {
       opacity: 0;
-      transform: translateY(10px);
+      transform: translateY(20px);
     }
     to {
       opacity: 1;
@@ -200,18 +229,22 @@ export const GlobalStyles = createGlobalStyle`
   @keyframes slideIn {
     from {
       transform: translateX(-100%);
+      opacity: 0;
     }
     to {
       transform: translateX(0);
+      opacity: 1;
     }
   }
 
   @keyframes pulse {
     0%, 100% {
       opacity: 1;
+      transform: scale(1);
     }
     50% {
-      opacity: 0.5;
+      opacity: 0.7;
+      transform: scale(1.05);
     }
   }
 
@@ -224,13 +257,37 @@ export const GlobalStyles = createGlobalStyle`
     }
   }
 
+  @keyframes shimmer {
+    0% {
+      background-position: -200px 0;
+    }
+    100% {
+      background-position: calc(200px + 100%) 0;
+    }
+  }
+
+  @keyframes bounce {
+    0%, 20%, 53%, 80%, 100% {
+      transform: translate3d(0, 0, 0);
+    }
+    40%, 43% {
+      transform: translate3d(0, -8px, 0);
+    }
+    70% {
+      transform: translate3d(0, -4px, 0);
+    }
+    90% {
+      transform: translate3d(0, -2px, 0);
+    }
+  }
+
   /* Animation classes */
   .fade-in {
-    animation: fadeIn 0.3s ease-out;
+    animation: fadeIn 0.5s ease-out;
   }
 
   .slide-in {
-    animation: slideIn 0.3s ease-out;
+    animation: slideIn 0.4s ease-out;
   }
 
   .pulse {
@@ -239,6 +296,67 @@ export const GlobalStyles = createGlobalStyle`
 
   .spin {
     animation: spin 1s linear infinite;
+  }
+
+  .shimmer {
+    background: linear-gradient(90deg, transparent, ${theme.colors.primary}20, transparent);
+    background-size: 200px 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  .bounce {
+    animation: bounce 1s ease-in-out;
+  }
+
+  /* Glass morphism effect */
+  .glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: ${theme.shadows.lg};
+  }
+
+  /* Card styles */
+  .card {
+    background: ${theme.colors.surface};
+    border-radius: ${theme.borderRadius.xl};
+    box-shadow: ${theme.shadows.lg};
+    padding: ${theme.spacing.xl};
+    transition: all ${theme.transitions.base};
+    
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: ${theme.shadows['2xl']};
+    }
+  }
+
+  /* Button variants */
+  .btn-primary {
+    background: ${theme.colors.gradientPrimary};
+    color: ${theme.colors.white};
+    padding: ${theme.spacing.md} ${theme.spacing.xl};
+    border-radius: ${theme.borderRadius.lg};
+    font-weight: ${theme.fontWeights.semibold};
+    box-shadow: ${theme.shadows.md};
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: ${theme.shadows.lg};
+    }
+  }
+
+  .btn-secondary {
+    background: ${theme.colors.gradientSecondary};
+    color: ${theme.colors.white};
+    padding: ${theme.spacing.md} ${theme.spacing.xl};
+    border-radius: ${theme.borderRadius.lg};
+    font-weight: ${theme.fontWeights.semibold};
+    box-shadow: ${theme.shadows.md};
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: ${theme.shadows.lg};
+    }
   }
 
   /* Responsive utilities */
@@ -257,6 +375,10 @@ export const GlobalStyles = createGlobalStyle`
     
     h3 {
       font-size: ${theme.fontSizes.xl};
+    }
+    
+    .card {
+      padding: ${theme.spacing.lg};
     }
   }
 `; 

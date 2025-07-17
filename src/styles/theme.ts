@@ -3,62 +3,69 @@ export const theme = {
     // Primary colors - Warm gold/yellow theme
     primary: '#FFD700', // Bright gold
     primaryLight: '#FFE55C', // Light gold
-    primaryDark: '#DAA520', // Darker gold
+    primaryDark: '#B8860B', // Darker gold (DarkGoldenrod)
     primaryHover: '#FFC107', // Amber gold for hover states
     
-    // Secondary colors
-    secondary: '#2C3E50', // Dark blue-gray
-    secondaryLight: '#34495E', // Lighter blue-gray
-    secondaryDark: '#1B2631', // Very dark blue-gray
+    // Secondary colors - Donkerdere steunkleuren
+    secondary: '#1A1A2E', // Very dark navy blue
+    secondaryLight: '#16213E', // Dark blue-gray
+    secondaryDark: '#0F0F23', // Almost black blue
     
-    // Accent colors
-    accent: '#E67E22', // Orange accent
-    accentLight: '#F39C12', // Light orange
-    accentDark: '#D35400', // Dark orange
+    // Accent colors - Donkerdere accenten
+    accent: '#C17817', // Dark orange-brown
+    accentLight: '#D4A574', // Warm beige
+    accentDark: '#8B4513', // Saddle brown
     
-    // Success/Error/Warning colors
-    success: '#27AE60', // Green
-    successLight: '#2ECC71', // Light green
-    error: '#E74C3C', // Red
-    errorLight: '#FF6B6B', // Light red
-    warning: '#F39C12', // Orange warning
-    info: '#3498DB', // Blue info
+    // Success/Error/Warning colors - Meer verfijnd
+    success: '#2D5A27', // Dark green
+    successLight: '#4A7C59', // Muted green
+    error: '#8B2635', // Dark red
+    errorLight: '#A0522D', // Sienna red
+    warning: '#B8860B', // Dark goldenrod
+    info: '#2C5F2D', // Dark forest green
     
-    // Neutral colors
+    // Neutral colors - Warmere tinten
     white: '#FFFFFF',
     black: '#000000',
-    gray50: '#F8F9FA',
-    gray100: '#F1F3F4',
-    gray200: '#E8EAED',
-    gray300: '#DADCE0',
-    gray400: '#BDC1C6',
-    gray500: '#9AA0A6',
-    gray600: '#80868B',
-    gray700: '#5F6368',
-    gray800: '#3C4043',
-    gray900: '#202124',
+    gray50: '#FDFDFD',
+    gray100: '#F5F5F5',
+    gray200: '#E8E8E8',
+    gray300: '#D1D1D1',
+    gray400: '#A8A8A8',
+    gray500: '#737373',
+    gray600: '#525252',
+    gray700: '#404040',
+    gray800: '#262626',
+    gray900: '#171717',
     
-    // Background colors
-    background: '#FAFAFA',
+    // Background colors - Warmere tinten
+    background: '#FEFEFE',
     surface: '#FFFFFF',
-    surfaceHover: '#F8F9FA',
-    surfaceActive: '#F1F3F4',
+    surfaceHover: '#F8F8F8',
+    surfaceActive: '#F0F0F0',
     
-    // Text colors
-    textPrimary: '#202124',
-    textSecondary: '#5F6368',
-    textTertiary: '#9AA0A6',
+    // Text colors - Donkerder voor betere leesbaarheid
+    textPrimary: '#1A1A1A',
+    textSecondary: '#404040',
+    textTertiary: '#737373',
     textInverse: '#FFFFFF',
     
-    // Border colors
-    border: '#E8EAED',
-    borderLight: '#F1F3F4',
-    borderDark: '#DADCE0',
+    // Border colors - Subtielere tinten
+    border: '#E0E0E0',
+    borderLight: '#F0F0F0',
+    borderDark: '#C0C0C0',
     
-    // Shadow colors
-    shadow: 'rgba(0, 0, 0, 0.1)',
-    shadowDark: 'rgba(0, 0, 0, 0.2)',
-    shadowLight: 'rgba(0, 0, 0, 0.05)',
+    // Shadow colors - Meer subtiel
+    shadow: 'rgba(0, 0, 0, 0.08)',
+    shadowDark: 'rgba(0, 0, 0, 0.15)',
+    shadowLight: 'rgba(0, 0, 0, 0.03)',
+    
+    // Gradient colors
+    gradientPrimary: 'linear-gradient(135deg, #FFD700 0%, #B8860B 100%)',
+    gradientSecondary: 'linear-gradient(135deg, #1A1A2E 0%, #16213E 100%)',
+    gradientAccent: 'linear-gradient(135deg, #C17817 0%, #8B4513 100%)',
+    gradientSuccess: 'linear-gradient(135deg, #2D5A27 0%, #4A7C59 100%)',
+    gradientError: 'linear-gradient(135deg, #8B2635 0%, #A0522D 100%)',
   },
   
   // Typography
@@ -121,15 +128,15 @@ export const theme = {
     full: '9999px',
   },
   
-  // Shadows
+  // Shadows - Meer verfijnd
   shadows: {
-    sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-    base: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-    md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-    lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-    xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-    '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-    inner: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)',
+    sm: '0 1px 2px 0 rgba(0, 0, 0, 0.04)',
+    base: '0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px 0 rgba(0, 0, 0, 0.04)',
+    md: '0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04)',
+    lg: '0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03)',
+    xl: '0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.02)',
+    '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
+    inner: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.04)',
     none: 'none',
   },
   
