@@ -31,7 +31,10 @@ const TransactionsPage: React.FC = () => {
     if (editingTransaction) {
       updateTransaction(editingTransaction.id, formData);
     } else {
-      createTransaction(formData as Omit<Transaction, 'id' | 'created_at'>);
+      createTransaction({
+        ...formData,
+        transaction_date: new Date().toISOString().split('T')[0]
+      } as Omit<Transaction, 'id' | 'created_at'>);
     }
     setIsModalOpen(false);
     setEditingTransaction(null);

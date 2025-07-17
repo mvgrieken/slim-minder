@@ -26,7 +26,7 @@ const BudgetsPage: React.FC = () => {
     const spent = transactions
       .filter(t => t.category === budget.category)
       .reduce((sum, t) => sum + t.amount, 0);
-    const percentage = (spent / budget.amount) * 100;
+    const percentage = (spent / budget.budget) * 100;
     const isOverBudget = percentage > 100;
     const isNearLimit = percentage > 80;
 
@@ -60,7 +60,7 @@ const BudgetsPage: React.FC = () => {
     }
   };
 
-  const totalBudget = budgets.reduce((sum, b) => sum + b.amount, 0);
+  const totalBudget = budgets.reduce((sum, b) => sum + b.budget, 0);
   const totalSpent = budgetsWithProgress.reduce((sum, b) => sum + b.spent, 0);
   const totalRemaining = totalBudget - totalSpent;
 
@@ -171,14 +171,14 @@ const BudgetsPage: React.FC = () => {
                   />
                 </ProgressBar>
                 <ProgressText>
-                  €{budget.spent.toLocaleString()} van €{budget.amount.toLocaleString()}
+                  €{budget.spent.toLocaleString()} van €{budget.budget.toLocaleString()}
                 </ProgressText>
               </BudgetProgress>
 
               <BudgetDetails>
                 <BudgetAmount>
                   <AmountLabel>Budget</AmountLabel>
-                  <AmountValue>€{budget.amount.toLocaleString()}</AmountValue>
+                  <AmountValue>€{budget.budget.toLocaleString()}</AmountValue>
                 </BudgetAmount>
                 <BudgetAmount>
                   <AmountLabel>Uitgegeven</AmountLabel>
@@ -186,8 +186,8 @@ const BudgetsPage: React.FC = () => {
                 </BudgetAmount>
                 <BudgetAmount>
                   <AmountLabel>Resterend</AmountLabel>
-                  <AmountValue remaining={budget.amount - budget.spent}>
-                    €{(budget.amount - budget.spent).toLocaleString()}
+                  <AmountValue remaining={budget.budget - budget.spent}>
+                    €{(budget.budget - budget.spent).toLocaleString()}
                   </AmountValue>
                 </BudgetAmount>
               </BudgetDetails>
@@ -233,7 +233,7 @@ const BudgetModal: React.FC<BudgetModalProps> = ({
 }) => {
   const [formData, setFormData] = useState({
     category: budget?.category || '',
-    amount: budget?.amount || 0
+    amount: budget?.budget || 0
   });
 
   const availableCategories = categories.filter(cat => 

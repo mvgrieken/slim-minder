@@ -20,9 +20,9 @@ const DashboardPage: React.FC = () => {
   const { user, transactions, budgets, savingsGoals } = useApp();
 
   const totalSpent = transactions.reduce((sum, t) => sum + t.amount, 0);
-  const totalBudget = budgets.reduce((sum, b) => sum + b.amount, 0);
-  const totalSavings = savingsGoals.reduce((sum, s) => sum + s.currentAmount, 0);
-  const totalTarget = savingsGoals.reduce((sum, s) => sum + s.targetAmount, 0);
+  const totalBudget = budgets.reduce((sum, b) => sum + b.budget, 0);
+  const totalSavings = savingsGoals.reduce((sum, s) => sum + s.current_amount, 0);
+  const totalTarget = savingsGoals.reduce((sum, s) => sum + s.target_amount, 0);
 
   return (
     <Container>
@@ -115,19 +115,19 @@ const DashboardPage: React.FC = () => {
               const spent = transactions
                 .filter(t => t.category === budget.category)
                 .reduce((sum, t) => sum + t.amount, 0);
-              const percentage = (spent / budget.amount) * 100;
+              const percentage = (spent / budget.budget) * 100;
               
               return (
                 <BudgetItem key={budget.id}>
                   <BudgetHeader>
                     <BudgetCategory>{budget.category}</BudgetCategory>
-                    <BudgetAmount>€{budget.amount.toLocaleString()}</BudgetAmount>
+                    <BudgetAmount>€{budget.budget.toLocaleString()}</BudgetAmount>
                   </BudgetHeader>
                   <ProgressBar>
                     <ProgressFill percentage={Math.min(percentage, 100)} />
                   </ProgressBar>
                   <BudgetStatus>
-                    €{spent.toLocaleString()} van €{budget.amount.toLocaleString()} gebruikt
+                    €{spent.toLocaleString()} van €{budget.budget.toLocaleString()} gebruikt
                   </BudgetStatus>
                 </BudgetItem>
               );
