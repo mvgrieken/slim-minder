@@ -4,25 +4,22 @@ import {
   Plus, 
   Search, 
   Filter, 
+  Download,
   Edit, 
-  Trash2, 
-  DollarSign,
-  Calendar,
-  Tag,
-  ArrowRight,
-  Download
+  Trash2,
+  ArrowRight
 } from 'react-feather';
 import { useApp } from '../contexts/AppContext';
 import { Transaction } from '../types/transaction';
 
 const TransactionsPage: React.FC = () => {
-  const { transactions, addTransaction, updateTransaction, deleteTransaction } = useApp();
+  const { transactions, createTransaction, updateTransaction, deleteTransaction } = useApp();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
-  const categories = ['Voeding', 'Transport', 'Entertainment', 'Woning', 'Gezondheid', 'Shopping', 'Overig'];
+  const categories = ['Voeding', 'Transport', 'Entertainment', 'Winkelen', 'Huisvesting', 'Gezondheid', 'Overig'];
 
   const filteredTransactions = transactions.filter(transaction => {
     const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -34,7 +31,7 @@ const TransactionsPage: React.FC = () => {
     if (editingTransaction) {
       updateTransaction(editingTransaction.id, formData);
     } else {
-      addTransaction(formData as Transaction);
+      createTransaction(formData as Omit<Transaction, 'id' | 'created_at'>);
     }
     setIsModalOpen(false);
     setEditingTransaction(null);
@@ -51,12 +48,22 @@ const TransactionsPage: React.FC = () => {
     }
   };
 
+  const totalIncome = transactions
+    .filter(t => t.amount > 0)
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const totalExpenses = transactions
+    .filter(t => t.amount < 0)
+    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+
+  const netAmount = totalIncome - totalExpenses;
+
   return (
     <Container>
       <Header>
         <HeaderContent>
           <Title>Transacties</Title>
-          <Subtitle>Beheer je uitgaven en inkomsten</Subtitle>
+          <Subtitle>Beheer je inkomsten en uitgaven</Subtitle>
         </HeaderContent>
         <HeaderActions>
           <ActionButton onClick={() => setIsModalOpen(true)} className="btn-primary">
@@ -66,7 +73,51 @@ const TransactionsPage: React.FC = () => {
         </HeaderActions>
       </Header>
 
-      <FiltersSection className="glass">
+      <StatsGrid>
+        <StatCard className="glass">
+          <StatIcon>
+            <ArrowRight size={24} />
+          </StatIcon>
+          <StatContent>
+            <StatValue positive>€{totalIncome.toLocaleString()}</StatValue>
+            <StatLabel>Inkomsten</StatLabel>
+          </StatContent>
+        </StatCard>
+
+        <StatCard className="glass">
+          <StatIcon>
+            <ArrowRight size={24} style={{ transform: 'rotate(180deg)' }} />
+          </StatIcon>
+          <StatContent>
+            <StatValue negative>€{totalExpenses.toLocaleString()}</StatValue>
+            <StatLabel>Uitgaven</StatLabel>
+          </StatContent>
+        </StatCard>
+
+        <StatCard className="glass">
+          <StatIcon>
+            <Download size={24} />
+          </StatIcon>
+          <StatContent>
+            <StatValue positive={netAmount >= 0}>
+              €{Math.abs(netAmount).toLocaleString()}
+            </StatValue>
+            <StatLabel>{netAmount >= 0 ? 'Netto Winst' : 'Netto Verlies'}</StatLabel>
+          </StatContent>
+        </StatCard>
+
+        <StatCard className="glass">
+          <StatIcon>
+            <Filter size={24} />
+          </StatIcon>
+          <StatContent>
+            <StatValue>{transactions.length}</StatValue>
+            <StatLabel>Totaal Transacties</StatLabel>
+          </StatContent>
+        </StatCard>
+      </StatsGrid>
+
+      <FiltersSection>
         <SearchContainer>
           <SearchIcon>
             <Search size={16} />
@@ -78,69 +129,32 @@ const TransactionsPage: React.FC = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </SearchContainer>
-        
-        <FilterContainer>
-          <FilterIcon>
-            <Filter size={16} />
-          </FilterIcon>
-          <CategorySelect
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-          >
-            <option value="all">Alle categorieën</option>
-            {categories.map(category => (
-              <option key={category} value={category}>{category}</option>
-            ))}
-          </CategorySelect>
-        </FilterContainer>
+
+        <CategoryFilter
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+        >
+          <option value="all">Alle Categorieën</option>
+          {categories.map(category => (
+            <option key={category} value={category}>{category}</option>
+          ))}
+        </CategoryFilter>
       </FiltersSection>
-
-      <StatsGrid>
-        <StatCard className="glass">
-          <StatIcon>
-            <DollarSign size={24} />
-          </StatIcon>
-          <StatContent>
-            <StatValue>€{filteredTransactions.reduce((sum, t) => sum + t.amount, 0).toLocaleString()}</StatValue>
-            <StatLabel>Totaal gefilterd</StatLabel>
-          </StatContent>
-        </StatCard>
-
-        <StatCard className="glass">
-          <StatIcon>
-            <Calendar size={24} />
-          </StatIcon>
-          <StatContent>
-            <StatValue>{filteredTransactions.length}</StatValue>
-            <StatLabel>Transacties</StatLabel>
-          </StatContent>
-        </StatCard>
-
-        <StatCard className="glass">
-          <StatIcon>
-            <Tag size={24} />
-          </StatIcon>
-          <StatContent>
-            <StatValue>{new Set(filteredTransactions.map(t => t.category)).size}</StatValue>
-            <StatLabel>Categorieën</StatLabel>
-          </StatContent>
-        </StatCard>
-      </StatsGrid>
 
       <TransactionsList>
         {filteredTransactions.length === 0 ? (
           <EmptyState>
             <EmptyIcon>
-              <DollarSign size={48} />
+              <Download size={48} />
             </EmptyIcon>
             <EmptyTitle>Geen transacties gevonden</EmptyTitle>
             <EmptyDescription>
-              {searchTerm || selectedCategory !== 'all' 
-                ? 'Probeer je zoekcriteria aan te passen'
-                : 'Voeg je eerste transactie toe om te beginnen'
+              {transactions.length === 0 
+                ? 'Voeg je eerste transactie toe om te beginnen'
+                : 'Geen transacties voldoen aan je zoekcriteria'
               }
             </EmptyDescription>
-            {!searchTerm && selectedCategory === 'all' && (
+            {transactions.length === 0 && (
               <EmptyAction onClick={() => setIsModalOpen(true)} className="btn-primary">
                 <Plus size={16} />
                 Eerste Transactie
@@ -150,21 +164,20 @@ const TransactionsPage: React.FC = () => {
         ) : (
           filteredTransactions.map((transaction) => (
             <TransactionCard key={transaction.id} className="card">
-              <TransactionIcon>
-                <DollarSign size={20} />
-              </TransactionIcon>
-              <TransactionDetails>
-                <TransactionTitle>{transaction.description}</TransactionTitle>
-                <TransactionMeta>
+              <TransactionInfo>
+                <TransactionHeader>
+                  <TransactionTitle>{transaction.description}</TransactionTitle>
                   <TransactionCategory>{transaction.category}</TransactionCategory>
-                  <TransactionDate>
-                    {new Date(transaction.created_at).toLocaleDateString('nl-NL')}
-                  </TransactionDate>
-                </TransactionMeta>
-              </TransactionDetails>
-              <TransactionAmount>
-                €{transaction.amount.toLocaleString()}
+                </TransactionHeader>
+                <TransactionDate>
+                  {new Date(transaction.created_at).toLocaleDateString('nl-NL')}
+                </TransactionDate>
+              </TransactionInfo>
+
+              <TransactionAmount positive={transaction.amount > 0}>
+                {transaction.amount > 0 ? '+' : ''}€{transaction.amount.toLocaleString()}
               </TransactionAmount>
+
               <TransactionActions>
                 <ActionButton onClick={() => handleEdit(transaction)}>
                   <Edit size={16} />
@@ -213,8 +226,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
   const [formData, setFormData] = useState({
     description: transaction?.description || '',
     amount: transaction?.amount || 0,
-    category: transaction?.category || categories[0],
-    created_at: transaction?.created_at || new Date().toISOString().split('T')[0]
+    category: transaction?.category || categories[0]
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -256,6 +268,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
               placeholder="0.00"
               required
             />
+            <FormHint>Gebruik negatieve waarden voor uitgaven, positieve voor inkomsten</FormHint>
           </FormGroup>
 
           <FormGroup>
@@ -269,16 +282,6 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
                 <option key={category} value={category}>{category}</option>
               ))}
             </FormSelect>
-          </FormGroup>
-
-          <FormGroup>
-            <FormLabel>Datum</FormLabel>
-            <FormInput
-              type="date"
-              value={formData.created_at}
-              onChange={(e) => setFormData({ ...formData, created_at: e.target.value })}
-              required
-            />
           </FormGroup>
 
           <ModalActions>
@@ -358,6 +361,60 @@ const ActionButton = styled.button`
   }
 `;
 
+const StatsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: ${({ theme }) => theme.spacing.lg};
+  margin-bottom: ${({ theme }) => theme.spacing.xl};
+`;
+
+const StatCard = styled.div`
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: ${({ theme }) => theme.borderRadius.xl};
+  padding: ${({ theme }) => theme.spacing.lg};
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.md};
+  transition: all ${({ theme }) => theme.transitions.base};
+
+  &:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  }
+`;
+
+const StatIcon = styled.div`
+  width: 40px;
+  height: 40px;
+  background: ${({ theme }) => theme.colors.gradientPrimary};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${({ theme }) => theme.colors.white};
+`;
+
+const StatContent = styled.div``;
+
+const StatValue = styled.div<{ positive?: boolean; negative?: boolean }>`
+  font-size: ${({ theme }) => theme.fontSizes.xl};
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  color: ${({ theme, positive, negative }) => 
+    positive ? theme.colors.successLight :
+    negative ? theme.colors.errorLight :
+    theme.colors.white
+  };
+  margin-bottom: ${({ theme }) => theme.spacing.xs};
+`;
+
+const StatLabel = styled.div`
+  color: ${({ theme }) => theme.colors.gray300};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+`;
+
 const FiltersSection = styled.div`
   display: flex;
   gap: ${({ theme }) => theme.spacing.lg};
@@ -406,29 +463,15 @@ const SearchInput = styled.input`
   }
 `;
 
-const FilterContainer = styled.div`
-  position: relative;
-  min-width: 200px;
-`;
-
-const FilterIcon = styled.div`
-  position: absolute;
-  left: ${({ theme }) => theme.spacing.md};
-  top: 50%;
-  transform: translateY(-50%);
-  color: ${({ theme }) => theme.colors.gray400};
-  z-index: 1;
-`;
-
-const CategorySelect = styled.select`
-  width: 100%;
-  padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.xl};
+const CategoryFilter = styled.select`
+  padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.lg};
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: ${({ theme }) => theme.borderRadius.lg};
   color: ${({ theme }) => theme.colors.white};
   font-size: ${({ theme }) => theme.fontSizes.base};
   cursor: pointer;
+  min-width: 200px;
 
   &:focus {
     outline: none;
@@ -440,56 +483,6 @@ const CategorySelect = styled.select`
     background: ${({ theme }) => theme.colors.secondary};
     color: ${({ theme }) => theme.colors.white};
   }
-`;
-
-const StatsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: ${({ theme }) => theme.spacing.lg};
-  margin-bottom: ${({ theme }) => theme.spacing.xl};
-`;
-
-const StatCard = styled.div`
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: ${({ theme }) => theme.borderRadius.xl};
-  padding: ${({ theme }) => theme.spacing.lg};
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.md};
-  transition: all ${({ theme }) => theme.transitions.base};
-
-  &:hover {
-    transform: translateY(-2px);
-    background: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-  }
-`;
-
-const StatIcon = styled.div`
-  width: 40px;
-  height: 40px;
-  background: ${({ theme }) => theme.colors.gradientPrimary};
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: ${({ theme }) => theme.colors.white};
-`;
-
-const StatContent = styled.div``;
-
-const StatValue = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.xl};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.white};
-  margin-bottom: ${({ theme }) => theme.spacing.xs};
-`;
-
-const StatLabel = styled.div`
-  color: ${({ theme }) => theme.colors.gray300};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
 `;
 
 const TransactionsList = styled.div`
@@ -506,7 +499,7 @@ const TransactionCard = styled.div`
   padding: ${({ theme }) => theme.spacing.lg};
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.spacing.lg};
+  justify-content: space-between;
   transition: all ${({ theme }) => theme.transitions.base};
 
   &:hover {
@@ -514,36 +507,32 @@ const TransactionCard = styled.div`
     background: rgba(255, 255, 255, 0.1);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
   }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: ${({ theme }) => theme.spacing.md};
+  }
 `;
 
-const TransactionIcon = styled.div`
-  width: 40px;
-  height: 40px;
-  background: ${({ theme }) => theme.colors.gradientPrimary};
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: ${({ theme }) => theme.colors.white};
-`;
-
-const TransactionDetails = styled.div`
+const TransactionInfo = styled.div`
   flex: 1;
 `;
 
-const TransactionTitle = styled.div`
-  color: ${({ theme }) => theme.colors.white};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
+const TransactionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.md};
   margin-bottom: ${({ theme }) => theme.spacing.xs};
 `;
 
-const TransactionMeta = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing.md};
-  align-items: center;
+const TransactionTitle = styled.h3`
+  color: ${({ theme }) => theme.colors.white};
+  font-size: ${({ theme }) => theme.fontSizes.lg};
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
 `;
 
-const TransactionCategory = styled.span`
+const TransactionCategory = styled.div`
   background: ${({ theme }) => theme.colors.gradientAccent};
   color: ${({ theme }) => theme.colors.white};
   padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.sm};
@@ -552,20 +541,27 @@ const TransactionCategory = styled.span`
   font-weight: ${({ theme }) => theme.fontWeights.medium};
 `;
 
-const TransactionDate = styled.span`
+const TransactionDate = styled.div`
   color: ${({ theme }) => theme.colors.gray300};
   font-size: ${({ theme }) => theme.fontSizes.sm};
 `;
 
-const TransactionAmount = styled.div`
-  color: ${({ theme }) => theme.colors.primary};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
+const TransactionAmount = styled.div<{ positive?: boolean }>`
   font-size: ${({ theme }) => theme.fontSizes.lg};
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  color: ${({ theme, positive }) => 
+    positive ? theme.colors.successLight : theme.colors.errorLight
+  };
+  margin: 0 ${({ theme }) => theme.spacing.lg};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    margin: 0;
+  }
 `;
 
 const TransactionActions = styled.div`
   display: flex;
-  gap: ${({ theme }) => theme.spacing.sm};
+  gap: ${({ theme }) => theme.spacing.xs};
 `;
 
 const EmptyState = styled.div`
@@ -708,6 +704,11 @@ const FormInput = styled.input`
     border-color: ${({ theme }) => theme.colors.primary};
     box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary}20;
   }
+`;
+
+const FormHint = styled.div`
+  color: ${({ theme }) => theme.colors.gray400};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
 `;
 
 const FormSelect = styled.select`

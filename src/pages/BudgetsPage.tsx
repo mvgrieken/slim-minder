@@ -16,7 +16,7 @@ import { useApp } from '../contexts/AppContext';
 import { Budget } from '../types/budget';
 
 const BudgetsPage: React.FC = () => {
-  const { budgets, transactions, addBudget, updateBudget, deleteBudget } = useApp();
+  const { budgets, transactions, createBudget, updateBudget, deleteBudget } = useApp();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
 
@@ -43,7 +43,7 @@ const BudgetsPage: React.FC = () => {
     if (editingBudget) {
       updateBudget(editingBudget.id, formData);
     } else {
-      addBudget(formData as Budget);
+      createBudget(formData as Omit<Budget, 'id' | 'created_at' | 'spent' | 'remaining'>);
     }
     setIsModalOpen(false);
     setEditingBudget(null);

@@ -15,15 +15,15 @@ import { useApp } from '../contexts/AppContext';
 import { SavingsGoal } from '../types/savingsGoal';
 
 const SavingsGoalsPage: React.FC = () => {
-  const { savingsGoals, addSavingsGoal, updateSavingsGoal, deleteSavingsGoal } = useApp();
+  const { savingsGoals, createSavingsGoal, updateSavingsGoal, deleteSavingsGoal } = useApp();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<SavingsGoal | null>(null);
 
   const categories = ['Reis', 'Auto', 'Huis', 'Onderwijs', 'Noodfonds', 'Investering', 'Overig'];
 
   const goalsWithProgress = savingsGoals.map(goal => {
-    const percentage = (goal.currentAmount / goal.targetAmount) * 100;
-    const remaining = goal.targetAmount - goal.currentAmount;
+    const percentage = (goal.current_amount / goal.target_amount) * 100;
+    const remaining = goal.target_amount - goal.current_amount;
     const isCompleted = percentage >= 100;
     const isNearTarget = percentage >= 80;
 
@@ -40,7 +40,7 @@ const SavingsGoalsPage: React.FC = () => {
     if (editingGoal) {
       updateSavingsGoal(editingGoal.id, formData);
     } else {
-      addSavingsGoal(formData as SavingsGoal);
+      createSavingsGoal(formData as Omit<SavingsGoal, 'id' | 'created_at'>);
     }
     setIsModalOpen(false);
     setEditingGoal(null);
@@ -57,8 +57,8 @@ const SavingsGoalsPage: React.FC = () => {
     }
   };
 
-  const totalTarget = savingsGoals.reduce((sum, g) => sum + g.targetAmount, 0);
-  const totalCurrent = savingsGoals.reduce((sum, g) => sum + g.currentAmount, 0);
+  const totalTarget = savingsGoals.reduce((sum, g) => sum + g.target_amount, 0);
+  const totalCurrent = savingsGoals.reduce((sum, g) => sum + g.current_amount, 0);
   const totalRemaining = totalTarget - totalCurrent;
   const overallProgress = totalTarget > 0 ? (totalCurrent / totalTarget) * 100 : 0;
 
@@ -180,18 +180,18 @@ const SavingsGoalsPage: React.FC = () => {
                   />
                 </ProgressBar>
                 <ProgressText>
-                  €{goal.currentAmount.toLocaleString()} van €{goal.targetAmount.toLocaleString()}
+                  €{goal.current_amount.toLocaleString()} van €{goal.target_amount.toLocaleString()}
                 </ProgressText>
               </GoalProgress>
 
               <GoalDetails>
                 <GoalDetail>
                   <DetailLabel>Doelbedrag</DetailLabel>
-                  <DetailValue>€{goal.targetAmount.toLocaleString()}</DetailValue>
+                  <DetailValue>€{goal.target_amount.toLocaleString()}</DetailValue>
                 </GoalDetail>
                 <GoalDetail>
                   <DetailLabel>Huidig</DetailLabel>
-                  <DetailValue>€{goal.currentAmount.toLocaleString()}</DetailValue>
+                  <DetailValue>€{goal.current_amount.toLocaleString()}</DetailValue>
                 </GoalDetail>
                 <GoalDetail>
                   <DetailLabel>Resterend</DetailLabel>
@@ -201,11 +201,11 @@ const SavingsGoalsPage: React.FC = () => {
                 </GoalDetail>
               </GoalDetails>
 
-              {goal.targetDate && (
+              {goal.deadline && (
                 <GoalDeadline>
                   <Calendar size={16} />
                   <DeadlineText>
-                    Doel: {new Date(goal.targetDate).toLocaleDateString('nl-NL')}
+                    Doel: {new Date(goal.deadline).toLocaleDateString('nl-NL')}
                   </DeadlineText>
                 </GoalDeadline>
               )}
@@ -256,9 +256,9 @@ const GoalModal: React.FC<GoalModalProps> = ({
   const [formData, setFormData] = useState({
     name: goal?.name || '',
     category: goal?.category || categories[0],
-    targetAmount: goal?.targetAmount || 0,
-    currentAmount: goal?.currentAmount || 0,
-    targetDate: goal?.targetDate || ''
+    target_amount: goal?.target_amount || 0,
+    current_amount: goal?.current_amount || 0,
+    deadline: goal?.deadline || ''
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -308,8 +308,8 @@ const GoalModal: React.FC<GoalModalProps> = ({
             <FormInput
               type="number"
               step="0.01"
-              value={formData.targetAmount}
-              onChange={(e) => setFormData({ ...formData, targetAmount: parseFloat(e.target.value) || 0 })}
+              value={formData.target_amount}
+              onChange={(e) => setFormData({ ...formData, target_amount: parseFloat(e.target.value) || 0 })}
               placeholder="0.00"
               required
             />
@@ -320,8 +320,8 @@ const GoalModal: React.FC<GoalModalProps> = ({
             <FormInput
               type="number"
               step="0.01"
-              value={formData.currentAmount}
-              onChange={(e) => setFormData({ ...formData, currentAmount: parseFloat(e.target.value) || 0 })}
+              value={formData.current_amount}
+              onChange={(e) => setFormData({ ...formData, current_amount: parseFloat(e.target.value) || 0 })}
               placeholder="0.00"
               required
             />
@@ -331,8 +331,8 @@ const GoalModal: React.FC<GoalModalProps> = ({
             <FormLabel>Doeldatum (optioneel)</FormLabel>
             <FormInput
               type="date"
-              value={formData.targetDate}
-              onChange={(e) => setFormData({ ...formData, targetDate: e.target.value })}
+              value={formData.deadline}
+              onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
             />
           </FormGroup>
 
