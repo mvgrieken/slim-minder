@@ -22,7 +22,7 @@ const SavingsGoalsPage: React.FC = () => {
   const categories = ['Reis', 'Auto', 'Huis', 'Onderwijs', 'Noodfonds', 'Investering', 'Overig'];
 
   const goalsWithProgress = savingsGoals.map(goal => {
-    const percentage = (goal.current_amount / goal.target_amount) * 100;
+    const percentage = goal.target_amount > 0 ? (goal.current_amount / goal.target_amount) * 100 : 0;
     const remaining = goal.target_amount - goal.current_amount;
     const isCompleted = percentage >= 100;
     const isNearTarget = percentage >= 80;
@@ -40,7 +40,7 @@ const SavingsGoalsPage: React.FC = () => {
     if (editingGoal) {
       updateSavingsGoal(editingGoal.id, formData);
     } else {
-      createSavingsGoal(formData as Omit<SavingsGoal, 'id' | 'created_at'>);
+      createSavingsGoal(formData as Omit<SavingsGoal, 'id' | 'created_at' | 'updated_at' | 'progress_percentage'>);
     }
     setIsModalOpen(false);
     setEditingGoal(null);
@@ -200,22 +200,6 @@ const SavingsGoalsPage: React.FC = () => {
                   </DetailValue>
                 </GoalDetail>
               </GoalDetails>
-
-              {goal.deadline && (
-                <GoalDeadline>
-                  <Calendar size={16} />
-                  <DeadlineText>
-                    Doel: {new Date(goal.deadline).toLocaleDateString('nl-NL')}
-                  </DeadlineText>
-                </GoalDeadline>
-              )}
-
-              {goal.isCompleted && (
-                <CompletionBadge>
-                  <Award size={16} />
-                  Doel bereikt!
-                </CompletionBadge>
-              )}
             </GoalCard>
           ))
         )}

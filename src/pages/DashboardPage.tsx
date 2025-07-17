@@ -19,8 +19,10 @@ import { useApp } from '../contexts/AppContext';
 const DashboardPage: React.FC = () => {
   const { user, transactions, budgets, savingsGoals } = useApp();
 
-  const totalSpent = transactions.reduce((sum, t) => sum + t.amount, 0);
-  const totalBudget = budgets.reduce((sum, b) => sum + b.budget, 0);
+  const totalSpent = transactions
+    .filter(t => t.amount < 0)
+    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  const totalBudget = budgets.reduce((sum, b) => sum + b.amount, 0);
   const totalSavings = savingsGoals.reduce((sum, s) => sum + s.current_amount, 0);
   const totalTarget = savingsGoals.reduce((sum, s) => sum + s.target_amount, 0);
 
@@ -29,7 +31,7 @@ const DashboardPage: React.FC = () => {
       <Header>
         <HeaderContent>
           <WelcomeText>
-            Welkom terug, <GoldText>{user?.name || 'Gebruiker'}</GoldText>
+            Welkom terug, <GoldText>{user?.firstName || 'Gebruiker'}</GoldText>
           </WelcomeText>
           <Subtitle>Hier is een overzicht van je financiële status</Subtitle>
         </HeaderContent>
@@ -77,7 +79,7 @@ const DashboardPage: React.FC = () => {
             <Shield size={24} />
           </StatIcon>
           <StatContent>
-            <StatValue>{Math.round((totalSavings / totalTarget) * 100)}%</StatValue>
+            <StatValue>{totalTarget > 0 ? Math.round((totalSavings / totalTarget) * 100) : 0}%</StatValue>
             <StatLabel>Spaardoel bereikt</StatLabel>
           </StatContent>
         </StatCard>
@@ -94,7 +96,7 @@ const DashboardPage: React.FC = () => {
                 </TransactionIcon>
                 <TransactionDetails>
                   <TransactionTitle>{transaction.description}</TransactionTitle>
-                  <TransactionCategory>{transaction.category}</TransactionCategory>
+                  <TransactionCategory>{transaction.categories?.name || 'Onbekend'}</TransactionCategory>
                 </TransactionDetails>
                 <TransactionAmount>
                   €{transaction.amount.toLocaleString()}
@@ -112,22 +114,20 @@ const DashboardPage: React.FC = () => {
           <SectionTitle>Budget Overzicht</SectionTitle>
           <BudgetCard className="card">
             {budgets.slice(0, 3).map((budget) => {
-              const spent = transactions
-                .filter(t => t.category === budget.category)
-                .reduce((sum, t) => sum + t.amount, 0);
-              const percentage = (spent / budget.budget) * 100;
+              const spent = budget.spent || 0;
+              const percentage = budget.amount > 0 ? (spent / budget.amount) * 100 : 0;
               
               return (
                 <BudgetItem key={budget.id}>
                   <BudgetHeader>
-                    <BudgetCategory>{budget.category}</BudgetCategory>
-                    <BudgetAmount>€{budget.budget.toLocaleString()}</BudgetAmount>
+                    <BudgetCategory>{budget.categories?.name || budget.name}</BudgetCategory>
+                    <BudgetAmount>€{budget.amount.toLocaleString()}</BudgetAmount>
                   </BudgetHeader>
                   <ProgressBar>
                     <ProgressFill percentage={Math.min(percentage, 100)} />
                   </ProgressBar>
                   <BudgetStatus>
-                    €{spent.toLocaleString()} van €{budget.budget.toLocaleString()} gebruikt
+                    €{spent.toLocaleString()} van €{budget.amount.toLocaleString()} gebruikt
                   </BudgetStatus>
                 </BudgetItem>
               );

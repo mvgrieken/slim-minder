@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { User, AccountTier, LoginForm, RegisterForm } from '../types';
 import { authService } from '../services/authService';
+import { supabase } from '../services/api';
 
 interface AuthState {
   user: User | null;
@@ -66,37 +67,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     checkAuthStatus();
+    
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_IN' && session?.user) {
+          const response = await authService.getCurrentUser();
+          if (response.success && response.data) {
+            dispatch({ type: 'SET_USER', payload: response.data });
+          }
+        } else if (event === 'SIGNED_OUT') {
+          dispatch({ type: 'LOGOUT' });
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const checkAuthStatus = async () => {
     try {
-      // Check both localStorage and sessionStorage for tokens
-      const localToken = localStorage.getItem('auth_token');
-      const sessionToken = sessionStorage.getItem('auth_token');
-      const token = localToken || sessionToken;
-      
-      if (!token) {
-        dispatch({ type: 'SET_LOADING', payload: false });
-        return;
-      }
-
       const response = await authService.verifyToken();
       if (response.success && response.data) {
         dispatch({ type: 'SET_USER', payload: response.data });
       } else {
-        // Clear tokens from both storages
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('refresh_token');
-        sessionStorage.removeItem('auth_token');
-        sessionStorage.removeItem('refresh_token');
         dispatch({ type: 'SET_LOADING', payload: false });
       }
     } catch (error) {
-      // Clear tokens from both storages
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('refresh_token');
-      sessionStorage.removeItem('auth_token');
-      sessionStorage.removeItem('refresh_token');
       dispatch({ type: 'SET_LOADING', payload: false });
     }
   };
@@ -107,19 +104,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const response = await authService.login(credentials);
       
       if (response.success && response.data) {
-        // Store tokens based on rememberMe preference
-        if (credentials.rememberMe) {
-          localStorage.setItem('auth_token', response.data.token);
-          if (response.data.refreshToken) {
-            localStorage.setItem('refresh_token', response.data.refreshToken);
-          }
-        } else {
-          sessionStorage.setItem('auth_token', response.data.token);
-          if (response.data.refreshToken) {
-            sessionStorage.setItem('refresh_token', response.data.refreshToken);
-          }
-        }
-        
         dispatch({ type: 'SET_USER', payload: response.data.user });
       } else {
         dispatch({ type: 'SET_ERROR', payload: response.message || 'Login mislukt' });
@@ -135,12 +119,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const response = await authService.register(data);
       
       if (response.success && response.data) {
-        // For registration, always use localStorage (rememberMe = true)
-        localStorage.setItem('auth_token', response.data.token);
-        if (response.data.refreshToken) {
-          localStorage.setItem('refresh_token', response.data.refreshToken);
-        }
-        
         dispatch({ type: 'SET_USER', payload: response.data.user });
       } else {
         dispatch({ type: 'SET_ERROR', payload: response.message || 'Registratie mislukt' });
@@ -151,16 +129,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const logout = () => {
-    // Clear tokens from both storages
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('refresh_token');
-    sessionStorage.removeItem('auth_token');
-    sessionStorage.removeItem('refresh_token');
-    
-    // Clear saved login credentials
-    localStorage.removeItem('slim_minder_saved_email');
-    localStorage.removeItem('slim_minder_remember_me');
-    
     authService.logout();
     dispatch({ type: 'LOGOUT' });
   };
@@ -212,6 +180,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
 }
 
+// Hook to use the context
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
@@ -220,30 +189,19 @@ export function useAuth() {
   return context;
 }
 
-// Higher-order component for protecting routes based on account tier
+// HOC for protecting routes based on account tier
 export function withAccountTier(Component: React.ComponentType, requiredTier: AccountTier) {
   return function ProtectedComponent(props: any) {
-    const { user, isAuthenticated } = useAuth();
+    const { user, isLoading } = useAuth();
     
-    if (!isAuthenticated || !user) {
-      return <div>Please log in to access this feature</div>;
+    if (isLoading) {
+      return <div>Loading...</div>;
     }
-
-    const tierLevel = {
-      FREE: 1,
-      CORE: 2,
-      PREMIUM: 3,
-    };
-
-    if (tierLevel[user.accountTier] < tierLevel[requiredTier]) {
-      return (
-        <div className="upgrade-prompt">
-          <h3>Upgrade Required</h3>
-          <p>This feature requires a {requiredTier} account.</p>
-        </div>
-      );
+    
+    if (!user || user.accountTier !== requiredTier) {
+      return <div>Access denied. This feature requires {requiredTier} tier.</div>;
     }
-
+    
     return <Component {...props} />;
   };
 } 

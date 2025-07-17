@@ -132,8 +132,9 @@ const DatabaseTest: React.FC = () => {
       user_id: user.id,
       amount: -50,
       description: 'Test transactie',
-      category: 'Test',
-      transaction_date: new Date().toISOString().split('T')[0]
+      category_id: undefined, // We'll need to get a category ID from the categories table
+      transaction_date: new Date().toISOString().split('T')[0],
+      currency: 'EUR'
     });
     return newTransaction;
   });

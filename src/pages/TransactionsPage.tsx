@@ -13,17 +13,15 @@ import { useApp } from '../contexts/AppContext';
 import { Transaction } from '../types/transaction';
 
 const TransactionsPage: React.FC = () => {
-  const { transactions, createTransaction, updateTransaction, deleteTransaction } = useApp();
+  const { transactions, categories, createTransaction, updateTransaction, deleteTransaction } = useApp();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
-  const categories = ['Voeding', 'Transport', 'Entertainment', 'Winkelen', 'Huisvesting', 'Gezondheid', 'Overig'];
-
   const filteredTransactions = transactions.filter(transaction => {
     const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || transaction.category === selectedCategory;
+    const matchesCategory = selectedCategory === 'all' || transaction.categories?.name === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -33,8 +31,9 @@ const TransactionsPage: React.FC = () => {
     } else {
       createTransaction({
         ...formData,
-        transaction_date: new Date().toISOString().split('T')[0]
-      } as Omit<Transaction, 'id' | 'created_at'>);
+        transaction_date: new Date().toISOString().split('T')[0],
+        currency: 'EUR'
+      } as Omit<Transaction, 'id' | 'created_at' | 'updated_at'>);
     }
     setIsModalOpen(false);
     setEditingTransaction(null);
@@ -139,7 +138,7 @@ const TransactionsPage: React.FC = () => {
         >
           <option value="all">Alle Categorieën</option>
           {categories.map(category => (
-            <option key={category} value={category}>{category}</option>
+            <option key={category.id} value={category.name}>{category.name}</option>
           ))}
         </CategoryFilter>
       </FiltersSection>
@@ -170,10 +169,10 @@ const TransactionsPage: React.FC = () => {
               <TransactionInfo>
                 <TransactionHeader>
                   <TransactionTitle>{transaction.description}</TransactionTitle>
-                  <TransactionCategory>{transaction.category}</TransactionCategory>
+                  <TransactionCategory>{transaction.categories?.name || 'Onbekend'}</TransactionCategory>
                 </TransactionHeader>
                 <TransactionDate>
-                  {new Date(transaction.created_at).toLocaleDateString('nl-NL')}
+                  {new Date(transaction.transaction_date).toLocaleDateString('nl-NL')}
                 </TransactionDate>
               </TransactionInfo>
 
@@ -229,7 +228,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
   const [formData, setFormData] = useState({
     description: transaction?.description || '',
     amount: transaction?.amount || 0,
-    category: transaction?.category || categories[0]
+    category: transaction?.categories?.name || categories[0]
   });
 
   const handleSubmit = (e: React.FormEvent) => {

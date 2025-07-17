@@ -46,15 +46,16 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
     if (!isEnabled || !budgets) return;
 
     budgets.forEach(budget => {
-      const percentage = (budget.spent / budget.budget) * 100;
+      const spent = budget.spent ?? budget.current_spent ?? 0;
+      const percentage = budget.amount > 0 ? (spent / budget.amount) * 100 : 0;
       
       // Send alerts at 80%, 90%, and 100%
       if (percentage >= 80 && percentage < 90) {
-        sendBudgetAlert(budget.category, Math.round(percentage), budget.spent);
+        sendBudgetAlert(budget.categories?.name || budget.name, Math.round(percentage), spent);
       } else if (percentage >= 90 && percentage < 100) {
-        sendBudgetAlert(budget.category, Math.round(percentage), budget.spent);
+        sendBudgetAlert(budget.categories?.name || budget.name, Math.round(percentage), spent);
       } else if (percentage >= 100) {
-        sendBudgetAlert(budget.category, Math.round(percentage), budget.spent);
+        sendBudgetAlert(budget.categories?.name || budget.name, Math.round(percentage), spent);
       }
     });
   }, [budgets, isEnabled, sendBudgetAlert]);

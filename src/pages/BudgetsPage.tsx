@@ -16,17 +16,13 @@ import { useApp } from '../contexts/AppContext';
 import { Budget } from '../types/budget';
 
 const BudgetsPage: React.FC = () => {
-  const { budgets, transactions, createBudget, updateBudget, deleteBudget } = useApp();
+  const { budgets, categories, createBudget, updateBudget, deleteBudget } = useApp();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
 
-  const categories = ['Voeding', 'Transport', 'Entertainment', 'Woning', 'Gezondheid', 'Shopping', 'Overig'];
-
   const budgetsWithProgress = budgets.map(budget => {
-    const spent = transactions
-      .filter(t => t.category === budget.category)
-      .reduce((sum, t) => sum + t.amount, 0);
-    const percentage = (spent / budget.budget) * 100;
+    const spent = budget.spent || 0;
+    const percentage = budget.amount > 0 ? (spent / budget.amount) * 100 : 0;
     const isOverBudget = percentage > 100;
     const isNearLimit = percentage > 80;
 
@@ -43,7 +39,7 @@ const BudgetsPage: React.FC = () => {
     if (editingBudget) {
       updateBudget(editingBudget.id, formData);
     } else {
-      createBudget(formData as Omit<Budget, 'id' | 'created_at' | 'spent' | 'remaining'>);
+      createBudget(formData as Omit<Budget, 'id' | 'created_at' | 'updated_at' | 'current_spent'>);
     }
     setIsModalOpen(false);
     setEditingBudget(null);
@@ -60,7 +56,7 @@ const BudgetsPage: React.FC = () => {
     }
   };
 
-  const totalBudget = budgets.reduce((sum, b) => sum + b.budget, 0);
+  const totalBudget = budgets.reduce((sum, b) => sum + b.amount, 0);
   const totalSpent = budgetsWithProgress.reduce((sum, b) => sum + b.spent, 0);
   const totalRemaining = totalBudget - totalSpent;
 
@@ -115,7 +111,7 @@ const BudgetsPage: React.FC = () => {
             <PieChart size={24} />
           </StatIcon>
           <StatContent>
-            <StatValue>{Math.round((totalSpent / totalBudget) * 100)}%</StatValue>
+            <StatValue>{totalBudget > 0 ? Math.round((totalSpent / totalBudget) * 100) : 0}%</StatValue>
             <StatLabel>Gebruikt</StatLabel>
           </StatContent>
         </StatCard>
@@ -141,7 +137,7 @@ const BudgetsPage: React.FC = () => {
             <BudgetCard key={budget.id} className="card">
               <BudgetHeader>
                 <BudgetInfo>
-                  <BudgetCategory>{budget.category}</BudgetCategory>
+                  <BudgetCategory>{budget.categories?.name || budget.name}</BudgetCategory>
                   <BudgetStatus isOverBudget={budget.isOverBudget} isNearLimit={budget.isNearLimit}>
                     {budget.isOverBudget ? (
                       <AlertTriangle size={16} />
@@ -171,14 +167,14 @@ const BudgetsPage: React.FC = () => {
                   />
                 </ProgressBar>
                 <ProgressText>
-                  €{budget.spent.toLocaleString()} van €{budget.budget.toLocaleString()}
+                  €{budget.spent.toLocaleString()} van €{budget.amount.toLocaleString()}
                 </ProgressText>
               </BudgetProgress>
 
               <BudgetDetails>
                 <BudgetAmount>
                   <AmountLabel>Budget</AmountLabel>
-                  <AmountValue>€{budget.budget.toLocaleString()}</AmountValue>
+                  <AmountValue>€{budget.amount.toLocaleString()}</AmountValue>
                 </BudgetAmount>
                 <BudgetAmount>
                   <AmountLabel>Uitgegeven</AmountLabel>
@@ -186,8 +182,8 @@ const BudgetsPage: React.FC = () => {
                 </BudgetAmount>
                 <BudgetAmount>
                   <AmountLabel>Resterend</AmountLabel>
-                  <AmountValue remaining={budget.budget - budget.spent}>
-                    €{(budget.budget - budget.spent).toLocaleString()}
+                  <AmountValue remaining={budget.amount - budget.spent}>
+                    €{(budget.amount - budget.spent).toLocaleString()}
                   </AmountValue>
                 </BudgetAmount>
               </BudgetDetails>
@@ -206,7 +202,7 @@ const BudgetsPage: React.FC = () => {
           onSubmit={handleSubmit}
           budget={editingBudget}
           categories={categories}
-          existingCategories={budgets.map(b => b.category)}
+          existingCategories={budgets.map(b => b.categories?.name || b.name)}
         />
       )}
     </Container>

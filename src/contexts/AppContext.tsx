@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
-import { ApiService, Transaction, Budget, SavingsGoal } from '../services/api';
+import { ApiService, Transaction, Budget, SavingsGoal, Category } from '../services/api';
 import { useAuth } from './AuthContext';
 
 // State interface
@@ -7,6 +7,7 @@ interface AppState {
   transactions: Transaction[];
   budgets: Budget[];
   savingsGoals: SavingsGoal[];
+  categories: Category[];
   loading: boolean;
   error: string | null;
 }
@@ -27,13 +28,15 @@ type AppAction =
   | { type: 'SET_SAVINGS_GOALS'; payload: SavingsGoal[] }
   | { type: 'ADD_SAVINGS_GOAL'; payload: SavingsGoal }
   | { type: 'UPDATE_SAVINGS_GOAL'; payload: SavingsGoal }
-  | { type: 'DELETE_SAVINGS_GOAL'; payload: string };
+  | { type: 'DELETE_SAVINGS_GOAL'; payload: string }
+  | { type: 'SET_CATEGORIES'; payload: Category[] };
 
 // Initial state
 const initialState: AppState = {
   transactions: [],
   budgets: [],
   savingsGoals: [],
+  categories: [],
   loading: false,
   error: null,
 };
@@ -94,6 +97,8 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ...state,
         savingsGoals: state.savingsGoals.filter(g => g.id !== action.payload),
       };
+    case 'SET_CATEGORIES':
+      return { ...state, categories: action.payload };
     default:
       return state;
   }
@@ -104,13 +109,13 @@ interface AppContextType extends AppState {
   user: any; // Add user property
   dispatch: React.Dispatch<AppAction>;
   loadUserData: () => Promise<void>;
-  createTransaction: (transaction: Omit<Transaction, 'id' | 'created_at'>) => Promise<void>;
+  createTransaction: (transaction: Omit<Transaction, 'id' | 'created_at' | 'updated_at'>) => Promise<void>;
   updateTransaction: (id: string, updates: Partial<Transaction>) => Promise<void>;
   deleteTransaction: (id: string) => Promise<void>;
-  createBudget: (budget: Omit<Budget, 'id' | 'created_at' | 'spent' | 'remaining'>) => Promise<void>;
+  createBudget: (budget: Omit<Budget, 'id' | 'created_at' | 'updated_at' | 'current_spent'>) => Promise<void>;
   updateBudget: (id: string, updates: Partial<Budget>) => Promise<void>;
   deleteBudget: (id: string) => Promise<void>;
-  createSavingsGoal: (goal: Omit<SavingsGoal, 'id' | 'created_at'>) => Promise<void>;
+  createSavingsGoal: (goal: Omit<SavingsGoal, 'id' | 'created_at' | 'updated_at' | 'progress_percentage'>) => Promise<void>;
   updateSavingsGoal: (id: string, updates: Partial<SavingsGoal>) => Promise<void>;
   deleteSavingsGoal: (id: string) => Promise<void>;
 }
@@ -134,15 +139,17 @@ export function AppProvider({ children }: AppProviderProps) {
     dispatch({ type: 'SET_ERROR', payload: null });
     
     try {
-      const [transactions, budgets, savingsGoals] = await Promise.all([
+      const [transactions, budgets, savingsGoals, categories] = await Promise.all([
         ApiService.getTransactions(user.id),
         ApiService.getBudgets(user.id),
         ApiService.getSavingsGoals(user.id),
+        ApiService.getCategories(),
       ]);
       
       dispatch({ type: 'SET_TRANSACTIONS', payload: transactions });
       dispatch({ type: 'SET_BUDGETS', payload: budgets });
       dispatch({ type: 'SET_SAVINGS_GOALS', payload: savingsGoals });
+      dispatch({ type: 'SET_CATEGORIES', payload: categories });
     } catch (error) {
       dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Unknown error' });
     } finally {
@@ -151,7 +158,7 @@ export function AppProvider({ children }: AppProviderProps) {
   };
 
   // Transaction actions
-  const createTransaction = async (transaction: Omit<Transaction, 'id' | 'created_at'>) => {
+  const createTransaction = async (transaction: Omit<Transaction, 'id' | 'created_at' | 'updated_at'>) => {
     if (!user) throw new Error('User not authenticated');
     
     try {
@@ -187,7 +194,7 @@ export function AppProvider({ children }: AppProviderProps) {
   };
 
   // Budget actions
-  const createBudget = async (budget: Omit<Budget, 'id' | 'created_at' | 'spent' | 'remaining'>) => {
+  const createBudget = async (budget: Omit<Budget, 'id' | 'created_at' | 'updated_at' | 'current_spent'>) => {
     if (!user) throw new Error('User not authenticated');
     
     try {
@@ -223,7 +230,7 @@ export function AppProvider({ children }: AppProviderProps) {
   };
 
   // Savings goal actions
-  const createSavingsGoal = async (goal: Omit<SavingsGoal, 'id' | 'created_at'>) => {
+  const createSavingsGoal = async (goal: Omit<SavingsGoal, 'id' | 'created_at' | 'updated_at' | 'progress_percentage'>) => {
     if (!user) throw new Error('User not authenticated');
     
     try {
