@@ -14,7 +14,7 @@ const NotificationBadge: React.FC<NotificationBadgeProps> = ({
   showCount = true, 
   size = 'md' 
 }) => {
-  const { notifications, isEnabled } = useNotifications();
+  const { notifications } = useNotifications();
   
   const unreadCount = notifications.filter(n => !n.read).length;
   const hasUnread = unreadCount > 0;

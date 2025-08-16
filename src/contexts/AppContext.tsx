@@ -270,7 +270,7 @@ export function AppProvider({ children }: AppProviderProps) {
     if (user) {
       loadUserData();
     }
-  }, [user]);
+  }, [user, loadUserData]);
 
   const contextValue: AppContextType = {
     ...state,

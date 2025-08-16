@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-import { ApiService, Transaction, Budget, SavingsGoal } from '../services/api';
+import { ApiService } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 
 const TestContainer = styled.div`

@@ -63,8 +63,6 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
   // Monitor savings goals for reminders and achievements
   useEffect(() => {
     if (!isEnabled || !savingsGoals) return;
-
-    const now = new Date();
     
     savingsGoals.forEach(goal => {
       // Check if goal is achieved
