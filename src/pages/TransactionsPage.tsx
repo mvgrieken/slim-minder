@@ -202,7 +202,7 @@ const TransactionsPage: React.FC = () => {
           }}
           onSubmit={handleSubmit}
           transaction={editingTransaction}
-          categories={categories}
+          categories={categories.map(cat => cat.name)}
         />
       )}
     </Container>

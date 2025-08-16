@@ -92,8 +92,11 @@ logs
 *.sln
 *.sw?
 
-# Vercel
-.vercel
+# Railway
+.railway
+
+# Vercel (removed)
+# .vercel
 
 # Supabase
 .supabase 

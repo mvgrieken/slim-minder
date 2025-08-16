@@ -46,7 +46,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
     if (!isEnabled || !budgets) return;
 
     budgets.forEach(budget => {
-      const spent = budget.spent ?? budget.current_spent ?? 0;
+      const spent = budget.current_spent ?? 0;
       const percentage = budget.amount > 0 ? (spent / budget.amount) * 100 : 0;
       
       // Send alerts at 80%, 90%, and 100%

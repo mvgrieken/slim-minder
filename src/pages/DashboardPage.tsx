@@ -114,13 +114,13 @@ const DashboardPage: React.FC = () => {
           <SectionTitle>Budget Overzicht</SectionTitle>
           <BudgetCard className="card">
             {budgets.slice(0, 3).map((budget) => {
-              const spent = budget.spent || 0;
+              const spent = budget.current_spent || 0;
               const percentage = budget.amount > 0 ? (spent / budget.amount) * 100 : 0;
               
               return (
                 <BudgetItem key={budget.id}>
                   <BudgetHeader>
-                    <BudgetCategory>{budget.categories?.name || budget.name}</BudgetCategory>
+                    <BudgetCategory>{budget.name}</BudgetCategory>
                     <BudgetAmount>€{budget.amount.toLocaleString()}</BudgetAmount>
                   </BudgetHeader>
                   <ProgressBar>

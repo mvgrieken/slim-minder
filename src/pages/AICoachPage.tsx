@@ -417,7 +417,8 @@ const AICoachPage: React.FC = () => {
     const categorySpending = monthTransactions
       .filter(t => t.amount < 0)
       .reduce((acc, t) => {
-        acc[t.category] = (acc[t.category] || 0) + Math.abs(t.amount);
+        const categoryName = (t as any).categories?.name || t.category_id || 'Onbekend';
+        acc[categoryName] = (acc[categoryName] || 0) + Math.abs(t.amount);
         return acc;
       }, {} as Record<string, number>);
 
@@ -426,22 +427,22 @@ const AICoachPage: React.FC = () => {
       .filter(t => t.amount < 0)
       .map(t => ({
         amount: Math.abs(t.amount),
-        category: t.category,
+        category: (t as any).categories?.name || t.category_id || 'Onbekend',
         date: new Date(t.transaction_date),
         dayOfWeek: new Date(t.transaction_date).getDay()
       }));
 
     // Budget analysis
     const budgetAlerts = budgets.map(budget => {
-      const spent = categorySpending[budget.category] || 0;
-      const percentage = (spent / budget.budget) * 100;
+      const spent = categorySpending[(budget as any).categories?.name || budget.category_id || 'Onbekend'] || 0;
+      const percentage = (spent / budget.amount) * 100;
       return { budget, spent, percentage };
     }).filter(alert => alert.percentage > 80);
 
     // Savings goals analysis
     const activeGoals = savingsGoals.filter(goal => {
-      if (!goal.deadline) return true;
-      const deadline = new Date(goal.deadline);
+      if (!goal.target_date) return true;
+      const deadline = new Date(goal.target_date);
       const today = new Date();
       return deadline > today && goal.current_amount < goal.target_amount;
     });
@@ -696,8 +697,8 @@ const AICoachPage: React.FC = () => {
       advice += `• Voortgang: ${percentage.toFixed(1)}% (€${goal.current_amount.toFixed(2)} van €${goal.target_amount.toFixed(2)})\n`;
       advice += `• Nog te sparen: €${remaining.toFixed(2)}\n`;
       
-      if (goal.deadline) {
-        const deadline = new Date(goal.deadline);
+      if (goal.target_date) {
+        const deadline = new Date(goal.target_date);
         const today = new Date();
         const monthsLeft = Math.max(1, (deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24 * 30));
         const monthlyNeeded = remaining / monthsLeft;

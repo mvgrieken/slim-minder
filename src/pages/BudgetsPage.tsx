@@ -21,7 +21,7 @@ const BudgetsPage: React.FC = () => {
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
 
   const budgetsWithProgress = budgets.map(budget => {
-    const spent = budget.spent || 0;
+    const spent = budget.current_spent || 0;
     const percentage = budget.amount > 0 ? (spent / budget.amount) * 100 : 0;
     const isOverBudget = percentage > 100;
     const isNearLimit = percentage > 80;
@@ -137,7 +137,7 @@ const BudgetsPage: React.FC = () => {
             <BudgetCard key={budget.id} className="card">
               <BudgetHeader>
                 <BudgetInfo>
-                  <BudgetCategory>{budget.categories?.name || budget.name}</BudgetCategory>
+                  <BudgetCategory>{budget.name}</BudgetCategory>
                   <BudgetStatus isOverBudget={budget.isOverBudget} isNearLimit={budget.isNearLimit}>
                     {budget.isOverBudget ? (
                       <AlertTriangle size={16} />
@@ -201,7 +201,7 @@ const BudgetsPage: React.FC = () => {
           }}
           onSubmit={handleSubmit}
           budget={editingBudget}
-          categories={categories}
+          categories={categories.map(cat => cat.name)}
           existingCategories={budgets.map(b => b.categories?.name || b.name)}
         />
       )}
@@ -228,12 +228,12 @@ const BudgetModal: React.FC<BudgetModalProps> = ({
   existingCategories
 }) => {
   const [formData, setFormData] = useState({
-    category: budget?.category || '',
-    amount: budget?.budget || 0
+    name: budget?.name || '',
+    amount: budget?.amount || 0
   });
 
   const availableCategories = categories.filter(cat => 
-    !existingCategories.includes(cat) || cat === budget?.category
+    !existingCategories.includes(cat) || cat === budget?.name
   );
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -257,8 +257,8 @@ const BudgetModal: React.FC<BudgetModalProps> = ({
           <FormGroup>
             <FormLabel>Categorie</FormLabel>
             <FormSelect
-              value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
             >
               <option value="">Selecteer categorie</option>

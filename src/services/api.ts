@@ -27,6 +27,11 @@ export interface Transaction {
   metadata?: any;
   created_at: string;
   updated_at: string;
+  categories?: {
+    name: string;
+    color: string;
+    icon: string;
+  };
 }
 
 export interface Budget {
@@ -43,6 +48,11 @@ export interface Budget {
   current_spent: number;
   created_at: string;
   updated_at: string;
+  categories?: {
+    name: string;
+    color: string;
+    icon: string;
+  };
 }
 
 export interface SavingsGoal {
@@ -406,7 +416,7 @@ export class ApiService {
     const categorySpending = transactions
       ?.filter(t => t.amount < 0)
       .reduce((acc, t) => {
-        const categoryName = t.categories?.name || 'Onbekend';
+        const categoryName = (t as any).categories?.name || t.category_id || 'Onbekend';
         acc[categoryName] = (acc[categoryName] || 0) + Math.abs(t.amount);
         return acc;
       }, {} as Record<string, number>) || {};

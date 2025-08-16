@@ -239,10 +239,13 @@ const GoalModal: React.FC<GoalModalProps> = ({
 }) => {
   const [formData, setFormData] = useState({
     name: goal?.name || '',
-    category: goal?.category || categories[0],
+    description: goal?.description || '',
     target_amount: goal?.target_amount || 0,
-    current_amount: goal?.current_amount || 0,
-    deadline: goal?.deadline || ''
+    target_date: goal?.target_date || '',
+    category: goal?.category || '',
+    priority: goal?.priority || 'MEDIUM' as const,
+    auto_save_enabled: goal?.auto_save_enabled || false,
+    auto_save_amount: goal?.auto_save_amount || 0
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -300,23 +303,11 @@ const GoalModal: React.FC<GoalModalProps> = ({
           </FormGroup>
 
           <FormGroup>
-            <FormLabel>Huidig bedrag (€)</FormLabel>
-            <FormInput
-              type="number"
-              step="0.01"
-              value={formData.current_amount}
-              onChange={(e) => setFormData({ ...formData, current_amount: parseFloat(e.target.value) || 0 })}
-              placeholder="0.00"
-              required
-            />
-          </FormGroup>
-
-          <FormGroup>
             <FormLabel>Doeldatum (optioneel)</FormLabel>
             <FormInput
               type="date"
-              value={formData.deadline}
-              onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+              value={formData.target_date}
+              onChange={(e) => setFormData({ ...formData, target_date: e.target.value })}
             />
           </FormGroup>
 
