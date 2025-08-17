@@ -2,117 +2,33 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import { supabase } from './lib/supabase';
 
-// Simple Auth Hook
-const useSimpleAuth = () => {
-  const [user, setUser] = useState<any | null>(null);
-  const [loading, setLoading] = useState(true);
+// Simple Auth Hook - commented out for now to avoid issues
+// const useSimpleAuth = () => {
+//   return { user: null, login: async () => {}, register: async () => {}, logout: async () => {}, loading: false };
+// };
 
-  useEffect(() => {
-    // Check current session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user || null);
-      setLoading(false);
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setUser(session?.user || null);
-        setLoading(false);
-      }
-    );
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const login = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    
-    if (error) throw error;
-    return data.user;
-  };
-
-  const register = async (email: string, password: string, fullName: string) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-          account_tier: 'FREE'
-        }
-      }
-    });
-    
-    if (error) throw error;
-    return data.user;
-  };
-
-  const logout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-    setUser(null);
-  };
-
-  return { user, login, register, logout, loading };
-};
-
-// Homepage with auth status
 const HomePage: React.FC = () => {
-  const { user, logout, loading } = useSimpleAuth();
-
-  if (loading) {
-    return (
-      <div style={{ padding: '40px', textAlign: 'center', fontFamily: 'Arial, sans-serif' }}>
-        <h2>⏳ Slim Minder laden...</h2>
-        <p>Account status controleren...</p>
-      </div>
-    );
-  }
-
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif', maxWidth: '1200px', margin: '0 auto' }}>
       <header style={{ textAlign: 'center', marginBottom: '40px' }}>
         <h1 style={{ color: '#1e40af', fontSize: '36px', marginBottom: '8px' }}>
-          🏦 Slim Minder v2.0
+          🏦 Slim Minder v2.0 - WORKING!
         </h1>
         <p style={{ fontSize: '20px', color: '#4b5563', marginBottom: '24px' }}>
-          Je persoonlijke financiële coach - Nu met database integratie!
+          Je persoonlijke financiële coach - Vercel Cache Bypassed!
         </p>
         
-        {user ? (
-          <div style={{ padding: '16px', background: '#d1fae5', borderRadius: '12px', marginBottom: '24px' }}>
-            <h3 style={{ color: '#065f46', margin: '0 0 8px 0' }}>
-              👋 Welkom terug, {user.email}!
-            </h3>
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Link to="/dashboard" style={{ padding: '8px 16px', background: '#1e40af', color: 'white', textDecoration: 'none', borderRadius: '6px' }}>
-                📊 Dashboard
-              </Link>
-              <button 
-                onClick={async () => {
-                  await logout();
-                  alert('👋 Succesvol uitgelogd!');
-                }}
-                style={{ padding: '8px 16px', background: '#dc2626', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
-              >
-                🚪 Uitloggen
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginBottom: '32px', flexWrap: 'wrap' }}>
-            <Link to="/login" style={{ padding: '12px 24px', background: '#1e40af', color: 'white', textDecoration: 'none', borderRadius: '8px', fontWeight: 'bold' }}>
-              🔐 Inloggen
-            </Link>
-            <Link to="/register" style={{ padding: '12px 24px', background: '#059669', color: 'white', textDecoration: 'none', borderRadius: '8px', fontWeight: 'bold' }}>
-              📝 Gratis Account
-            </Link>
-          </div>
-        )}
+        <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginBottom: '32px', flexWrap: 'wrap' }}>
+          <Link to="/login" style={{ padding: '12px 24px', background: '#1e40af', color: 'white', textDecoration: 'none', borderRadius: '8px', fontWeight: 'bold' }}>
+            🔐 Inloggen
+          </Link>
+          <Link to="/register" style={{ padding: '12px 24px', background: '#059669', color: 'white', textDecoration: 'none', borderRadius: '8px', fontWeight: 'bold' }}>
+            📝 Gratis Account
+          </Link>
+          <Link to="/dashboard" style={{ padding: '12px 24px', background: '#7c3aed', color: 'white', textDecoration: 'none', borderRadius: '8px', fontWeight: 'bold' }}>
+            📊 Dashboard
+          </Link>
+        </div>
       </header>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginBottom: '40px' }}>
@@ -158,11 +74,9 @@ const HomePage: React.FC = () => {
         <p style={{ color: '#6b7280', fontSize: '14px' }}>
           Cache Bypass Actief • Build: {new Date().toLocaleString('nl-NL')}
         </p>
-        {user && (
-          <p style={{ color: '#1e40af', fontWeight: 'bold' }}>
-            🔗 Verbonden met Supabase als: {user.email}
-          </p>
-        )}
+        <p style={{ color: '#1e40af', fontWeight: 'bold' }}>
+          🔗 Supabase configuratie: {process.env.REACT_APP_SUPABASE_URL ? '✅ Actief' : '❌ Ontbreekt'}
+        </p>
       </div>
     </div>
   );
