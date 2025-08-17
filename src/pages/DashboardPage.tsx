@@ -15,9 +15,10 @@ import {
   Plus
 } from 'react-feather';
 import { useApp } from '../contexts/AppContext';
+import { RealtimeIndicator } from '../components/ui/RealtimeIndicator';
 
 const DashboardPage: React.FC = () => {
-  const { user, transactions, budgets, savingsGoals } = useApp();
+  const { user, transactions, budgets, savingsGoals, lastUpdate, isRealtimeConnected } = useApp();
 
   const totalSpent = transactions
     .filter(t => t.amount < 0)
@@ -36,6 +37,10 @@ const DashboardPage: React.FC = () => {
           <Subtitle>Hier is een overzicht van je financiële status</Subtitle>
         </HeaderContent>
         <HeaderActions>
+          <RealtimeIndicator 
+            isConnected={isRealtimeConnected} 
+            lastUpdate={lastUpdate}
+          />
           <QuickActionButton to="/transactions/new" className="btn-primary">
             <Plus size={16} />
             Nieuwe Transactie

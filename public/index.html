@@ -38,8 +38,8 @@
     <!-- Inter Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Security Headers - Temporarily disabled for debugging -->
-    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.app https://*.vercel.app; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.slimminder.nl https://*.supabase.co https://vercel.app https://*.vercel.app;"> -->
+    <!-- Security Headers - Production ready -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://api.openai.com;">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta http-equiv="X-XSS-Protection" content="1; mode=block">
@@ -60,10 +60,9 @@
     <!-- Accessibility: Screen reader improvements -->
     <div id="aria-live-region" aria-live="polite" aria-atomic="true" class="sr-only"></div>
     
-    <!-- Service Worker Registration - Temporarily disabled for debugging -->
-    <!--
+    <!-- Service Worker Registration -->
     <script>
-      if ('serviceWorker' in navigator) {
+      if ('serviceWorker' in navigator && window.location.hostname !== 'localhost') {
         window.addEventListener('load', function() {
           navigator.serviceWorker.register('%PUBLIC_URL%/sw.js')
             .then(function(registration) {
@@ -75,6 +74,5 @@
         });
       }
     </script>
-    -->
   </body>
 </html> 

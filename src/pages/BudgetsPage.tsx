@@ -14,9 +14,15 @@ import {
 } from 'react-feather';
 import { useApp } from '../contexts/AppContext';
 import { Budget } from '../types/budget';
+import { 
+  FullPageLoading, 
+  BudgetSkeleton, 
+  EmptyState as LoadingEmptyState, 
+  ErrorState as LoadingErrorState 
+} from '../components/ui/LoadingStates';
 
 const BudgetsPage: React.FC = () => {
-  const { budgets, categories, createBudget, updateBudget, deleteBudget } = useApp();
+  const { budgets, categories, createBudget, updateBudget, deleteBudget, loading, error } = useApp();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
 

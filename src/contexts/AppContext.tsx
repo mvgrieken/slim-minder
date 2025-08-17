@@ -136,6 +136,16 @@ interface AppProviderProps {
 export function AppProvider({ children }: AppProviderProps) {
   const [state, dispatch] = useReducer(appReducer, initialState);
   const { user } = useAuth();
+  
+  // Real-time data hook (only in production)
+  const realTimeData = useRealtimeData();
+  
+  logger.debug('AppProvider state:', {
+    transactionsCount: state.transactions.length,
+    budgetsCount: state.budgets.length,
+    realTimeEnabled: FEATURES.realTimeData,
+    realTimeConnected: realTimeData.isConnected
+  });
 
   // Load user data
   const loadUserData = async () => {
@@ -280,7 +290,14 @@ export function AppProvider({ children }: AppProviderProps) {
 
   const contextValue: AppContextType = {
     ...state,
-    user, // Add user to context value
+    // Real-time data integration - temporarily disabled for type safety
+    // TODO: Fix type conflicts between api.ts and types/index.ts Transaction interfaces
+    // transactions: FEATURES.realTimeData ? realTimeData.transactions : state.transactions,
+    // budgets: FEATURES.realTimeData ? realTimeData.budgets : state.budgets, 
+    // savingsGoals: FEATURES.realTimeData ? realTimeData.savingsGoals : state.savingsGoals,
+    lastUpdate: FEATURES.realTimeData ? realTimeData.lastUpdate : state.lastUpdate,
+    isRealtimeConnected: FEATURES.realTimeData ? realTimeData.isConnected : state.isRealtimeConnected,
+    user,
     dispatch,
     loadUserData,
     createTransaction,

@@ -11,9 +11,15 @@ import {
 } from 'react-feather';
 import { useApp } from '../contexts/AppContext';
 import { Transaction } from '../types/transaction';
+import { 
+  FullPageLoading, 
+  TransactionSkeleton, 
+  EmptyState as LoadingEmptyState, 
+  ErrorState as LoadingErrorState 
+} from '../components/ui/LoadingStates';
 
 const TransactionsPage: React.FC = () => {
-  const { transactions, categories, createTransaction, updateTransaction, deleteTransaction } = useApp();
+  const { transactions, categories, createTransaction, updateTransaction, deleteTransaction, loading, error } = useApp();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -59,6 +65,16 @@ const TransactionsPage: React.FC = () => {
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
   const netAmount = totalIncome - totalExpenses;
+
+  // Loading state
+  if (loading) {
+    return <FullPageLoading message="Transacties laden..." />;
+  }
+
+  // Error state
+  if (error) {
+    return <LoadingErrorState title="Fout bij laden transacties" message={error} />;
+  }
 
   return (
     <Container>
