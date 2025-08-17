@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import MinimalApp from './MinimalApp';
 import reportWebVitals from './reportWebVitals';
 
 // Get the root element
@@ -14,8 +13,12 @@ if (!container) {
 // Create React root
 const root = ReactDOM.createRoot(container);
 
-// Render the app - using MinimalApp to test basic functionality (StrictMode disabled for debugging)
-root.render(<MinimalApp />);
+// Render the app
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
 
 // Performance monitoring
 reportWebVitals(console.log);

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { User, AccountTier, LoginForm, RegisterForm } from '../types';
 import { authService } from '../services/authService';
-import { supabase } from '../services/api';
+import { supabase } from '../lib/supabase';
 
 interface AuthState {
   user: User | null;

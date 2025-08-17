@@ -15,7 +15,8 @@
       "Bash(npm run lint:*)",
       "Bash(git rm:*)",
       "Bash(npm run dev:*)",
-      "WebFetch(domain:slim-minder.vercel.app)"
+      "WebFetch(domain:slim-minder.vercel.app)",
+      "Bash(npx serve:*)"
     ],
     "deny": [],
     "ask": [],

@@ -13,6 +13,7 @@ import { AppProvider } from './contexts/AppContext';
 // Components
 import ErrorBoundary from './components/ErrorBoundary';
 import { NotificationProvider } from './components/NotificationProvider';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
 // Pages
 import HomePage from './pages/HomePage';
@@ -42,20 +43,51 @@ const App: React.FC = () => {
             <NotificationProvider>
               <Router>
                 <Routes>
-                  <Route path="/" element={<SafeHomePage />} />
-                  <Route path="/home" element={<HomePage />} />
+                  <Route path="/" element={<HomePage />} />
                   <Route path="/test" element={<TestPage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/register" element={<RegisterPage />} />
-                  <Route path="/dashboard" element={<DashboardPage />} />
-                  <Route path="/transactions" element={<TransactionsPage />} />
-                  <Route path="/budgets" element={<BudgetsPage />} />
-                  <Route path="/savings" element={<SavingsGoalsPage />} />
-                  <Route path="/coach" element={<AICoachPage />} />
-                  <Route path="/gamification" element={<GamificationPage />} />
+                  <Route path="/dashboard" element={
+                    <ProtectedRoute>
+                      <DashboardPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/transactions" element={
+                    <ProtectedRoute>
+                      <TransactionsPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/budgets" element={
+                    <ProtectedRoute>
+                      <BudgetsPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/savings" element={
+                    <ProtectedRoute>
+                      <SavingsGoalsPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/coach" element={
+                    <ProtectedRoute requiredTier="CORE">
+                      <AICoachPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/gamification" element={
+                    <ProtectedRoute>
+                      <GamificationPage />
+                    </ProtectedRoute>
+                  } />
                   <Route path="/inspiration" element={<InspirationPage />} />
-                  <Route path="/bank-connection" element={<BankConnectionPage />} />
-                  <Route path="/notifications" element={<NotificationsPage />} />
+                  <Route path="/bank-connection" element={
+                    <ProtectedRoute requiredTier="CORE">
+                      <BankConnectionPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/notifications" element={
+                    <ProtectedRoute>
+                      <NotificationsPage />
+                    </ProtectedRoute>
+                  } />
                   <Route path="/diagnostic" element={<DiagnosticPage />} />
                   <Route path="*" element={<NotFoundPage />} />
                 </Routes>

@@ -1,5 +1,5 @@
-import { User, LoginForm, RegisterForm, AccountTier } from '@/types';
-import { supabase } from './api';
+import { User, LoginForm, RegisterForm, AccountTier } from '../types';
+import { supabase } from '../lib/supabase';
 
 interface AuthResponse {
   user: User;
