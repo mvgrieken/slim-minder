@@ -14,19 +14,15 @@ if (!container) {
 // Create React root
 const root = ReactDOM.createRoot(container);
 
-// Render the app - using MinimalApp to test basic functionality
-root.render(
-  <React.StrictMode>
-    <MinimalApp />
-  </React.StrictMode>
-);
+// Render the app - using MinimalApp to test basic functionality (StrictMode disabled for debugging)
+root.render(<MinimalApp />);
 
 // Performance monitoring
 reportWebVitals(console.log);
 
-// Hot Module Replacement for development
+// Hot Module Replacement for development - disabled for production debugging
 // @ts-ignore
-if (module.hot) {
-  // @ts-ignore
-  module.hot.accept();
-} 
+// if (module.hot) {
+//   // @ts-ignore
+//   module.hot.accept();
+// } 
