@@ -31,7 +31,7 @@
     "yup": "^1.0.2"
   },
   "scripts": {
-    "start": "serve -s build -p $PORT",
+    "start": "serve -s build -l ${PORT:-3000} -n",
     "dev": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
