@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Slim Minder - JavaScript Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .success { background: green; color: white; padding: 10px; }
+        .error { background: red; color: white; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Slim Minder JavaScript Test</h1>
+    
+    <div id="js-status" class="error">
+        ❌ JavaScript is NOT working
+    </div>
+    
+    <div id="content">
+        <p>Als je deze tekst ziet, dan laadt HTML wel correct.</p>
+        <button onclick="testButton()">Test JavaScript</button>
+    </div>
+    
+    <script>
+        // Test basic JavaScript execution
+        console.log('🚀 JavaScript is executing!');
+        
+        // Update status
+        const statusDiv = document.getElementById('js-status');
+        statusDiv.className = 'success';
+        statusDiv.innerHTML = '✅ JavaScript IS working!';
+        
+        // Add timestamp
+        const content = document.getElementById('content');
+        content.innerHTML += '<p><strong>JavaScript loaded at:</strong> ' + new Date().toLocaleString() + '</p>';
+        
+        // Test function
+        function testButton() {
+            alert('🎉 JavaScript interactivity works!');
+            console.log('Button clicked at:', new Date());
+        }
+        
+        // Test async functionality
+        setTimeout(() => {
+            content.innerHTML += '<p><strong>Async JavaScript:</strong> setTimeout works!</p>';
+        }, 1000);
+        
+        // Log environment info
+        console.log('Environment info:', {
+            userAgent: navigator.userAgent,
+            url: window.location.href,
+            referrer: document.referrer
+        });
+    </script>
+</body>
+</html>
