@@ -421,6 +421,27 @@ const TestPage: React.FC = () => {
         >
           {isRunning ? 'Tests worden uitgevoerd...' : '🔄 Tests opnieuw uitvoeren'}
         </RefreshButton>
+        
+        <div style={{ padding: '20px', textAlign: 'center', borderTop: '1px solid #eee' }}>
+          <h3 style={{ marginBottom: '16px' }}>🧭 Navigatie</h3>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <a href="/" style={{ padding: '8px 16px', background: '#007bff', color: 'white', borderRadius: '6px', textDecoration: 'none' }}>
+              🏠 Home
+            </a>
+            <a href="/login" style={{ padding: '8px 16px', background: '#28a745', color: 'white', borderRadius: '6px', textDecoration: 'none' }}>
+              🔐 Login
+            </a>
+            <a href="/register" style={{ padding: '8px 16px', background: '#ffc107', color: 'black', borderRadius: '6px', textDecoration: 'none' }}>
+              📝 Register
+            </a>
+            <a href="/dashboard" style={{ padding: '8px 16px', background: '#17a2b8', color: 'white', borderRadius: '6px', textDecoration: 'none' }}>
+              📊 Dashboard
+            </a>
+            <a href="/diagnostic" style={{ padding: '8px 16px', background: '#dc3545', color: 'white', borderRadius: '6px', textDecoration: 'none' }}>
+              🔍 Diagnostic
+            </a>
+          </div>
+        </div>
       </TestContainer>
     </GlobalStyle>
   );
