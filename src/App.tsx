@@ -6,9 +6,9 @@ import { ThemeProvider } from 'styled-components';
 import { GlobalStyles } from './styles/GlobalStyles';
 import { theme } from './styles/theme';
 
-// Contexts
-import { AuthProvider } from './contexts/AuthContext';
-import { AppProvider } from './contexts/AppContext';
+// Contexts - temporarily simplified for debugging
+// import { AuthProvider } from './contexts/AuthContext';
+// import { AppProvider } from './contexts/AppContext';
 
 // Components
 import ErrorBoundary from './components/ErrorBoundary';
@@ -38,63 +38,25 @@ const App: React.FC = () => {
     <ErrorBoundary>
       <ThemeProvider theme={theme}>
         <GlobalStyles />
-        <AuthProvider>
-          <AppProvider>
-            <NotificationProvider>
-              <Router>
-                <Routes>
+        <Router>
+          <Routes>
                   <Route path="/" element={<HomePage />} />
                   <Route path="/test" element={<TestPage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/register" element={<RegisterPage />} />
-                  <Route path="/dashboard" element={
-                    <ProtectedRoute>
-                      <DashboardPage />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/transactions" element={
-                    <ProtectedRoute>
-                      <TransactionsPage />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/budgets" element={
-                    <ProtectedRoute>
-                      <BudgetsPage />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/savings" element={
-                    <ProtectedRoute>
-                      <SavingsGoalsPage />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/coach" element={
-                    <ProtectedRoute requiredTier="CORE">
-                      <AICoachPage />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/gamification" element={
-                    <ProtectedRoute>
-                      <GamificationPage />
-                    </ProtectedRoute>
-                  } />
+                  <Route path="/dashboard" element={<DashboardPage />} />
+                  <Route path="/transactions" element={<TransactionsPage />} />
+                  <Route path="/budgets" element={<BudgetsPage />} />
+                  <Route path="/savings" element={<SavingsGoalsPage />} />
+                  <Route path="/coach" element={<AICoachPage />} />
+                  <Route path="/gamification" element={<GamificationPage />} />
                   <Route path="/inspiration" element={<InspirationPage />} />
-                  <Route path="/bank-connection" element={
-                    <ProtectedRoute requiredTier="CORE">
-                      <BankConnectionPage />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/notifications" element={
-                    <ProtectedRoute>
-                      <NotificationsPage />
-                    </ProtectedRoute>
-                  } />
+                  <Route path="/bank-connection" element={<BankConnectionPage />} />
+                  <Route path="/notifications" element={<NotificationsPage />} />
                   <Route path="/diagnostic" element={<DiagnosticPage />} />
                   <Route path="*" element={<NotFoundPage />} />
-                </Routes>
-              </Router>
-            </NotificationProvider>
-          </AppProvider>
-        </AuthProvider>
+          </Routes>
+        </Router>
       </ThemeProvider>
     </ErrorBoundary>
   );
