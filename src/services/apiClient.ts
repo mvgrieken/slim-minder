@@ -1,7 +1,8 @@
 import { toast } from 'react-hot-toast';
+import { API_CONFIG, logger, performance } from '../utils/environment';
 
 // API base URL - in production this would come from environment variables
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = API_CONFIG.baseUrl;
 
 interface ApiResponse<T = any> {
   data: T;
@@ -27,6 +28,18 @@ class ApiClient {
     url: string,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
+    const requestId = Math.random().toString(36).substr(2, 9);
+    const startTime = Date.now();
+    
+    // Performance monitoring
+    performance.mark(`api-request-start-${requestId}`);
+    
+    logger.debug(`API Request [${requestId}]:`, {
+      method: options.method || 'GET',
+      url: `${this.baseURL}${url}`,
+      options: { ...options, headers: options.headers ? Object.keys(options.headers) : [] }
+    });
+
     const token = localStorage.getItem('auth_token');
     
     const config: RequestInit = {
@@ -35,37 +48,105 @@ class ApiClient {
         ...(token && { Authorization: `Bearer ${token}` }),
         ...options.headers,
       },
+      timeout: API_CONFIG.timeout,
       ...options,
     };
 
-    try {
-      const response = await fetch(`${this.baseURL}${url}`, config);
-      
-      if (!response.ok) {
-        // Handle 401 unauthorized errors
-        if (response.status === 401) {
-          await this.handleAuthError();
+    let retryCount = 0;
+    const maxRetries = API_CONFIG.retries;
+
+    while (retryCount <= maxRetries) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.timeout);
+        
+        const response = await fetch(`${this.baseURL}${url}`, {
+          ...config,
+          signal: controller.signal,
+        });
+        
+        clearTimeout(timeoutId);
+        
+        const duration = Date.now() - startTime;
+        performance.mark(`api-request-end-${requestId}`);
+        performance.measure(`api-request-${requestId}`, `api-request-start-${requestId}`, `api-request-end-${requestId}`);
+        
+        logger.debug(`API Response [${requestId}]:`, {
+          status: response.status,
+          duration: `${duration}ms`,
+          retry: retryCount > 0 ? retryCount : undefined
+        });
+        
+        if (!response.ok) {
+          // Handle 401 unauthorized errors
+          if (response.status === 401) {
+            await this.handleAuthError();
+          }
+          
+          // Handle specific retry scenarios
+          if (this.shouldRetry(response.status) && retryCount < maxRetries) {
+            retryCount++;
+            logger.warn(`Retrying request [${requestId}] (${retryCount}/${maxRetries})...`);
+            await this.delay(1000 * retryCount); // Exponential backoff
+            continue;
+          }
+          
+          const errorData = await response.json().catch(() => ({}));
+          const error = new Error(errorData.message || 'Er ging iets mis') as any;
+          error.status = response.status;
+          error.data = errorData;
+          error.requestId = requestId;
+          throw error;
+        }
+
+        const data = await response.json().catch(() => null);
+        
+        return {
+          data,
+          status: response.status,
+          statusText: response.statusText,
+          headers: response.headers,
+        };
+      } catch (error: any) {
+        if (error.name === 'AbortError') {
+          error.message = 'Request timeout';
+          error.status = 408;
         }
         
-        const errorData = await response.json().catch(() => ({}));
-        const error = new Error(errorData.message || 'Er ging iets mis') as any;
-        error.status = response.status;
-        error.data = errorData;
+        if (retryCount < maxRetries && this.shouldRetryError(error)) {
+          retryCount++;
+          logger.warn(`Retrying request [${requestId}] after error (${retryCount}/${maxRetries}):`, error.message);
+          await this.delay(1000 * retryCount);
+          continue;
+        }
+        
+        logger.error(`API Error [${requestId}]:`, {
+          message: error.message,
+          status: error.status,
+          duration: `${Date.now() - startTime}ms`,
+          retries: retryCount
+        });
+        
+        this.handleError(error as ApiError);
         throw error;
       }
-
-      const data = await response.json().catch(() => null);
-      
-      return {
-        data,
-        status: response.status,
-        statusText: response.statusText,
-        headers: response.headers,
-      };
-    } catch (error) {
-      this.handleError(error as ApiError);
-      throw error;
     }
+  }
+
+  private shouldRetry(status: number): boolean {
+    // Retry on server errors and rate limiting
+    return status >= 500 || status === 429;
+  }
+
+  private shouldRetryError(error: any): boolean {
+    // Retry on network errors and timeouts
+    return error.name === 'AbortError' || 
+           error.message.includes('fetch') || 
+           error.message.includes('network');
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   private handleError(error: ApiError) {

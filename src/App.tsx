@@ -30,8 +30,6 @@ import NotFoundPage from './pages/NotFoundPage';
 import BankConnectionPage from './pages/BankConnectionPage';
 import NotificationsPage from './pages/NotificationsPage';
 
-// Components
-import DatabaseTest from './components/DatabaseTest';
 
 const App: React.FC = () => {
   return (
@@ -45,7 +43,6 @@ const App: React.FC = () => {
                 <Routes>
                   <Route path="/" element={<HomePage />} />
                   <Route path="/test" element={<TestPage />} />
-                  <Route path="/db-test" element={<DatabaseTest />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/register" element={<RegisterPage />} />
                   <Route path="/dashboard" element={<DashboardPage />} />

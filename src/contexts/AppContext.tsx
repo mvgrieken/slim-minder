@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { ApiService, Transaction, Budget, SavingsGoal, Category } from '../services/api';
 import { useAuth } from './AuthContext';
+import { useRealtimeData } from '../hooks/useRealtimeData';
+import { FEATURES, logger } from '../utils/environment';
 
 // State interface
 interface AppState {
@@ -10,6 +12,8 @@ interface AppState {
   categories: Category[];
   loading: boolean;
   error: string | null;
+  lastUpdate: Date | null;
+  isRealtimeConnected: boolean;
 }
 
 // Action types
