@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Slim Minder - Simple Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .card { border: 1px solid #ddd; padding: 20px; margin: 16px 0; border-radius: 8px; }
+        .success { background: #d4edda; border-color: #c3e6cb; }
+        .nav { display: flex; gap: 12px; margin: 20px 0; }
+        .btn { padding: 12px 24px; background: #007bff; color: white; text-decoration: none; border-radius: 6px; }
+    </style>
+</head>
+<body>
+    <h1>🏦 Slim Minder - Simple Version</h1>
+    
+    <div class="card success">
+        <h3>✅ SUCCESS: HTML en CSS laden correct!</h3>
+        <p>Als je dit ziet, dan werkt de basis web infrastructure.</p>
+    </div>
+    
+    <div class="nav">
+        <a href="/" class="btn">🏠 React App (/) </a>
+        <a href="/test" class="btn">🧪 Test Page</a>
+        <a href="/diagnostic" class="btn">🔍 Diagnostic</a>
+        <a href="https://slim-minder.vercel.app/" class="btn">🔄 Refresh</a>
+    </div>
+    
+    <div class="card">
+        <h3>🎯 Probleem Diagnose</h3>
+        <p>Het probleem ligt waarschijnlijk aan één van deze oorzaken:</p>
+        <ul>
+            <li><strong>Vercel CDN caching issue</strong> - oude versie cached</li>
+            <li><strong>JavaScript bundle corrupt</strong> - build probleem</li>
+            <li><strong>Browser compatibility</strong> - oude browser</li>
+            <li><strong>Network issues</strong> - scripts laden niet</li>
+        </ul>
+    </div>
+    
+    <div class="card">
+        <h3>💡 Mogelijke Oplossingen</h3>
+        <ol>
+            <li><strong>Hard refresh:</strong> Ctrl+F5 of Cmd+Shift+R</li>
+            <li><strong>Clear cache:</strong> Browser cache legen</li>
+            <li><strong>Andere browser:</strong> Test in Chrome/Firefox/Safari</li>
+            <li><strong>Incognito mode:</strong> Test zonder extensions</li>
+        </ol>
+    </div>
+    
+    <script>
+        console.log('✅ Static JavaScript is executing!');
+        document.body.style.backgroundColor = '#f8f9fa';
+        
+        // Test if we can modify DOM
+        const testDiv = document.createElement('div');
+        testDiv.innerHTML = '<div class="card success"><h4>✅ JavaScript DOM manipulation works!</h4><p>Timestamp: ' + new Date().toLocaleString() + '</p></div>';
+        document.body.appendChild(testDiv);
+        
+        // Log environment
+        console.log('Environment:', {
+            userAgent: navigator.userAgent,
+            url: window.location.href,
+            timestamp: new Date().toISOString()
+        });
+    </script>
+</body>
+</html>
