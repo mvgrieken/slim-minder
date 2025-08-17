@@ -64,7 +64,7 @@ export const useRealtimeData = () => {
           )
         `)
         .eq('user_id', user.id)
-        .eq('active', true);
+        .eq('is_active', true);
 
       if (budgetsError) throw budgetsError;
 
@@ -73,7 +73,7 @@ export const useRealtimeData = () => {
         .from('savings_goals')
         .select('*')
         .eq('user_id', user.id)
-        .eq('active', true);
+        .eq('is_active', true);
 
       if (goalsError) throw goalsError;
 
@@ -170,7 +170,7 @@ export const useRealtimeData = () => {
             
             switch (payload.eventType) {
               case 'INSERT':
-                if ((payload.new as Budget).active) {
+                if ((payload.new as any).is_active) {
                   newBudgets.push(payload.new as Budget);
                 }
                 break;
@@ -178,13 +178,13 @@ export const useRealtimeData = () => {
               case 'UPDATE':
                 const updateIndex = newBudgets.findIndex(b => b.id === payload.new.id);
                 if (updateIndex !== -1) {
-                  if ((payload.new as Budget).active) {
+                  if ((payload.new as any).is_active) {
                     newBudgets[updateIndex] = payload.new as Budget;
                   } else {
                     // Remove if deactivated
                     newBudgets = newBudgets.filter(b => b.id !== payload.new.id);
                   }
-                } else if ((payload.new as Budget).active) {
+                } else if ((payload.new as any).is_active) {
                   // Add if activated
                   newBudgets.push(payload.new as Budget);
                 }
@@ -226,7 +226,7 @@ export const useRealtimeData = () => {
             
             switch (payload.eventType) {
               case 'INSERT':
-                if ((payload.new as SavingsGoal).active) {
+                if ((payload.new as any).is_active) {
                   newGoals.push(payload.new as SavingsGoal);
                 }
                 break;
@@ -234,13 +234,13 @@ export const useRealtimeData = () => {
               case 'UPDATE':
                 const updateIndex = newGoals.findIndex(g => g.id === payload.new.id);
                 if (updateIndex !== -1) {
-                  if ((payload.new as SavingsGoal).active) {
+                  if ((payload.new as any).is_active) {
                     newGoals[updateIndex] = payload.new as SavingsGoal;
                   } else {
                     // Remove if deactivated
                     newGoals = newGoals.filter(g => g.id !== payload.new.id);
                   }
-                } else if ((payload.new as SavingsGoal).active) {
+                } else if ((payload.new as any).is_active) {
                   // Add if activated
                   newGoals.push(payload.new as SavingsGoal);
                 }

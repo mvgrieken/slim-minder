@@ -43,6 +43,8 @@ const initialState: AppState = {
   categories: [],
   loading: false,
   error: null,
+  lastUpdate: null,
+  isRealtimeConnected: false,
 };
 
 // Reducer

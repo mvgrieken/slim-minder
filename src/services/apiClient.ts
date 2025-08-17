@@ -48,7 +48,6 @@ class ApiClient {
         ...(token && { Authorization: `Bearer ${token}` }),
         ...options.headers,
       },
-      timeout: API_CONFIG.timeout,
       ...options,
     };
 
@@ -131,6 +130,9 @@ class ApiClient {
         throw error;
       }
     }
+    
+    // This should never be reached, but TypeScript requires it
+    throw new Error('Maximum retries exceeded');
   }
 
   private shouldRetry(status: number): boolean {
