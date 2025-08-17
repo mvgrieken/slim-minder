@@ -16,7 +16,8 @@
       "Bash(git rm:*)",
       "Bash(npm run dev:*)",
       "WebFetch(domain:slim-minder.vercel.app)",
-      "Bash(npx serve:*)"
+      "Bash(npx serve:*)",
+      "Bash(git merge:*)"
     ],
     "deny": [],
     "ask": [],
