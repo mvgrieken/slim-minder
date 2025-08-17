@@ -50,7 +50,7 @@ const SimpleHomePage: React.FC = () => (
     <div style={{ marginTop: '40px', padding: '20px', background: '#f0f9ff', borderRadius: '8px' }}>
       <h4>✅ App Status: Werkend!</h4>
       <p>JavaScript, React Router en basis functionaliteit werken correct.</p>
-      <p><strong>🔄 Production Branch:</strong> v2.0-production - {new Date().toLocaleString('nl-NL')}</p>
+      <p><strong>🌟 Netlify Deployment:</strong> v2.0-fresh - {new Date().toLocaleString('nl-NL')}</p>
       <small>Build tijd: {new Date().toISOString()}</small>
     </div>
   </div>
