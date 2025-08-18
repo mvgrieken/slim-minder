@@ -19,7 +19,11 @@
       "Bash(npx serve:*)",
       "Bash(git merge:*)",
       "WebSearch",
-      "WebFetch(domain:www.vercel-status.com)"
+      "WebFetch(domain:www.vercel-status.com)",
+      "Bash(supabase:*)",
+      "Bash(npm install:*)",
+      "Bash(npx supabase:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": [],

@@ -307,32 +307,13 @@ const RegisterPage: React.FC = () => {
         password: formData.password
       });
       
-      // If successful and user created, then add profile data separately
-      if (data.user && !error) {
-        try {
-          const { error: profileError } = await supabase
-            .from('user_profiles')
-            .insert({
-              user_id: data.user.id,
-              full_name: formData.fullName,
-              email: formData.email,
-              account_tier: 'FREE'
-            });
-          
-          if (profileError) {
-            console.warn('Profile creation failed:', profileError);
-            // Continue anyway - auth user is created
-          }
-        } catch (profileErr) {
-          console.warn('Manual profile creation failed:', profileErr);
-          // Continue anyway - auth user is created
-        }
-      }
+      // Profile creation is handled by database trigger automatically
+      // No need for manual profile creation
 
       if (error) throw error;
 
       if (data.user) {
-        alert('🎉 Account succesvol aangemaakt! Check je email voor verificatie.');
+        alert('🎉 Account succesvol aangemaakt! Je kunt nu direct inloggen.');
         setUser(data.user);
       }
       
