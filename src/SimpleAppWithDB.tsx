@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import { supabase } from './lib/supabase';
+import { BudgetsPage } from './BudgetsAndSavings';
 
 // Simple Auth Hook - commented out for now to avoid issues
 // const useSimpleAuth = () => {
@@ -903,8 +904,8 @@ const SimpleAppWithDB: React.FC = () => {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/transactions" element={<TransactionsPage />} />
-        <Route path="/budgets" element={<div style={{padding: '20px', textAlign: 'center'}}><h2>📊 Budgets (Coming Soon)</h2><Link to="/">← Home</Link></div>} />
-        <Route path="/savings" element={<div style={{padding: '20px', textAlign: 'center'}}><h2>🎯 Savings (Coming Soon)</h2><Link to="/">← Home</Link></div>} />
+        <Route path="/budgets" element={<BudgetsPage />} />
+        <Route path="/savings" element={<div style={{padding: '20px', textAlign: 'center'}}><h2>🎯 Spaardoelen (Build in progress)</h2><Link to="/">← Home</Link></div>} />
         <Route path="*" element={<div style={{padding: '20px', textAlign: 'center'}}><h2>404</h2><Link to="/">← Home</Link></div>} />
       </Routes>
     </Router>
