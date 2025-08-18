@@ -78,6 +78,22 @@ const HomePage: React.FC = () => {
         <p style={{ color: '#1e40af', fontWeight: 'bold' }}>
           🔗 Supabase configuratie: {process.env.REACT_APP_SUPABASE_URL ? '✅ Actief' : '❌ Ontbreekt'}
         </p>
+        <button 
+          onClick={async () => {
+            try {
+              // Test database connection
+              const { data, error } = await supabase.from('categories').select('count').limit(1);
+              if (error) throw error;
+              alert('✅ Database verbinding werkt! Categories tabel toegankelijk.');
+            } catch (error: any) {
+              alert(`❌ Database test fout:\n${error.message}`);
+              console.error('Database test error:', error);
+            }
+          }}
+          style={{ padding: '8px 16px', background: '#7c3aed', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', marginTop: '12px' }}
+        >
+          🧪 Test Database
+        </button>
       </div>
     </div>
   );
@@ -115,7 +131,12 @@ const LoginPage: React.FC = () => {
       setUser(data.user);
       
     } catch (err: any) {
-      setError(err.message || 'Login mislukt');
+      console.error('Login error:', err);
+      const errorMessage = err.message || 'Login mislukt';
+      setError(errorMessage);
+      
+      // More detailed error for debugging
+      alert(`❌ Login fout:\n${errorMessage}\n\nCheck console voor details.`);
     } finally {
       setIsLoading(false);
     }
@@ -280,16 +301,33 @@ const RegisterPage: React.FC = () => {
     }
 
     try {
+      // First try simple signup without metadata
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            full_name: formData.fullName,
-            account_tier: 'FREE'
-          }
-        }
+        password: formData.password
       });
+      
+      // If successful and user created, then add profile data separately
+      if (data.user && !error) {
+        try {
+          const { error: profileError } = await supabase
+            .from('user_profiles')
+            .insert({
+              user_id: data.user.id,
+              full_name: formData.fullName,
+              email: formData.email,
+              account_tier: 'FREE'
+            });
+          
+          if (profileError) {
+            console.warn('Profile creation failed:', profileError);
+            // Continue anyway - auth user is created
+          }
+        } catch (profileErr) {
+          console.warn('Manual profile creation failed:', profileErr);
+          // Continue anyway - auth user is created
+        }
+      }
 
       if (error) throw error;
 
@@ -299,7 +337,12 @@ const RegisterPage: React.FC = () => {
       }
       
     } catch (err: any) {
-      setError(err.message || 'Registratie mislukt');
+      console.error('Registration error:', err);
+      const errorMessage = err.message || 'Registratie mislukt';
+      setError(`Database error: ${errorMessage}`);
+      
+      // Show detailed error for debugging
+      alert(`❌ Registratie fout:\n${errorMessage}\n\nCheck console voor details.`);
     } finally {
       setIsLoading(false);
     }
