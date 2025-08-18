@@ -133,10 +133,15 @@ const LoginPage: React.FC = () => {
     } catch (err: any) {
       console.error('Login error:', err);
       const errorMessage = err.message || 'Login mislukt';
-      setError(errorMessage);
       
-      // More detailed error for debugging
-      alert(`❌ Login fout:\n${errorMessage}\n\nCheck console voor details.`);
+      // Special handling for email not confirmed
+      if (errorMessage.includes('Email not confirmed')) {
+        setError('Email verificatie vereist. Check je inbox en klik op de verificatie link.');
+        alert(`📧 Email Verificatie Vereist!\n\nJe account is aangemaakt, maar je moet eerst je email bevestigen.\n\n1. Check je inbox voor een email van Supabase\n2. Klik op de verificatie link\n3. Kom dan terug om in te loggen\n\n(Of vraag admin om email verification uit te schakelen)`);
+      } else {
+        setError(errorMessage);
+        alert(`❌ Login fout:\n${errorMessage}`);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -259,6 +264,22 @@ const LoginPage: React.FC = () => {
         <Link to="/register" style={{ color: '#059669', fontWeight: 'bold', textDecoration: 'none' }}>
           📝 Gratis account aanmaken →
         </Link>
+      </div>
+      
+      <div style={{ marginTop: '16px', padding: '12px', background: '#fef3c7', borderRadius: '8px', border: '1px solid #fbbf24' }}>
+        <p style={{ margin: '0 0 8px 0', fontSize: '14px', color: '#92400e' }}>
+          <strong>🧪 Test Account (Demo):</strong>
+        </p>
+        <button 
+          onClick={async () => {
+            setEmail('test@slimminder.nl');
+            setPassword('TestPassword123');
+            alert('✅ Test credentials ingevuld! Klik "Inloggen" om te proberen.');
+          }}
+          style={{ padding: '8px 16px', background: '#f59e0b', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '14px' }}
+        >
+          🔑 Test Credentials Invullen
+        </button>
       </div>
     </div>
   );
