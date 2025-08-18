@@ -272,13 +272,36 @@ const LoginPage: React.FC = () => {
         </p>
         <button 
           onClick={async () => {
-            setEmail('test@slimminder.nl');
-            setPassword('TestPassword123');
-            alert('✅ Test credentials ingevuld! Klik "Inloggen" om te proberen.');
+            setEmail('demo@slimminder.nl');
+            setPassword('Demo123456');
+            alert('✅ Demo credentials ingevuld!\n\nEmail: demo@slimminder.nl\nPassword: Demo123456\n\nKlik "Inloggen" om de app te testen!');
           }}
           style={{ padding: '8px 16px', background: '#f59e0b', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '14px' }}
         >
-          🔑 Test Credentials Invullen
+          🔑 Demo Account Invullen
+        </button>
+        
+        <button 
+          onClick={async () => {
+            try {
+              // Try to login with demo account directly
+              const { data, error } = await supabase.auth.signInWithPassword({
+                email: 'demo@slimminder.nl',
+                password: 'Demo123456',
+              });
+
+              if (error) throw error;
+
+              alert('🎉 Demo login succesvol!');
+              setUser(data.user);
+              
+            } catch (err: any) {
+              alert(`❌ Demo login fout: ${err.message}\n\nProbeer eerst email verification uit te schakelen in Supabase dashboard.`);
+            }
+          }}
+          style={{ padding: '8px 16px', background: '#059669', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', marginLeft: '8px' }}
+        >
+          🚀 Direct Demo Login
         </button>
       </div>
     </div>
