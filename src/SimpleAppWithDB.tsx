@@ -82,13 +82,393 @@ const HomePage: React.FC = () => {
   );
 };
 
+// Working Login Page with Supabase
+const LoginPage: React.FC = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [user, setUser] = useState<any>(null);
+
+  // Check if already logged in
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+    });
+  }, []);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+
+      alert('🎉 Login succesvol! Welkom bij Slim Minder!');
+      setUser(data.user);
+      
+    } catch (err: any) {
+      setError(err.message || 'Login mislukt');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    alert('👋 Je bent uitgelogd!');
+  };
+
+  if (user) {
+    return (
+      <div style={{ padding: '20px', maxWidth: '500px', margin: '0 auto', fontFamily: 'Arial, sans-serif' }}>
+        <h2 style={{ color: '#059669' }}>✅ Succesvol ingelogd!</h2>
+        <div style={{ padding: '20px', background: '#d1fae5', borderRadius: '8px', marginBottom: '20px' }}>
+          <p><strong>Email:</strong> {user.email}</p>
+          <p><strong>User ID:</strong> {user.id}</p>
+          <p><strong>Aangemaakt:</strong> {new Date(user.created_at).toLocaleDateString('nl-NL')}</p>
+        </div>
+        
+        <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
+          <Link to="/dashboard" style={{ padding: '12px 20px', background: '#1e40af', color: 'white', textDecoration: 'none', borderRadius: '6px' }}>
+            📊 Ga naar Dashboard
+          </Link>
+          <button onClick={handleLogout} style={{ padding: '12px 20px', background: '#dc2626', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>
+            🚪 Uitloggen
+          </button>
+        </div>
+        
+        <Link to="/" style={{ color: '#1e40af', textDecoration: 'none' }}>← Terug naar home</Link>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ padding: '20px', maxWidth: '400px', margin: '0 auto', fontFamily: 'Arial, sans-serif' }}>
+      <h2 style={{ color: '#1e40af', marginBottom: '8px' }}>🔐 Inloggen bij Slim Minder</h2>
+      <p style={{ color: '#6b7280', marginBottom: '24px' }}>
+        Log in om je financiële dashboard te bekijken
+      </p>
+      
+      <Link to="/" style={{ color: '#1e40af', textDecoration: 'none', marginBottom: '20px', display: 'block' }}>
+        ← Terug naar home
+      </Link>
+
+      {error && (
+        <div style={{ padding: '12px', background: '#fee2e2', border: '1px solid #fecaca', borderRadius: '8px', color: '#991b1b', marginBottom: '16px' }}>
+          ❌ {error}
+        </div>
+      )}
+
+      <form onSubmit={handleLogin} style={{ marginTop: '20px' }}>
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold', color: '#374151' }}>
+            Email adres:
+          </label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="jouw@email.com"
+            required
+            disabled={isLoading}
+            style={{
+              width: '100%',
+              padding: '12px',
+              border: '2px solid #d1d5db',
+              borderRadius: '8px',
+              fontSize: '16px',
+              boxSizing: 'border-box'
+            }}
+          />
+        </div>
+
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold', color: '#374151' }}>
+            Wachtwoord:
+          </label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            required
+            disabled={isLoading}
+            style={{
+              width: '100%',
+              padding: '12px',
+              border: '2px solid #d1d5db',
+              borderRadius: '8px',
+              fontSize: '16px',
+              boxSizing: 'border-box'
+            }}
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={isLoading}
+          style={{
+            width: '100%',
+            padding: '14px',
+            background: isLoading ? '#9ca3af' : '#1e40af',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '16px',
+            fontWeight: 'bold',
+            cursor: isLoading ? 'not-allowed' : 'pointer',
+            marginBottom: '16px'
+          }}
+        >
+          {isLoading ? '⏳ Inloggen...' : '🚀 Inloggen'}
+        </button>
+      </form>
+
+      <div style={{ textAlign: 'center', padding: '16px', background: '#f8fafc', borderRadius: '8px' }}>
+        <p style={{ margin: '0 0 8px 0', color: '#6b7280' }}>Nog geen account?</p>
+        <Link to="/register" style={{ color: '#059669', fontWeight: 'bold', textDecoration: 'none' }}>
+          📝 Gratis account aanmaken →
+        </Link>
+      </div>
+    </div>
+  );
+};
+
+// Working Register Page with Supabase
+const RegisterPage: React.FC = () => {
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [user, setUser] = useState<any>(null);
+
+  // Check if already logged in
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+    });
+  }, []);
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Wachtwoorden komen niet overeen');
+      setIsLoading(false);
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError('Wachtwoord moet minimaal 6 karakters lang zijn');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.fullName,
+            account_tier: 'FREE'
+          }
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.user) {
+        alert('🎉 Account succesvol aangemaakt! Check je email voor verificatie.');
+        setUser(data.user);
+      }
+      
+    } catch (err: any) {
+      setError(err.message || 'Registratie mislukt');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (user) {
+    return (
+      <div style={{ padding: '20px', maxWidth: '500px', margin: '0 auto', fontFamily: 'Arial, sans-serif' }}>
+        <h2 style={{ color: '#059669' }}>✅ Account aangemaakt!</h2>
+        <div style={{ padding: '20px', background: '#d1fae5', borderRadius: '8px', marginBottom: '20px' }}>
+          <p><strong>Welkom:</strong> {formData.fullName}</p>
+          <p><strong>Email:</strong> {user.email}</p>
+          <p><strong>Account Type:</strong> FREE (gratis)</p>
+          <p style={{ color: '#065f46', fontWeight: 'bold' }}>
+            🎯 Je kunt nu beginnen met budgetteren!
+          </p>
+        </div>
+        
+        <Link to="/dashboard" style={{ padding: '12px 20px', background: '#1e40af', color: 'white', textDecoration: 'none', borderRadius: '6px', display: 'inline-block', marginBottom: '16px' }}>
+          📊 Ga naar Dashboard
+        </Link>
+        <br />
+        <Link to="/" style={{ color: '#1e40af', textDecoration: 'none' }}>← Terug naar home</Link>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ padding: '20px', maxWidth: '400px', margin: '0 auto', fontFamily: 'Arial, sans-serif' }}>
+      <h2 style={{ color: '#059669', marginBottom: '8px' }}>📝 Account Aanmaken</h2>
+      <p style={{ color: '#6b7280', marginBottom: '24px' }}>
+        Maak een gratis account en begin direct met budgetteren
+      </p>
+      
+      <Link to="/" style={{ color: '#1e40af', textDecoration: 'none', marginBottom: '20px', display: 'block' }}>
+        ← Terug naar home
+      </Link>
+
+      {error && (
+        <div style={{ padding: '12px', background: '#fee2e2', border: '1px solid #fecaca', borderRadius: '8px', color: '#991b1b', marginBottom: '16px' }}>
+          ❌ {error}
+        </div>
+      )}
+
+      <form onSubmit={handleRegister}>
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold', color: '#374151' }}>
+            Volledige naam:
+          </label>
+          <input
+            type="text"
+            value={formData.fullName}
+            onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
+            placeholder="Jan van der Berg"
+            required
+            disabled={isLoading}
+            style={{
+              width: '100%',
+              padding: '12px',
+              border: '2px solid #d1d5db',
+              borderRadius: '8px',
+              fontSize: '16px',
+              boxSizing: 'border-box'
+            }}
+          />
+        </div>
+
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold', color: '#374151' }}>
+            Email adres:
+          </label>
+          <input
+            type="email"
+            value={formData.email}
+            onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+            placeholder="jan@example.com"
+            required
+            disabled={isLoading}
+            style={{
+              width: '100%',
+              padding: '12px',
+              border: '2px solid #d1d5db',
+              borderRadius: '8px',
+              fontSize: '16px',
+              boxSizing: 'border-box'
+            }}
+          />
+        </div>
+
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold', color: '#374151' }}>
+            Wachtwoord:
+          </label>
+          <input
+            type="password"
+            value={formData.password}
+            onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+            placeholder="••••••••"
+            required
+            disabled={isLoading}
+            style={{
+              width: '100%',
+              padding: '12px',
+              border: '2px solid #d1d5db',
+              borderRadius: '8px',
+              fontSize: '16px',
+              boxSizing: 'border-box'
+            }}
+          />
+        </div>
+
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold', color: '#374151' }}>
+            Bevestig wachtwoord:
+          </label>
+          <input
+            type="password"
+            value={formData.confirmPassword}
+            onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+            placeholder="••••••••"
+            required
+            disabled={isLoading}
+            style={{
+              width: '100%',
+              padding: '12px',
+              border: '2px solid #d1d5db',
+              borderRadius: '8px',
+              fontSize: '16px',
+              boxSizing: 'border-box'
+            }}
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={isLoading}
+          style={{
+            width: '100%',
+            padding: '14px',
+            background: isLoading ? '#9ca3af' : '#059669',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '16px',
+            fontWeight: 'bold',
+            cursor: isLoading ? 'not-allowed' : 'pointer',
+            marginBottom: '16px'
+          }}
+        >
+          {isLoading ? '⏳ Account aanmaken...' : '🚀 Account Aanmaken'}
+        </button>
+      </form>
+
+      <div style={{ textAlign: 'center', padding: '16px', background: '#f0fdf4', borderRadius: '8px' }}>
+        <p style={{ margin: '0 0 8px 0', color: '#6b7280' }}>Al een account?</p>
+        <Link to="/login" style={{ color: '#1e40af', fontWeight: 'bold', textDecoration: 'none' }}>
+          🔐 Hier inloggen →
+        </Link>
+      </div>
+    </div>
+  );
+};
+
 const SimpleAppWithDB: React.FC = () => {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<div style={{padding: '20px', textAlign: 'center'}}><h2>🔐 Login (Coming Soon)</h2><Link to="/">← Home</Link></div>} />
-        <Route path="/register" element={<div style={{padding: '20px', textAlign: 'center'}}><h2>📝 Register (Coming Soon)</h2><Link to="/">← Home</Link></div>} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
         <Route path="/dashboard" element={<div style={{padding: '20px', textAlign: 'center'}}><h2>📊 Dashboard (Coming Soon)</h2><Link to="/">← Home</Link></div>} />
         <Route path="/transactions" element={<div style={{padding: '20px', textAlign: 'center'}}><h2>💰 Transactions (Coming Soon)</h2><Link to="/">← Home</Link></div>} />
         <Route path="/budgets" element={<div style={{padding: '20px', textAlign: 'center'}}><h2>📊 Budgets (Coming Soon)</h2><Link to="/">← Home</Link></div>} />
