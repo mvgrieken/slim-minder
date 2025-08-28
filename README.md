@@ -2,6 +2,8 @@
 
 Cross-platform app (iOS, Android, Web) with Expo, a TypeScript API, a background worker, and shared packages.
 
+Slim Minder is een innovatieve gedragsgerichte budgetcoach-app die financieel kwetsbare huishoudens helpt om gezonder met geld om te gaan.
+
 ## Structure
 - `apps/mobile`: Expo app (iOS/Android/Web)
 - `apps/api`: TypeScript API (Express; can evolve to NestJS)
