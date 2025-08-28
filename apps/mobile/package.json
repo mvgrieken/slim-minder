@@ -12,23 +12,15 @@
     "build:ios": "eas build --platform ios",
     "build:android": "eas build --platform android",
     "build:web": "expo export:web",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "test": "jest"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.23.1",
     "@react-navigation/bottom-tabs": "^6.5.20",
     "@react-navigation/native": "^6.1.17",
     "@react-navigation/native-stack": "^6.11.0",
-    "@slim-minder/utils": "*",
     "@supabase/supabase-js": "^2.45.4",
-    "@tanstack/react-query": "^5.0.0",
     "expo": "^51.0.0",
-    "expo-av": "^14.0.0",
-    "expo-image": "^1.12.0",
-    "expo-notifications": "^0.28.0",
-    "expo-router": "^3.5.0",
     "nativewind": "^4.1.23",
     "react": "18.2.0",
     "react-native": "0.74.0",
@@ -37,8 +29,9 @@
     "react-native-screens": "^3.31.1",
     "react-native-url-polyfill": "^2.0.0",
     "tailwindcss": "^3.4.17",
-    "zod": "^3.22.0",
-    "zustand": "^4.5.0"
+    "react-native-web": "~0.19.10",
+    "react-dom": "18.2.0",
+    "@expo/metro-runtime": "~3.2.3"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",
@@ -48,8 +41,6 @@
     "eslint": "^8.57.0",
     "eslint-plugin-react": "^7.34.0",
     "eslint-plugin-react-native": "^4.1.0",
-    "jest": "^29.7.0",
-    "@testing-library/react-native": "^12.4.0",
     "typescript": "^5.4.0"
   }
 }
