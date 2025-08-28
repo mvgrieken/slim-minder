@@ -1,68 +1,20 @@
 {
-  "name": "slim-minder-web",
-  "version": "2.0.1",
+  "name": "slim-minder",
   "private": true,
-  "homepage": "./",
-  "dependencies": {
-    "@hookform/resolvers": "^2.9.11",
-    "@supabase/supabase-js": "^2.38.4",
-    "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
-    "@types/styled-components": "^5.1.26",
-    "crypto-js": "^4.1.1",
-    "date-fns": "^2.29.3",
-    "dotenv": "^17.2.0",
-    "framer-motion": "^10.8.0",
-    "lodash": "^4.17.21",
-    "lucide-react": "^0.321.0",
-    "process": "^0.11.10",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-feather": "^2.0.10",
-    "react-hook-form": "^7.43.5",
-    "react-hot-toast": "^2.4.0",
-    "react-router-dom": "^6.8.1",
-    "react-scripts": "5.0.1",
-    "recharts": "^2.5.0",
-    "styled-components": "^5.3.9",
-    "typescript": "^4.9.5",
-    "web-vitals": "^2.1.4",
-    "yup": "^1.0.2"
-  },
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "start": "react-scripts start",
-    "dev": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "lint": "eslint src --ext .js,.jsx,.ts,.tsx",
-    "lint:fix": "eslint src --ext .js,.jsx,.ts,.tsx --fix",
-    "type-check": "tsc --noEmit"
+    "dev:mobile": "cd apps/mobile && expo start",
+    "dev:api": "cd apps/api && npm run dev",
+    "dev:worker": "cd apps/worker && npm run dev",
+    "typecheck": "echo 'Typecheck configured per package'",
+    "build": "echo 'Run builds per package'",
+    "lint": "echo 'Add linter later'"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "devDependencies": {
-    "@types/crypto-js": "^4.1.1",
-    "@types/jest": "^27.5.2",
-    "@types/node": "^16.18.23",
-    "@types/react": "^18.0.30",
-    "@types/react-dom": "^18.0.11"
+  "engines": {
+    "node": ">=18.17"
   }
 }

@@ -1,0 +1,135 @@
+// Prisma schema draft (not wired yet)
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String   @id @default(uuid())
+  createdAt  DateTime @default(now())
+  // Expand later: email, authId, etc.
+
+  categories Category[]
+  budgets    Budget[]
+  txs        Transaction[]
+  goals      Goal[]
+  badges     Badge[]
+  notices    Notification[]
+  accounts   BankAccount[]
+  links      AccountLink[]
+  nudgeRules NudgeRule[]
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  name      String
+  icon      String?
+  archived  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  txs       Transaction[]
+  budgets   Budget[]
+
+  @@unique([userId, name])
+}
+
+model Budget {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+  period     String   @default("month")
+  limit      Decimal
+  currency   String
+  startsOn   DateTime
+  active     Boolean  @default(true)
+
+  @@index([userId, categoryId, startsOn])
+}
+
+model Transaction {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  bankAccountId String?
+  bank          BankAccount? @relation(fields: [bankAccountId], references: [id])
+  date          DateTime
+  amount        Decimal
+  currency      String
+  description   String?
+  merchant      String?
+  categoryId    String?
+  category      Category? @relation(fields: [categoryId], references: [id])
+  raw           Json?
+  createdAt     DateTime @default(now())
+
+  @@index([userId, date])
+}
+
+model Goal {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  title        String
+  targetAmount Decimal
+  currency     String
+  deadline     DateTime?
+  createdAt    DateTime @default(now())
+}
+
+model NudgeRule {
+  id      String  @id @default(uuid())
+  userId  String
+  user    User    @relation(fields: [userId], references: [id])
+  type    String
+  params  Json
+  active  Boolean @default(true)
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  body      String
+  createdAt DateTime @default(now())
+  readAt    DateTime?
+}
+
+model Badge {
+  id       String   @id @default(uuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id])
+  name     String
+  earnedAt DateTime @default(now())
+}
+
+model BankAccount {
+  id               String   @id @default(uuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id])
+  provider         String
+  providerAccountId String
+  iban             String?
+  displayName      String?
+  currency         String
+  createdAt        DateTime @default(now())
+  txs              Transaction[]
+}
+
+model AccountLink {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  provider     String
+  status       String   // linked/expired/pending
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
