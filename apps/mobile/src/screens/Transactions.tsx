@@ -2,8 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TextInput, Pressable, RefreshControl } from 'react-native';
 import { useSession } from '../session';
 import { listTransactions, createTransaction, listCategories, Category, Transaction, deleteTransaction, updateTransaction } from '../api';
-import { formatCurrency } from '../../../packages/utils/src/currency';
 import { useToast } from '../toast';
+
+// Currency formatting utility
+const formatCurrency = (amount: number, currency: string = 'EUR', locale: string = 'nl-NL') => {
+  try {
+    return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(amount);
+  } catch {
+    return `${currency} ${amount.toFixed(2)}`;
+  }
+};
 
 export default function TransactionsScreen() {
   const { userId } = useSession();
