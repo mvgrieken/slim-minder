@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TextInput, Pressable, RefreshControl } from 'react-native';
 import { useSession } from '../session';
 import { listTransactions, createTransaction, listCategories, Category, Transaction, deleteTransaction, updateTransaction } from '../api';
-import { formatCurrency } from '../../../packages/utils/src/currency';
+import { formatCurrency } from '@slim-minder/utils';
 import { useToast } from '../toast';
 
 export default function TransactionsScreen() {

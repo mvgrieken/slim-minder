@@ -8,6 +8,9 @@
     "scheme": "slimminder",
     "web": {
       "bundler": "metro"
-    }
+    },
+    "assetBundlePatterns": [
+      "_redirects"
+    ]
   }
 }
