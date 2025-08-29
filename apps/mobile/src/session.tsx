@@ -19,15 +19,24 @@ export const SessionProvider: React.FC<React.PropsWithChildren<{}>> = ({ childre
     let mounted = true;
     (async () => {
       try {
-        // 1) Try Supabase session
-        const { data } = await supabase.auth.getSession();
-        const sub = data.session?.user?.id;
-        if (sub) {
-          if (!mounted) return;
-          setUserId(sub);
-          setLoading(false);
-          return;
+        const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+        const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+        
+        if (!supabaseUrl || !supabaseKey || supabaseUrl === 'http://localhost') {
+          console.warn('Supabase environment variables not configured, falling back to guest mode');
+          setError('Supabase not configured - using guest mode');
+        } else {
+          // 1) Try Supabase session
+          const { data } = await supabase.auth.getSession();
+          const sub = data.session?.user?.id;
+          if (sub) {
+            if (!mounted) return;
+            setUserId(sub);
+            setLoading(false);
+            return;
+          }
         }
+        
         // 2) Dev fallback: guest (if allowed)
         const allowGuest = (process.env.EXPO_PUBLIC_ALLOW_GUEST || 'true') === 'true';
         if (allowGuest) {
@@ -46,6 +55,7 @@ export const SessionProvider: React.FC<React.PropsWithChildren<{}>> = ({ childre
           setUserId(null);
         }
       } catch (e: any) {
+        console.error('SessionProvider initialization error:', e);
         setError(String(e?.message || e));
       } finally {
         if (mounted) setLoading(false);
