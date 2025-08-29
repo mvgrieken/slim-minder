@@ -2,6 +2,7 @@
   "name": "slim-minder",
   "private": true,
   "version": "0.1.0",
+  "description": "Een innovatieve gedragsgerichte budgetcoach-app die financieel kwetsbare huishoudens helpt om gezonder met geld om te gaan.",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -10,11 +11,53 @@
     "dev:mobile": "cd apps/mobile && expo start",
     "dev:api": "cd apps/api && npm run dev",
     "dev:worker": "cd apps/worker && npm run dev",
-    "typecheck": "echo 'Typecheck configured per package'",
-    "build": "echo 'Run builds per package'",
-    "lint": "echo 'Add linter later'"
+    "dev:all": "concurrently \"npm run dev:api\" \"npm run dev:worker\" \"npm run dev:mobile\"",
+    "build": "npm run build:packages && npm run build:api",
+    "build:packages": "npm run build --workspace=packages/types && npm run build --workspace=packages/utils && npm run build --workspace=packages/ui",
+    "build:api": "cd apps/api && npm run build",
+    "build:mobile": "cd apps/mobile && npm run build",
+    "typecheck": "npm run typecheck --workspaces",
+    "lint": "npm run lint --workspaces",
+    "lint:fix": "npm run lint:fix --workspaces",
+    "test": "npm run test --workspaces",
+    "test:api": "cd apps/api && npm test",
+    "test:mobile": "cd apps/mobile && npm test",
+    "db:migrate": "cd apps/api && npm run prisma:migrate",
+    "db:seed": "cd apps/api && npm run prisma:seed",
+    "db:studio": "cd apps/api && npm run prisma:studio",
+    "db:reset": "cd apps/api && npm run prisma:migrate:reset",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "setup": "bash scripts/setup.sh",
+    "clean": "npm run clean --workspaces && rm -rf node_modules",
+    "clean:install": "npm run clean && npm install",
+    "start": "npm run dev:all"
   },
   "engines": {
-    "node": ">=18.17"
-  }
+    "node": ">=18.17",
+    "npm": ">=9.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [
+    "budget",
+    "finance",
+    "react-native",
+    "expo",
+    "typescript",
+    "supabase",
+    "prisma"
+  ],
+  "author": "Slim Minder Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/slimminder/slim-minder.git"
+  },
+  "bugs": {
+    "url": "https://github.com/slimminder/slim-minder/issues"
+  },
+  "homepage": "https://slimminder.app"
 }

@@ -1,180 +1,544 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TextInput, Pressable, RefreshControl } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  ActivityIndicator,
+  RefreshControl,
+  TouchableOpacity,
+  TextInput,
+  Alert,
+  Modal,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSession } from '../session';
-import { listTransactions, createTransaction, listCategories, Category, Transaction, deleteTransaction, updateTransaction } from '../api';
+import { listTransactions, Transaction, createTransaction } from '../api';
 import { formatCurrency } from '../../../packages/utils/src/currency';
-import { useToast } from '../toast';
+import { SMButton } from '../../../packages/ui/src/components/SMButton';
+import { format, parseISO } from 'date-fns';
+import { nl } from 'date-fns/locale';
+import { useForm, Controller } from 'react-hook-form';
+
+interface TransactionFormData {
+  amount: string;
+  description: string;
+  date: string;
+  categoryId?: string;
+}
 
 export default function TransactionsScreen() {
-  const { userId } = useSession();
-  const [items, setItems] = useState<Transaction[]>([]);
-  const [cats, setCats] = useState<Category[]>([]);
-  const [amount, setAmount] = useState('');
-  const [desc, setDesc] = useState('');
-  const [selectedCat, setSelectedCat] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editAmount, setEditAmount] = useState('');
-  const [editDesc, setEditDesc] = useState('');
-  const [editCat, setEditCat] = useState<string | null>(null);
-  const toast = useToast();
+  const { userId, loading, error } = useSession();
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [filterCategory, setFilterCategory] = useState<string | null>(null);
 
-  async function refresh() {
+  const { control, handleSubmit, reset, formState: { errors } } = useForm<TransactionFormData>({
+    defaultValues: {
+      amount: '',
+      description: '',
+      date: format(new Date(), 'yyyy-MM-dd'),
+    }
+  });
+
+  const loadTransactions = async (refresh = false) => {
     if (!userId) return;
-    setLoading(true);
+    
+    if (refresh) {
+      setRefreshing(true);
+    } else {
+      setLoadingMore(true);
+    }
+
     try {
-      const [tx, c] = await Promise.all([
-        listTransactions(userId),
-        listCategories(userId),
-      ]);
-      setItems(tx);
-      setCats(c.filter(x => !x.archived));
-    } catch (e: any) {
-      toast.show(`Laden mislukt: ${e.message || e}`, 'error');
+      const txs = await listTransactions(userId, {
+        from: format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd'),
+        to: format(new Date(), 'yyyy-MM-dd'),
+        categoryId: filterCategory || undefined,
+      });
+      
+      setTransactions(txs);
+    } catch (err) {
+      console.error('Failed to load transactions:', err);
+      Alert.alert('Fout', 'Kon transacties niet laden. Probeer het opnieuw.');
     } finally {
-      setLoading(false);
+      setRefreshing(false);
+      setLoadingMore(false);
     }
-  }
+  };
 
-  useEffect(() => { refresh(); }, [userId]);
+  useEffect(() => {
+    if (userId) loadTransactions(true);
+  }, [userId, filterCategory]);
 
-  async function onAdd() {
+  const filteredTransactions = transactions.filter(tx =>
+    tx.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    tx.merchant?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const groupedTransactions = filteredTransactions.reduce((groups, tx) => {
+    const date = format(parseISO(tx.date), 'yyyy-MM-dd');
+    if (!groups[date]) {
+      groups[date] = [];
+    }
+    groups[date].push(tx);
+    return groups;
+  }, {} as Record<string, Transaction[]>);
+
+  const sortedDates = Object.keys(groupedTransactions).sort((a, b) => b.localeCompare(a));
+
+  const onSubmitTransaction = async (data: TransactionFormData) => {
     if (!userId) return;
-    const val = parseFloat(amount);
-    if (!isFinite(val) || val <= 0) { toast.show('Voer een geldig bedrag in', 'error'); return; }
-    const date = new Date().toISOString();
+
     try {
-      await createTransaction(userId, { amount: val, currency: 'EUR', date, categoryId: selectedCat, description: desc || undefined });
-      setAmount(''); setDesc(''); setSelectedCat(null);
-      toast.show('Transactie toegevoegd', 'success');
-      refresh();
-    } catch (e: any) {
-      toast.show(`Toevoegen mislukt: ${e.message || e}`, 'error');
+      const amount = parseFloat(data.amount);
+      if (isNaN(amount)) {
+        Alert.alert('Fout', 'Voer een geldig bedrag in');
+        return;
+      }
+
+      await createTransaction(userId, {
+        amount: -Math.abs(amount), // Always negative for expenses
+        currency: 'EUR',
+        date: data.date,
+        description: data.description,
+        categoryId: data.categoryId || null,
+      });
+
+      setShowAddModal(false);
+      reset();
+      loadTransactions(true);
+      Alert.alert('Succes', 'Transactie toegevoegd');
+    } catch (err) {
+      console.error('Failed to create transaction:', err);
+      Alert.alert('Fout', 'Kon transactie niet toevoegen. Probeer het opnieuw.');
     }
+  };
+
+  const renderTransaction = ({ item }: { item: Transaction }) => (
+    <View style={styles.transactionCard}>
+      <View style={styles.transactionInfo}>
+        <Text style={styles.transactionDescription}>
+          {item.description || 'Onbekende transactie'}
+        </Text>
+        {item.merchant && (
+          <Text style={styles.transactionMerchant}>{item.merchant}</Text>
+        )}
+      </View>
+      <View style={styles.transactionAmount}>
+        <Text style={[
+          styles.amountText,
+          { color: item.amount < 0 ? '#DC2626' : '#16A34A' }
+        ]}>
+          {formatCurrency(Math.abs(item.amount))}
+        </Text>
+        <Text style={styles.amountLabel}>
+          {item.amount < 0 ? 'Uitgave' : 'Inkomsten'}
+        </Text>
+      </View>
+    </View>
+  );
+
+  const renderDateSection = ({ item: date }: { item: string }) => (
+    <View style={styles.dateSection}>
+      <Text style={styles.dateHeader}>
+        {format(parseISO(date), 'EEEE d MMMM', { locale: nl })}
+      </Text>
+      {groupedTransactions[date].map((tx) => (
+        <View key={tx.id}>
+          {renderTransaction({ item: tx })}
+        </View>
+      ))}
+    </View>
+  );
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color="#007AFF" />
+          <Text style={styles.loadingText}>Sessie laden...</Text>
+        </View>
+      </SafeAreaView>
+    );
   }
 
-  const catName = (id?: string | null) => cats.find(c => c.id === id)?.name || '—';
-
-  async function onDeleteTx(id: string) {
-    if (!userId) return;
-    try {
-      await deleteTransaction(userId, id);
-      toast.show('Transactie verwijderd', 'success');
-      refresh();
-    } catch (e: any) {
-      toast.show(`Verwijderen mislukt: ${e.message || e}`, 'error');
-    }
-  }
-
-  function startEdit(tx: Transaction) {
-    setEditingId(tx.id);
-    setEditAmount(String(tx.amount));
-    setEditDesc(tx.description || '');
-    setEditCat(tx.categoryId || null);
-  }
-
-  async function saveEdit() {
-    if (!userId || !editingId) return;
-    const val = parseFloat(editAmount);
-    if (!isFinite(val) || val <= 0) { toast.show('Voer een geldig bedrag in', 'error'); return; }
-    try {
-      await updateTransaction(userId, editingId, { amount: val, description: editDesc || undefined, categoryId: editCat });
-      toast.show('Transactie bijgewerkt', 'success');
-      setEditingId(null);
-      refresh();
-    } catch (e: any) {
-      toast.show(`Bijwerken mislukt: ${e.message || e}`, 'error');
-    }
+  if (error) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.center}>
+          <Text style={styles.errorText}>{error}</Text>
+          <SMButton
+            title="Opnieuw proberen"
+            onPress={() => window.location.reload()}
+            variant="primary"
+            style={{ marginTop: 16 }}
+          />
+        </View>
+      </SafeAreaView>
+    );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.h1}>Transacties</Text>
-
-      <View style={styles.card}>
-        <Text style={styles.h2}>Nieuwe transactie</Text>
-        <View style={styles.row}>
-          <TextInput placeholder="Bedrag (EUR)" keyboardType="numeric" value={amount} onChangeText={setAmount} style={styles.input} />
-          <TextInput placeholder="Omschrijving (optioneel)" value={desc} onChangeText={setDesc} style={styles.input} />
-        </View>
-      <FlatList
-        data={cats}
-        keyExtractor={(i) => i.id}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={{ marginTop: 8 }}
-          renderItem={({ item }) => (
-            <Pressable onPress={() => setSelectedCat(item.id)} style={[styles.pill, selectedCat === item.id && styles.pillSel]}>
-              <Text style={[styles.pillTxt, selectedCat === item.id && styles.pillTxtSel]}>{item.name}</Text>
-            </Pressable>
-          )}
-          ListEmptyComponent={<Text style={styles.muted}>Geen categorieën</Text>}
+    <SafeAreaView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.title}>Transacties</Text>
+        <SMButton
+          title="Toevoegen"
+          onPress={() => setShowAddModal(true)}
+          variant="primary"
+          size="small"
         />
-        <Pressable style={[styles.btn, { marginTop: 10 }]} onPress={onAdd}><Text style={styles.btnTxt}>Opslaan</Text></Pressable>
       </View>
 
+      {/* Search and Filter */}
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Zoeken in transacties..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholderTextColor="#94A3B8"
+        />
+        {filterCategory && (
+          <TouchableOpacity
+            style={styles.filterChip}
+            onPress={() => setFilterCategory(null)}
+          >
+            <Text style={styles.filterChipText}>Filter: {filterCategory}</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
+      {/* Transactions List */}
       <FlatList
-        data={items}
-        keyExtractor={(i) => i.id}
-        style={{ marginTop: 12 }}
-        refreshControl={<RefreshControl refreshing={loading} onRefresh={refresh} />}
-        renderItem={({ item }) => (
-          <View style={styles.txRow}>
-            {editingId === item.id ? (
-              <View style={{ flex: 1 }}>
-                <View style={styles.row}>
-                  <TextInput value={editAmount} onChangeText={setEditAmount} keyboardType="numeric" style={[styles.input, { flex: 0.6 }]} />
-                  <TextInput value={editDesc} onChangeText={setEditDesc} placeholder="Omschrijving" style={[styles.input, { flex: 1 }]} />
-                </View>
-                <FlatList data={cats} keyExtractor={(i) => i.id} horizontal style={{ marginTop: 6 }} renderItem={({ item: c }) => (
-                  <Pressable onPress={() => setEditCat(c.id)} style={[styles.pill, editCat === c.id && styles.pillSel]}>
-                    <Text style={[styles.pillTxt, editCat === c.id && styles.pillTxtSel]}>{c.name}</Text>
-                  </Pressable>
-                )} />
-                <View style={[styles.row, { marginTop: 6 }]}>
-                  <Pressable onPress={saveEdit} style={styles.btn}><Text style={styles.btnTxt}>Opslaan</Text></Pressable>
-                  <Pressable onPress={() => setEditingId(null)}><Text style={styles.link}>Annuleer</Text></Pressable>
-                </View>
-              </View>
-            ) : (
-              <View style={{ flex: 1 }}>
-                <Text style={styles.txDesc}>{item.description || item.merchant || 'Transactie'}</Text>
-                <Text style={styles.muted}>{new Date(item.date).toLocaleDateString('nl-NL')} • {catName(item.categoryId)}</Text>
-              </View>
-            )}
-            {editingId !== item.id && (
-              <>
-                <Text style={styles.txAmt}>{formatCurrency(item.amount)}</Text>
-                <Pressable onPress={() => startEdit(item)}><Text style={styles.link}>Wijzig</Text></Pressable>
-                <Pressable onPress={() => onDeleteTx(item.id)}><Text style={styles.linkDanger}>Verwijder</Text></Pressable>
-              </>
+        data={sortedDates}
+        renderItem={renderDateSection}
+        keyExtractor={(date) => date}
+        style={styles.list}
+        contentContainerStyle={styles.listContent}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={() => loadTransactions(true)} />
+        }
+        showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyTitle}>Geen transacties</Text>
+            <Text style={styles.emptyText}>
+              {searchQuery || filterCategory 
+                ? 'Geen transacties gevonden met de huidige filters'
+                : 'Je hebt nog geen transacties. Voeg je eerste transactie toe!'
+              }
+            </Text>
+            {!searchQuery && !filterCategory && (
+              <SMButton
+                title="Eerste transactie toevoegen"
+                onPress={() => setShowAddModal(true)}
+                variant="primary"
+                style={{ marginTop: 12 }}
+              />
             )}
           </View>
-        )}
-        ListEmptyComponent={<Text style={styles.muted}>Nog geen transacties.</Text>}
+        }
       />
-      {loading && <Text style={styles.muted}>Laden…</Text>}
-    </View>
+
+      {/* Add Transaction Modal */}
+      <Modal
+        visible={showAddModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Transactie toevoegen</Text>
+            <TouchableOpacity onPress={() => setShowAddModal(false)}>
+              <Text style={styles.modalClose}>Sluiten</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.modalContent}>
+            <Controller
+              control={control}
+              name="description"
+              rules={{ required: 'Beschrijving is verplicht' }}
+              render={({ field: { onChange, value } }) => (
+                <View style={styles.inputContainer}>
+                  <Text style={styles.inputLabel}>Beschrijving</Text>
+                  <TextInput
+                    style={[styles.input, errors.description && styles.inputError]}
+                    placeholder="Bijv. Boodschappen Albert Heijn"
+                    value={value}
+                    onChangeText={onChange}
+                    placeholderTextColor="#94A3B8"
+                  />
+                  {errors.description && (
+                    <Text style={styles.errorText}>{errors.description.message}</Text>
+                  )}
+                </View>
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="amount"
+              rules={{ 
+                required: 'Bedrag is verplicht',
+                pattern: {
+                  value: /^\d+([.,]\d{1,2})?$/,
+                  message: 'Voer een geldig bedrag in'
+                }
+              }}
+              render={({ field: { onChange, value } }) => (
+                <View style={styles.inputContainer}>
+                  <Text style={styles.inputLabel}>Bedrag (€)</Text>
+                  <TextInput
+                    style={[styles.input, errors.amount && styles.inputError]}
+                    placeholder="0,00"
+                    value={value}
+                    onChangeText={onChange}
+                    keyboardType="decimal-pad"
+                    placeholderTextColor="#94A3B8"
+                  />
+                  {errors.amount && (
+                    <Text style={styles.errorText}>{errors.amount.message}</Text>
+                  )}
+                </View>
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="date"
+              rules={{ required: 'Datum is verplicht' }}
+              render={({ field: { onChange, value } }) => (
+                <View style={styles.inputContainer}>
+                  <Text style={styles.inputLabel}>Datum</Text>
+                  <TextInput
+                    style={[styles.input, errors.date && styles.inputError]}
+                    placeholder="YYYY-MM-DD"
+                    value={value}
+                    onChangeText={onChange}
+                    placeholderTextColor="#94A3B8"
+                  />
+                  {errors.date && (
+                    <Text style={styles.errorText}>{errors.date.message}</Text>
+                  )}
+                </View>
+              )}
+            />
+
+            <View style={styles.modalActions}>
+              <SMButton
+                title="Annuleren"
+                onPress={() => setShowAddModal(false)}
+                variant="outline"
+                style={{ flex: 1, marginRight: 8 }}
+              />
+              <SMButton
+                title="Toevoegen"
+                onPress={handleSubmit(onSubmitTransaction)}
+                variant="primary"
+                style={{ flex: 1, marginLeft: 8 }}
+              />
+            </View>
+          </View>
+        </SafeAreaView>
+      </Modal>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
-  h1: { fontSize: 24, fontWeight: '700' },
-  h2: { fontSize: 18, fontWeight: '600' },
-  card: { padding: 12, borderRadius: 12, backgroundColor: '#f7f7f7', marginTop: 12 },
-  row: { flexDirection: 'row', gap: 8, alignItems: 'center', marginTop: 8 },
-  input: { flex: 1, borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingHorizontal: 10, height: 44 },
-  btn: { backgroundColor: '#111827', paddingHorizontal: 12, paddingVertical: 10, borderRadius: 8, alignSelf: 'flex-start' },
-  btnTxt: { color: '#fff', fontWeight: '600' },
-  link: { color: '#2563eb', fontWeight: '600', paddingHorizontal: 8, paddingVertical: 6 },
-  linkDanger: { color: '#b91c1c', fontWeight: '600', paddingHorizontal: 8, paddingVertical: 6 },
-  muted: { color: '#666' },
-  pill: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, backgroundColor: '#e5e7eb', marginRight: 8 },
-  pillSel: { backgroundColor: '#111827' },
-  pillTxt: { color: '#111827' },
-  pillTxtSel: { color: '#fff' },
-  txRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10 },
-  txDesc: { fontSize: 16 },
-  txAmt: { fontWeight: '700' },
+  container: {
+    flex: 1,
+    backgroundColor: '#F8FAFC',
+  },
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#64748B',
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#DC2626',
+    textAlign: 'center',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#1E293B',
+  },
+  searchContainer: {
+    padding: 16,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
+  },
+  searchInput: {
+    backgroundColor: '#F1F5F9',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    fontSize: 16,
+    color: '#1E293B',
+    marginBottom: 8,
+  },
+  filterChip: {
+    backgroundColor: '#DBEAFE',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    alignSelf: 'flex-start',
+  },
+  filterChipText: {
+    fontSize: 12,
+    color: '#1E40AF',
+    fontWeight: '500',
+  },
+  list: {
+    flex: 1,
+  },
+  listContent: {
+    padding: 16,
+  },
+  dateSection: {
+    marginBottom: 24,
+  },
+  dateHeader: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#64748B',
+    marginBottom: 8,
+    textTransform: 'capitalize',
+  },
+  transactionCard: {
+    backgroundColor: '#FFFFFF',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  transactionInfo: {
+    flex: 1,
+  },
+  transactionDescription: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#1E293B',
+    marginBottom: 2,
+  },
+  transactionMerchant: {
+    fontSize: 12,
+    color: '#64748B',
+  },
+  transactionAmount: {
+    alignItems: 'flex-end',
+  },
+  amountText: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  amountLabel: {
+    fontSize: 10,
+    color: '#94A3B8',
+    textTransform: 'uppercase',
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 32,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1E293B',
+    marginBottom: 8,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: '#64748B',
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#F8FAFC',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1E293B',
+  },
+  modalClose: {
+    fontSize: 16,
+    color: '#007AFF',
+    fontWeight: '500',
+  },
+  modalContent: {
+    flex: 1,
+    padding: 16,
+  },
+  inputContainer: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#374151',
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: '#1E293B',
+  },
+  inputError: {
+    borderColor: '#DC2626',
+  },
+  modalActions: {
+    flexDirection: 'row',
+    marginTop: 32,
+  },
 });
