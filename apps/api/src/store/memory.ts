@@ -65,10 +65,12 @@ export const memoryStore: Store = {
     const from = filters?.from ? new Date(filters.from) : undefined;
     const to = filters?.to ? new Date(filters.to) : undefined;
     const categoryId = filters?.categoryId;
+    const categoryIds = filters?.categoryIds;
     return list.filter(t => {
       const d = new Date(t.date);
       if (from && d < from) return false;
       if (to && d > to) return false;
+      if (categoryIds && (!t.categoryId || !categoryIds.includes(t.categoryId))) return false;
       if (categoryId && t.categoryId !== categoryId) return false;
       return true;
     });
