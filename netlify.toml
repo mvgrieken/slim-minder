@@ -5,6 +5,8 @@
 [build.environment]
   NODE_VERSION = "18"
   NPM_FLAGS = "--legacy-peer-deps"
+  EXPO_PUBLIC_SUPABASE_URL = "https://aenhydmyyneunvhunxjz.supabase.co"
+  EXPO_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFlbmh5ZG15eW5ldW52aHVueGp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMTYyMjcsImV4cCI6MjA3MTg5MjIyN30.P1rtifcC3BzqZFNojeS96pThMSP2HYmUh2YX-9UfdhM"
 
 [[redirects]]
   from = "/*"
