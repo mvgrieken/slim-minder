@@ -1,0 +1,11 @@
+[build]
+  command = "cd apps/mobile && npm run build:web"
+  publish = "apps/mobile/dist"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
