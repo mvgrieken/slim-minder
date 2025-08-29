@@ -1,5 +1,5 @@
 [build]
-  command = "npm ci && cd apps/mobile && npm run build:web"
+  command = "npm ci && npm run build --prefix packages/utils && cd apps/mobile && npm run build:web"
   publish = "apps/mobile/dist"
 
 [build.environment]
