@@ -50,7 +50,7 @@ export const prismaStore: Store = {
           gte: filters?.from ? new Date(filters.from) : undefined,
           lte: filters?.to ? new Date(filters.to) : undefined,
         },
-        categoryId: filters?.categoryId,
+        categoryId: filters?.categoryIds ? { in: filters.categoryIds } : filters?.categoryId,
       },
       orderBy: { date: 'desc' }
     });

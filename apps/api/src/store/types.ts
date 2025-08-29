@@ -23,7 +23,7 @@ export interface Store {
   deleteBudget(userId: ID, id: ID): Promise<void>;
 
   // transactions
-  listTransactions(userId: ID, filters?: { from?: string; to?: string; categoryId?: ID }): Promise<Transaction[]>;
+  listTransactions(userId: ID, filters?: { from?: string; to?: string; categoryId?: ID; categoryIds?: ID[] }): Promise<Transaction[]>;
   createTransaction(userId: ID, input: Omit<Transaction, 'id'|'userId'|'createdAt'>): Promise<Transaction>;
   updateTransaction(userId: ID, id: ID, patch: Partial<Omit<Transaction, 'id'|'userId'|'createdAt'>>): Promise<Transaction | null>;
   deleteTransaction(userId: ID, id: ID): Promise<void>;
