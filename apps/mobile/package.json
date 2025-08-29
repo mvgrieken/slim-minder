@@ -11,9 +11,9 @@
     "build:android": "expo build:android",
     "build:ios": "expo build:ios",
     "start:web": "expo start --web",
-    "build:web": "expo export --platform web --output-dir web-build && copy public\\_redirects web-build\\_redirects",
+    "build:web": "expo export --platform web --output-dir web-build && cp public/_redirects web-build/_redirects",
     "preview:web": "npx http-server web-build -p 4173",
-    "build": "expo export --platform web --output-dir web-build && copy public\\_redirects web-build\\_redirects",
+    "build": "expo export --platform web --output-dir web-build && cp public/_redirects web-build/_redirects",
     "eject": "expo eject"
   },
   "dependencies": {
