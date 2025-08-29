@@ -8,6 +8,13 @@
     "packages/*"
   ],
   "scripts": {
+    "dev": "cd apps/mobile && expo start",
+    "start:web": "cd apps/mobile && expo start --web",
+    "typecheck": "npm run typecheck --workspaces",
+    "lint": "npm run lint --workspaces",
+    "test": "npm run test --workspaces",
+    "build:web": "cd apps/mobile && npm run build:web",
+    "preview:web": "cd apps/mobile && npm run preview:web",
     "dev:mobile": "cd apps/mobile && expo start",
     "dev:api": "cd apps/api && npm run dev",
     "dev:worker": "cd apps/worker && npm run dev",
@@ -16,10 +23,7 @@
     "build:packages": "npm run build --workspace=packages/types && npm run build --workspace=packages/utils && npm run build --workspace=packages/ui",
     "build:api": "cd apps/api && npm run build",
     "build:mobile": "cd apps/mobile && npm run build",
-    "typecheck": "npm run typecheck --workspaces",
-    "lint": "npm run lint --workspaces",
     "lint:fix": "npm run lint:fix --workspaces",
-    "test": "npm run test --workspaces",
     "test:api": "cd apps/api && npm test",
     "test:mobile": "cd apps/mobile && npm test",
     "db:migrate": "cd apps/api && npm run prisma:migrate",
@@ -35,11 +39,21 @@
     "start": "npm run dev:all"
   },
   "engines": {
-    "node": ">=18.17",
+    "node": ">=20.0.0",
     "npm": ">=9.0"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "eslint": "^8.57.0",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "eslint-plugin-react": "^7.34.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-native": "^4.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "prettier": "^3.3.3",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2"
   },
   "keywords": [
     "budget",
