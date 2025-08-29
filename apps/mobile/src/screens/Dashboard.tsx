@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
 import { useSession } from '../session';
 import { budgetsProgress, BudgetProgress } from '../api';
-import { formatCurrency } from '../../../packages/utils/src/currency';
+import { formatCurrency } from '@slim-minder/utils';
 
 export default function DashboardScreen() {
   const { userId, loading, error } = useSession();
