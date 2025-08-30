@@ -78,7 +78,7 @@
     "*.{json,md}": [
       "prettier --write"
     ]
-  }
+  },
   "keywords": [
     "budget",
     "finance",
