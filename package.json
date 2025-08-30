@@ -37,7 +37,6 @@
     "clean": "npm run clean --workspaces && rm -rf node_modules",
     "clean:install": "npm run clean && npm install",
     "start": "npm run dev:all",
-    "prepare": "husky",
     "validate-deps": "npm run validate-deps --workspace=apps/mobile",
     "pre-commit": "lint-staged && npm run validate-deps",
     "pre-push": "npm run build:web"
@@ -60,16 +59,10 @@
     "eslint-plugin-react-native": "^4.1.0",
     "eslint-plugin-import": "^2.29.1",
     "prettier": "^3.3.3",
-    "husky": "^9.0.11",
     "lint-staged": "^15.2.2",
     "semver": "^7.6.0"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run pre-commit",
-      "pre-push": "npm run pre-push"
-    }
-  },
+
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "eslint --fix",
