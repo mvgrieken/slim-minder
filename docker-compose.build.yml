@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  build:
+    build: 
+      context: .
+      dockerfile: Dockerfile.build
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=production
+      - CI=""
+    command: npm run build:web --workspace=apps/mobile
+
+  preview:
+    build: 
+      context: .
+      dockerfile: Dockerfile.build
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "4173:4173"
+    environment:
+      - NODE_ENV=production
+    command: npm run preview:web --workspace=apps/mobile

@@ -36,11 +36,19 @@
     "setup": "bash scripts/setup.sh",
     "clean": "npm run clean --workspaces && rm -rf node_modules",
     "clean:install": "npm run clean && npm install",
-    "start": "npm run dev:all"
+    "start": "npm run dev:all",
+    "prepare": "husky",
+    "validate-deps": "npm run validate-deps --workspace=apps/mobile",
+    "pre-commit": "lint-staged && npm run validate-deps",
+    "pre-push": "npm run build:web"
   },
   "engines": {
     "node": ">=20.0.0",
     "npm": ">=9.0"
+  },
+  "overrides": {
+    "metro": "^0.80.12",
+    "metro-core": "^0.80.12"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
@@ -53,8 +61,24 @@
     "eslint-plugin-import": "^2.29.1",
     "prettier": "^3.3.3",
     "husky": "^9.0.11",
-    "lint-staged": "^15.2.2"
+    "lint-staged": "^15.2.2",
+    "semver": "^7.6.0"
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run pre-commit",
+      "pre-push": "npm run pre-push"
+    }
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  }
   "keywords": [
     "budget",
     "finance",

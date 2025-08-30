@@ -4,8 +4,9 @@
   publish = "web-build"
 
 [build.environment]
-  NODE_VERSION = "18.17.0"
-  NPM_VERSION = "9.0.0"
+  NODE_VERSION = "20.17.0"
+  NPM_VERSION = "10.8.0"
+  CI = ""
 
 # Secrets scanning configuration
 [build.processing]

@@ -1,0 +1,23 @@
+FROM node:20.17.0-alpine
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apk add --no-cache git python3 make g++
+
+# Copy package files
+COPY package*.json ./
+COPY apps/mobile/package*.json ./apps/mobile/
+
+# Install dependencies
+RUN npm ci --workspace=apps/mobile
+
+# Copy source code
+COPY . .
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV CI=""
+
+# Build application
+CMD ["npm", "run", "build:web", "--workspace=apps/mobile"]
