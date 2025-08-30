@@ -22,6 +22,7 @@ model User {
   accounts   BankAccount[]
   links      AccountLink[]
   nudgeRules NudgeRule[]
+  chatInteractions ChatInteraction[]
 }
 
 model Category {
@@ -131,5 +132,18 @@ model AccountLink {
   status       String   // linked/expired/pending
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+}
+
+model ChatInteraction {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  userMessage  String
+  aiResponse   String
+  context      Json?
+  metadata     Json?
+  userRating   Int?     // 1-5 rating
+  userFeedback String?
+  createdAt    DateTime @default(now())
 }
 

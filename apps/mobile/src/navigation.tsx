@@ -5,6 +5,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import DashboardScreen from './screens/Dashboard';
 import TransactionsScreen from './screens/Transactions';
 import CategoriesScreen from './screens/Categories';
+import AIChatScreen from './screens/AIChat';
+import BankAccountsScreen from './screens/BankAccounts';
 import AuthScreen from './screens/Auth';
 import { useSession } from './session';
 
@@ -21,6 +23,16 @@ function Tabs() {
   );
 }
 
+function AppStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Tabs" component={Tabs} />
+      <Stack.Screen name="AIChat" component={AIChatScreen} />
+      <Stack.Screen name="BankAccounts" component={BankAccountsScreen} />
+    </Stack.Navigator>
+  );
+}
+
 export default function RootNavigator() {
   const { userId, loading } = useSession();
   return (
@@ -29,7 +41,7 @@ export default function RootNavigator() {
         {loading ? (
           <Stack.Screen name="Loading" component={() => null} />
         ) : userId ? (
-          <Stack.Screen name="App" component={Tabs} />
+          <Stack.Screen name="App" component={AppStack} />
         ) : (
           <Stack.Screen name="Auth" component={AuthScreen} />
         )}

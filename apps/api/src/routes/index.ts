@@ -5,6 +5,8 @@ import { registerCategoryRoutes } from './categories';
 import { registerBudgetRoutes } from './budgets';
 import { registerTransactionRoutes } from './transactions';
 import { registerProgressRoutes } from './progress';
+import { registerBankRoutes } from './bank-express';
+import { registerAIRoutes } from './ai-express';
 
 export function registerRoutes(app: Express) {
   registerHealthRoutes(app);
@@ -13,4 +15,6 @@ export function registerRoutes(app: Express) {
   registerBudgetRoutes(app);
   registerTransactionRoutes(app);
   registerProgressRoutes(app);
+  registerBankRoutes(app);
+  registerAIRoutes(app);
 }

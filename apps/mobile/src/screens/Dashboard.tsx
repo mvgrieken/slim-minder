@@ -18,6 +18,10 @@ import { SMButton } from '../../../packages/ui/src/components/SMButton';
 import { format, startOfMonth, endOfMonth, isToday } from 'date-fns';
 import { nl } from 'date-fns/locale';
 
+interface DashboardScreenProps {
+  navigation: any;
+}
+
 const { width } = Dimensions.get('window');
 
 interface DashboardStats {
@@ -29,7 +33,7 @@ interface DashboardStats {
   averageDailySpending: number;
 }
 
-export default function DashboardScreen() {
+export default function DashboardScreen({ navigation }: DashboardScreenProps) {
   const { userId, loading, error } = useSession();
   const [budgetItems, setBudgetItems] = useState<BudgetProgress[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -277,15 +281,15 @@ export default function DashboardScreen() {
           <Text style={styles.sectionTitle}>Snelle acties</Text>
           <View style={styles.quickActions}>
             <SMButton
-              title="Transactie toevoegen"
-              onPress={() => {/* Navigate to transaction creation */}}
+              title="AI Coach"
+              onPress={() => navigation.navigate('AIChat')}
               variant="outline"
               size="small"
               style={{ flex: 1, marginRight: 8 }}
             />
             <SMButton
-              title="Budget aanpassen"
-              onPress={() => {/* Navigate to budget management */}}
+              title="Bank Verbinden"
+              onPress={() => navigation.navigate('BankAccounts')}
               variant="outline"
               size="small"
               style={{ flex: 1, marginLeft: 8 }}

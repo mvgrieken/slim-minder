@@ -1,0 +1,541 @@
+{
+  "generatedAt": "2024-12-29T10:00:00Z",
+  "mode": "APPLY",
+  "project": "Slim Minder",
+  "specFile": "docs/functional-specs.txt",
+  "summary": {
+    "totalReq": 20,
+    "implemented": 7,
+    "partial": 8,
+    "missing": 5,
+    "unknown": 0,
+    "coveragePct": 35
+  },
+  "requirements": [
+    {
+      "id": "REQ-001",
+      "title": "Veilige bankkoppeling (PSD2)",
+      "status": "Missing",
+      "evidence": [],
+      "tests": [],
+      "gaps": ["PSD2 integratie", "Tink/Budget Insight"],
+      "nfr": false
+    },
+    {
+      "id": "REQ-002",
+      "title": "Automatische transactieload",
+      "status": "Missing",
+      "evidence": [],
+      "tests": [],
+      "gaps": ["Bank API integratie", "transactie sync"],
+      "nfr": false
+    },
+    {
+      "id": "REQ-003",
+      "title": "Slimme budgetten per categorie",
+      "status": "Partially Implemented",
+      "evidence": [
+        {
+          "path": "apps/api/src/routes/budgets.ts",
+          "symbol": "budgetRoutes",
+          "lines": "1-63"
+        },
+        {
+          "path": "apps/mobile/src/screens/Dashboard.tsx",
+          "symbol": "Dashboard",
+          "lines": "1-497"
+        }
+      ],
+      "tests": [],
+      "gaps": ["Real-time tracking", "waarschuwingen"],
+      "nfr": false
+    },
+    {
+      "id": "REQ-004",
+      "title": "Real-time waarschuwingen & nudges",
+      "status": "Missing",
+      "evidence": [],
+      "tests": [],
+      "gaps": ["Push notificaties", "nudge engine"],
+      "nfr": false
+    },
+    {
+      "id": "REQ-005",
+      "title": "Doelen stellen & gamification",
+      "status": "Partially Implemented",
+      "evidence": [
+        {
+          "path": "apps/api/prisma/schema.prisma",
+          "symbol": "Goal, Badge models",
+          "lines": "60-80"
+        }
+      ],
+      "tests": [],
+      "gaps": ["Badge systeem", "voortgang tracking"],
+      "nfr": false
+    },
+    {
+      "id": "REQ-006",
+      "title": "Persoonlijke AI-coach",
+      "status": "Missing",
+      "evidence": [],
+      "tests": [],
+      "gaps": ["OpenAI/Claude integratie", "chat interface"],
+      "nfr": false
+    },
+    {
+      "id": "REQ-007",
+      "title": "Gebruikersauthenticatie",
+      "status": "Implemented",
+      "evidence": [
+        {
+          "path": "apps/mobile/src/screens/Auth.tsx",
+          "symbol": "Auth",
+          "lines": "1-481"
+        },
+        {
+          "path": "apps/api/src/auth.ts",
+          "symbol": "authMiddleware",
+          "lines": "1-43"
+        }
+      ],
+      "tests": [],
+      "gaps": [],
+      "nfr": false
+    },
+    {
+      "id": "REQ-008",
+      "title": "Transactie categorisatie",
+      "status": "Partially Implemented",
+      "evidence": [
+        {
+          "path": "apps/mobile/src/screens/Categories.tsx",
+          "symbol": "Categories",
+          "lines": "1-729"
+        },
+        {
+          "path": "apps/mobile/src/screens/Transactions.tsx",
+          "symbol": "Transactions",
+          "lines": "1-545"
+        }
+      ],
+      "tests": [],
+      "gaps": ["ML categorisatie", "auto-suggestions"],
+      "nfr": false
+    },
+    {
+      "id": "REQ-009",
+      "title": "Dashboard & overzichten",
+      "status": "Partially Implemented",
+      "evidence": [
+        {
+          "path": "apps/mobile/src/screens/Dashboard.tsx",
+          "symbol": "Dashboard",
+          "lines": "1-497"
+        }
+      ],
+      "tests": [],
+      "gaps": ["Grafieken", "real-time updates"],
+      "nfr": false
+    },
+    {
+      "id": "REQ-010",
+      "title": "Cross-platform support",
+      "status": "Implemented",
+      "evidence": [
+        {
+          "path": "apps/mobile/package.json",
+          "symbol": "Expo config",
+          "lines": "1-72"
+        }
+      ],
+      "tests": [],
+      "gaps": [],
+      "nfr": false
+    },
+    {
+      "id": "REQ-011",
+      "title": "Database schema",
+      "status": "Implemented",
+      "evidence": [
+        {
+          "path": "apps/api/prisma/schema.prisma",
+          "symbol": "Prisma schema",
+          "lines": "1-136"
+        }
+      ],
+      "tests": [],
+      "gaps": [],
+      "nfr": false
+    },
+    {
+      "id": "REQ-012",
+      "title": "API endpoints",
+      "status": "Partially Implemented",
+      "evidence": [
+        {
+          "path": "apps/api/src/routes/",
+          "symbol": "API routes",
+          "lines": "1-200"
+        }
+      ],
+      "tests": [],
+      "gaps": ["PSD2", "AI", "notificatie endpoints"],
+      "nfr": false
+    },
+    {
+      "id": "REQ-013",
+      "title": "TypeScript types",
+      "status": "Implemented",
+      "evidence": [
+        {
+          "path": "packages/types/src/index.ts",
+          "symbol": "Type definitions",
+          "lines": "1-84"
+        }
+      ],
+      "tests": [],
+      "gaps": [],
+      "nfr": false
+    },
+    {
+      "id": "REQ-014",
+      "title": "Build pipeline",
+      "status": "Implemented",
+      "evidence": [
+        {
+          "path": "netlify.toml",
+          "symbol": "Netlify config",
+          "lines": "1-67"
+        },
+        {
+          "path": "package.json",
+          "symbol": "Build scripts",
+          "lines": "1-95"
+        }
+      ],
+      "tests": [],
+      "gaps": [],
+      "nfr": false
+    },
+    {
+      "id": "REQ-015",
+      "title": "Push notificaties",
+      "status": "Missing",
+      "evidence": [],
+      "tests": [],
+      "gaps": ["Expo notifications", "FCM/APNS"],
+      "nfr": false
+    },
+    {
+      "id": "REQ-016",
+      "title": "Spaarpotten",
+      "status": "Missing",
+      "evidence": [],
+      "tests": [],
+      "gaps": ["SavingsPots model", "automatische overschrijvingen"],
+      "nfr": false
+    },
+    {
+      "id": "REQ-017",
+      "title": "Scenario-planning",
+      "status": "Missing",
+      "evidence": [],
+      "tests": [],
+      "gaps": ["Financiële simulaties", "grafieken"],
+      "nfr": false
+    },
+    {
+      "id": "REQ-018",
+      "title": "Gezinsfuncties",
+      "status": "Missing",
+      "evidence": [],
+      "tests": [],
+      "gaps": ["Multi-user support", "gedeelde budgetten"],
+      "nfr": false
+    },
+    {
+      "id": "REQ-019",
+      "title": "Senior modus",
+      "status": "Missing",
+      "evidence": [],
+      "tests": [],
+      "gaps": ["Easy mode", "grote letters", "vereenvoudigde UI"],
+      "nfr": false
+    },
+    {
+      "id": "REQ-020",
+      "title": "Security & privacy",
+      "status": "Partially Implemented",
+      "evidence": [
+        {
+          "path": "apps/api/src/auth.ts",
+          "symbol": "authMiddleware",
+          "lines": "1-43"
+        }
+      ],
+      "tests": [],
+      "gaps": ["RLS policies", "encryptie", "GDPR compliance"],
+      "nfr": true
+    }
+  ],
+  "architectureFindings": [
+    {
+      "principle": "Dependency Inversion Principle",
+      "score": 2,
+      "examples": [
+        {
+          "path": "apps/api/src/routes/budgets.ts",
+          "issue": "Direct database access in routes"
+        }
+      ],
+      "risk": "high"
+    },
+    {
+      "principle": "Single Responsibility Principle",
+      "score": 3,
+      "examples": [
+        {
+          "path": "apps/mobile/src/screens/Dashboard.tsx",
+          "issue": "Large component (497 lines)"
+        }
+      ],
+      "risk": "medium"
+    },
+    {
+      "principle": "Framework Independence",
+      "score": 2,
+      "examples": [
+        {
+          "path": "apps/mobile/src/api.ts",
+          "issue": "Expo dependencies in business logic"
+        }
+      ],
+      "risk": "high"
+    },
+    {
+      "principle": "Observability",
+      "score": 1,
+      "examples": [
+        {
+          "path": "apps/api/src/main.ts",
+          "issue": "Console.log statements"
+        }
+      ],
+      "risk": "high"
+    },
+    {
+      "principle": "Security",
+      "score": 2,
+      "examples": [
+        {
+          "path": "apps/api/src/routes/transactions.ts",
+          "issue": "No input validation"
+        }
+      ],
+      "risk": "high"
+    }
+  ],
+  "securityPrivacy": [
+    {
+      "area": "Input Validation",
+      "issue": "No Zod schemas for API endpoints",
+      "risk": "high"
+    },
+    {
+      "area": "Authorization",
+      "issue": "No Row Level Security policies",
+      "risk": "high"
+    },
+    {
+      "area": "Data Protection",
+      "issue": "No encryption of sensitive data",
+      "risk": "high"
+    },
+    {
+      "area": "Logging",
+      "issue": "Console.log statements may leak PII",
+      "risk": "medium"
+    },
+    {
+      "area": "Error Handling",
+      "issue": "No consistent error responses",
+      "risk": "medium"
+    }
+  ],
+  "incidents": [
+    {
+      "title": "PSD2 Integratie Ontbreekt",
+      "links": ["REQ-001", "REQ-002"],
+      "summary": {
+        "symptoms": "Kritieke MVP functionaliteit niet geïmplementeerd",
+        "impact": "App kan geen echte waarde bieden zonder bankkoppeling",
+        "scope": "Core business functionality"
+      },
+      "sequenceDiagram": "mermaid\nsequenceDiagram\n    participant U as User\n    participant M as Mobile App\n    participant A as API\n    participant D as Database\n    participant B as Bank API\n    \n    U->>M: Probeert bank te koppelen\n    M->>A: POST /bank/connect\n    A->>D: Geen PSD2 integratie\n    A-->>M: Error: Not implemented\n    M-->>U: \"Functie niet beschikbaar\"\n",
+      "rca": {
+        "primaryCause": "PSD2 integratie niet geprioriteerd in MVP",
+        "underlyingCauses": ["Geen Tink/Budget Insight integratie", "Geen PSD2 compliance implementatie", "Geen bank API adapters"],
+        "fiveWhys": ["Waarom geen PSD2? → Niet geïmplementeerd", "Waarom niet geïmplementeerd? → Geen prioriteit", "Waarom geen prioriteit? → Focus op andere features", "Waarom andere features? → Onjuiste MVP scope", "Waarom onjuiste scope? → Geen user research"],
+        "evidence": [
+          {
+            "path": "apps/api/src/routes/",
+            "lines": "Geen bank endpoints"
+          },
+          {
+            "path": "packages/types/src/index.ts",
+            "lines": "BankAccount interface maar geen implementatie"
+          }
+        ]
+      },
+      "solutionArchitecture": {
+        "overview": "PSD2 integratie via Tink/Budget Insight met adapter pattern",
+        "diagrams": ["mermaid\nflowchart TD\n    A[Mobile App] --> B[API Gateway]\n    B --> C[PSD2 Adapter]\n    C --> D[Tink/Budget Insight]\n    D --> E[Bank APIs]\n    C --> F[Transaction Processor]\n    F --> G[Database]\n"],
+        "specs": {
+          "apis": ["/api/bank/connect", "/api/bank/transactions"],
+          "dtos": ["BankConnectionRequest", "TransactionSyncResponse"],
+          "schema": ["AccountLink", "Transaction models"],
+          "config": ["PSD2 provider credentials"],
+          "featureFlags": ["ENABLE_PSD2_INTEGRATION"],
+          "migrations": ["Add bank tables"]
+        },
+        "risks": ["PSD2 compliance vereisten", "Bank API rate limits", "Data privacy concerns"],
+        "rollback": ["Disable feature flag"]
+      },
+      "remediationPlan": {
+        "actions": [
+          {
+            "title": "Technical Spike",
+            "effort": "M",
+            "dependencies": [],
+            "acceptanceCriteria": ["Onderzoek Tink/Budget Insight APIs", "PSD2 compliance requirements", "Proof of concept"]
+          },
+          {
+            "title": "PSD2 Adapter Development",
+            "effort": "L",
+            "dependencies": ["Technical Spike"],
+            "acceptanceCriteria": ["Implementeer bank API adapters", "PSD2 authentication flow", "Error handling & retry logic"]
+          },
+          {
+            "title": "Transaction Sync Service",
+            "effort": "M",
+            "dependencies": ["PSD2 Adapter"],
+            "acceptanceCriteria": ["Automatische transactie import", "Categorisatie engine", "Real-time updates"]
+          }
+        ],
+        "patches": ["--- a/apps/api/src/routes/bank.ts\n+++ b/apps/api/src/routes/bank.ts\n@@ -0,0 +1,50 @@\n+import { FastifyInstance } from 'fastify';\n+import { z } from 'zod';\n+\n+const ConnectBankSchema = z.object({\n+  provider: z.enum(['tink', 'budget-insight']),\n+  redirectUrl: z.string().url()\n+});\n+\n+export async function bankRoutes(fastify: FastifyInstance) {\n+  fastify.post('/connect', {\n+    schema: {\n+      body: ConnectBankSchema\n+    },\n+    handler: async (request, reply) => {\n+      // PSD2 connection logic\n+    }\n+  });\n+}"],
+        "tests": [
+          {
+            "name": "PSD2 Integration Tests",
+            "level": "integration",
+            "scenario": ["arrange: Setup bank API mocks", "act: Execute connection flow", "assert: Verify successful connection"]
+          }
+        ],
+        "runbooks": ["PSD2 compliance checklist", "Bank API health checks", "Transaction sync monitoring"],
+        "automation": ["Automated bank connection tests", "Transaction sync monitoring", "PSD2 compliance checks"]
+      }
+    },
+    {
+      "title": "AI Coach Functionaliteit Ontbreekt",
+      "links": ["REQ-006"],
+      "summary": {
+        "symptoms": "Beloofde AI-coach niet geïmplementeerd",
+        "impact": "Gebruikers krijgen geen persoonlijke begeleiding",
+        "scope": "Core differentiator"
+      },
+      "sequenceDiagram": "mermaid\nsequenceDiagram\n    participant U as User\n    participant M as Mobile App\n    participant A as API\n    participant AI as AI Service\n    \n    U->>M: Stelt vraag aan AI coach\n    M->>A: POST /ai/chat\n    A->>AI: Geen AI integratie\n    A-->>M: Error: Not implemented\n    M-->>U: \"AI coach niet beschikbaar\"\n",
+      "rca": {
+        "primaryCause": "AI integratie niet geïmplementeerd",
+        "underlyingCauses": ["Geen OpenAI/Claude API integratie", "Geen chat interface", "Geen context management"],
+        "fiveWhys": ["Waarom geen AI? → Niet geïmplementeerd", "Waarom niet geïmplementeerd? → Geen prioriteit", "Waarom geen prioriteit? → Focus op andere features", "Waarom andere features? → Onjuiste MVP scope", "Waarom onjuiste scope? → Geen user research"],
+        "evidence": [
+          {
+            "path": "apps/api/src/routes/",
+            "lines": "Geen AI endpoints"
+          },
+          {
+            "path": "apps/mobile/src/screens/",
+            "lines": "Geen chat componenten"
+          }
+        ]
+      },
+      "solutionArchitecture": {
+        "overview": "AI coach via OpenAI/Claude met context management",
+        "diagrams": ["mermaid\nflowchart TD\n    A[Mobile App] --> B[Chat Interface]\n    B --> C[API Gateway]\n    C --> D[AI Service]\n    D --> E[OpenAI/Claude API]\n    D --> F[Context Cache]\n    F --> G[Database]\n"],
+        "specs": {
+          "apis": ["/api/ai/chat", "/api/ai/context"],
+          "dtos": ["ChatMessage", "AIResponse"],
+          "schema": ["ChatInteraction", "AIContextCache"],
+          "config": ["OpenAI API key", "model parameters"],
+          "featureFlags": ["ENABLE_AI_COACH"],
+          "migrations": ["Add chat tables"]
+        },
+        "risks": ["API rate limits", "Privacy concerns", "Cost management"],
+        "rollback": ["Disable feature flag"]
+      },
+      "remediationPlan": {
+        "actions": [
+          {
+            "title": "AI Service Setup",
+            "effort": "M",
+            "dependencies": [],
+            "acceptanceCriteria": ["OpenAI/Claude API integratie", "Prompt engineering", "Context management"]
+          },
+          {
+            "title": "Chat Interface",
+            "effort": "M",
+            "dependencies": ["AI Service"],
+            "acceptanceCriteria": ["React Native chat component", "Message threading", "Typing indicators"]
+          }
+        ],
+        "patches": [],
+        "tests": [
+          {
+            "name": "AI Chat Tests",
+            "level": "unit",
+            "scenario": ["arrange: Setup AI API mocks", "act: Send chat message", "assert: Verify AI response"]
+          }
+        ],
+        "runbooks": ["AI service monitoring", "Prompt optimization", "Cost tracking"],
+        "automation": ["AI response monitoring", "Cost alerts", "Performance tracking"]
+      }
+    }
+  ],
+  "roadmap": [
+    {
+      "title": "PSD2 Bank Integration",
+      "links": ["REQ-001", "REQ-002"],
+      "effort": "L",
+      "dependencies": [],
+      "acceptanceCriteria": ["Gebruiker kan bank koppelen", "Transacties worden geïmporteerd"]
+    },
+    {
+      "title": "AI Coach Implementation",
+      "links": ["REQ-006"],
+      "effort": "L",
+      "dependencies": [],
+      "acceptanceCriteria": ["Gebruiker kan vragen stellen", "Krijgt contextuele antwoorden"]
+    },
+    {
+      "title": "Push Notifications",
+      "links": ["REQ-004", "REQ-015"],
+      "effort": "M",
+      "dependencies": ["PSD2"],
+      "acceptanceCriteria": ["Real-time budget waarschuwingen"]
+    },
+    {
+      "title": "Gamification System",
+      "links": ["REQ-005"],
+      "effort": "M",
+      "dependencies": [],
+      "acceptanceCriteria": ["Badges", "punten systeem"]
+    },
+    {
+      "title": "Security Hardening",
+      "links": ["REQ-020"],
+      "effort": "M",
+      "dependencies": [],
+      "acceptanceCriteria": ["RLS policies", "encryptie", "audit logging"]
+    }
+  ]
+}
