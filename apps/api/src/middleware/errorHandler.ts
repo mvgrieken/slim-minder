@@ -80,8 +80,8 @@ export const errorHandler = (
     message = error.message;
   }
 
-  // Log error in development
-  if (process.env.NODE_ENV === 'development') {
+  // Log error in development/test
+  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
     console.error('Error details:', {
       message: error.message,
       stack: error.stack,

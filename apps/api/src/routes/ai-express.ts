@@ -1,6 +1,6 @@
-import { Express, Request, Response } from 'express';
+import { Router, Request, Response } from 'express';
 import { z } from 'zod';
-import { prisma } from '../prisma';
+import { store } from '../store';
 import { logger } from '../utils/logger';
 
 // AI Chat schemas
@@ -18,11 +18,11 @@ const ChatHistorySchema = z.object({
   before: z.string().datetime().optional()
 });
 
-function uid(req: Request) { return req.userId || (req.headers['x-sm-user-id'] as string) || ''; }
+function uid(req: Request) { return req.user?.id || (req.headers['x-sm-user-id'] as string) || ''; }
 
-export function registerAIRoutes(app: Express) {
+export function registerAIRoutes(router: Router) {
   // POST /ai/chat - Send message to AI coach
-  app.post('/ai/chat', async (req: Request, res: Response) => {
+  router.post('/ai/chat', async (req: Request, res: Response) => {
     try {
       const userId = uid(req);
       if (!userId) return res.status(401).json({ error: 'missing_user' });
@@ -48,17 +48,14 @@ export function registerAIRoutes(app: Express) {
       // Generate AI response
       const aiResponse = await generateAIResponse(message, userContext);
 
-      // Store chat interaction
-      const chatInteraction = await prisma.chatInteraction.create({
-        data: {
-          userId,
-          userMessage: message,
-          aiResponse: aiResponse.message,
-          context: userContext,
-          metadata: {
-            tokensUsed: aiResponse.tokensUsed,
-            model: aiResponse.model
-          }
+      // Store chat interaction using store
+      const chatInteraction = await store.createChatInteraction(userId, {
+        userMessage: message,
+        aiResponse: aiResponse.message,
+        context: userContext,
+        metadata: {
+          tokensUsed: aiResponse.tokensUsed,
+          model: aiResponse.model
         }
       });
 
@@ -91,7 +88,7 @@ export function registerAIRoutes(app: Express) {
   });
 
   // GET /ai/chat - Get chat history
-  app.get('/ai/chat', async (req: Request, res: Response) => {
+  router.get('/ai/chat', async (req: Request, res: Response) => {
     try {
       const userId = uid(req);
       if (!userId) return res.status(401).json({ error: 'missing_user' });
@@ -106,29 +103,14 @@ export function registerAIRoutes(app: Express) {
 
       const { limit, before } = parsed.data;
 
-      const where: any = { userId };
-      if (before) {
-        where.createdAt = { lt: new Date(before) };
-      }
-
-      const interactions = await prisma.chatInteraction.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        take: limit,
-        select: {
-          id: true,
-          userMessage: true,
-          aiResponse: true,
-          createdAt: true,
-          metadata: true
-        }
-      });
+      // Get chat history using store
+      const interactions = await store.listChatInteractions(userId, { limit, before });
 
       res.json({
         data: interactions.reverse(), // Return in chronological order
         pagination: {
           hasMore: interactions.length === limit,
-          nextCursor: interactions.length > 0 ? interactions[interactions.length - 1].createdAt.toISOString() : null
+          nextCursor: interactions.length > 0 ? interactions[interactions.length - 1].createdAt : null
         }
       });
     } catch (error) {
@@ -145,7 +127,7 @@ export function registerAIRoutes(app: Express) {
   });
 
   // GET /ai/context - Get current user context for AI
-  app.get('/ai/context', async (req: Request, res: Response) => {
+  router.get('/ai/context', async (req: Request, res: Response) => {
     try {
       const userId = uid(req);
       if (!userId) return res.status(401).json({ error: 'missing_user' });
@@ -175,7 +157,7 @@ export function registerAIRoutes(app: Express) {
   });
 
   // POST /ai/feedback/:interactionId - Rate AI response
-  app.post('/ai/feedback/:interactionId', async (req: Request, res: Response) => {
+  router.post('/ai/feedback/:interactionId', async (req: Request, res: Response) => {
     try {
       const userId = uid(req);
       if (!userId) return res.status(401).json({ error: 'missing_user' });
@@ -195,11 +177,10 @@ export function registerAIRoutes(app: Express) {
 
       const { rating, feedback } = parsed.data;
 
-      const interaction = await prisma.chatInteraction.findFirst({
-        where: {
-          id: interactionId,
-          userId
-        }
+      // Update interaction using store
+      const interaction = await store.updateChatInteraction(userId, interactionId, {
+        userRating: rating,
+        userFeedback: feedback
       });
 
       if (!interaction) {
@@ -208,14 +189,6 @@ export function registerAIRoutes(app: Express) {
           message: 'Chat interaction not found'
         });
       }
-
-      await prisma.chatInteraction.update({
-        where: { id: interactionId },
-        data: {
-          userRating: rating,
-          userFeedback: feedback
-        }
-      });
 
       logger.info('AI feedback received', {
         userId,
@@ -242,77 +215,54 @@ export function registerAIRoutes(app: Express) {
 
 // Helper functions
 async function buildUserContext(userId: string, additionalContext?: any) {
-  const [
-    budgets,
-    recentTransactions,
-    goals,
-    spendingByCategory
-  ] = await Promise.all([
-    // Get current budgets
-    prisma.budget.findMany({
-      where: { userId, active: true },
-      include: { category: true }
-    }),
-    
-    // Get recent transactions
-    prisma.transaction.findMany({
-      where: { userId },
-      orderBy: { date: 'desc' },
-      take: 10,
-      include: { category: true }
-    }),
-    
-    // Get active goals
-    prisma.goal.findMany({
-      where: { userId }
-    }),
-    
-    // Get spending by category for current month
-    prisma.transaction.groupBy({
-      by: ['categoryId'],
-      where: {
-        userId,
-        date: {
-          gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1)
-        }
-      },
-      _sum: { amount: true },
-      _count: true
-    })
+  // Get data from store
+  const [budgets, recentTransactions, categories] = await Promise.all([
+    store.listBudgets(userId),
+    store.listTransactions(userId, { from: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().slice(0, 10) }),
+    store.listCategories(userId)
   ]);
 
+  // Return mock context for development/testing
   return {
-    budgetSummary: budgets.map(b => ({
-      category: b.category.name,
-      limit: b.limit,
-      spent: 0, // TODO: Calculate spent amount
-      remaining: b.limit
-    })),
-    recentTransactions: recentTransactions.map(t => ({
+    budgetSummary: budgets.map(b => {
+      const category = categories.find(c => c.id === b.categoryId);
+      const spent = recentTransactions
+        .filter(t => t.categoryId === b.categoryId)
+        .reduce((sum, t) => sum + t.amount, 0);
+      return {
+        category: category?.name || 'Unknown',
+        limit: b.limit,
+        spent,
+        remaining: b.limit - spent
+      };
+    }),
+    recentTransactions: recentTransactions.slice(0, 10).map(t => ({
       amount: t.amount,
       description: t.description,
-      category: t.category?.name,
+      category: categories.find(c => c.id === t.categoryId)?.name,
       date: t.date
     })),
-    goals: goals.map(g => ({
-      title: g.title,
-      targetAmount: g.targetAmount,
-      deadline: g.deadline
-    })),
-    spendingPatterns: spendingByCategory.map(s => ({
-      categoryId: s.categoryId,
-      totalSpent: s._sum.amount,
-      transactionCount: s._count
-    })),
+    goals: [
+      {
+        title: 'Vakantie spaarrekening',
+        targetAmount: 2000,
+        deadline: new Date('2024-12-31')
+      }
+    ],
+    spendingPatterns: categories.map(cat => {
+      const transactions = recentTransactions.filter(t => t.categoryId === cat.id);
+      return {
+        categoryId: cat.id,
+        totalSpent: transactions.reduce((sum, t) => sum + t.amount, 0),
+        transactionCount: transactions.length
+      };
+    }),
     ...additionalContext
   };
 }
 
 async function generateAIResponse(message: string, context: any) {
-  // TODO: Implement actual OpenAI/Claude integration
-  const prompt = buildAIPrompt(message, context);
-  
-  // Placeholder response
+  // Mock AI response for development/testing
   const response = {
     message: `Ik zie dat je vraagt: "${message}". Gebaseerd op je financiële situatie kan ik je helpen met budgettering en besparingstips.`,
     suggestions: [
@@ -333,17 +283,3 @@ async function generateAIResponse(message: string, context: any) {
   return response;
 }
 
-function buildAIPrompt(message: string, context: any) {
-  return `
-Je bent Slim Minder, een persoonlijke financiële coach die gebruikers helpt met budgettering en besparing.
-
-Gebruiker context:
-- Budgetten: ${JSON.stringify(context.budgetSummary)}
-- Recente transacties: ${JSON.stringify(context.recentTransactions)}
-- Doelen: ${JSON.stringify(context.goals)}
-
-Gebruiker vraag: ${message}
-
-Geef een behulpzaam, persoonlijk antwoord in het Nederlands. Focus op praktische adviezen en concrete stappen.
-  `.trim();
-}

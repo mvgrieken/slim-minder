@@ -5,6 +5,8 @@ const users = new Map<ID, User>();
 const categories = new Map<ID, Category[]>();
 const budgets = new Map<ID, Budget[]>();
 const txs = new Map<ID, Transaction[]>();
+const bankAccounts = new Map<ID, any[]>();
+const chatInteractions = new Map<ID, any[]>();
 
 export const memoryStore: Store = {
   async createGuest() {
@@ -94,5 +96,83 @@ export const memoryStore: Store = {
     const list = txs.get(userId) || [];
     txs.set(userId, list.filter(t => t.id !== id));
   },
+
+  // Bank functionality for development/testing
+  async listBankAccounts(userId) {
+    const accounts = bankAccounts.get(userId) || [];
+    if (accounts.length === 0) {
+      // Create mock account for development
+      const mockAccount = {
+        id: 'mock-account-1',
+        userId,
+        provider: 'tink',
+        providerAccountId: 'mock-provider-id',
+        iban: 'NL91ABNA0417164300',
+        displayName: 'ING Bank - Hoofdrekening',
+        currency: 'EUR',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      accounts.push(mockAccount);
+      bankAccounts.set(userId, accounts);
+    }
+    return accounts;
+  },
+
+  async createBankAccount(userId, input) {
+    const accounts = bankAccounts.get(userId) || [];
+    const account = {
+      id: randomUUID(),
+      userId,
+      ...input,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    accounts.push(account);
+    bankAccounts.set(userId, accounts);
+    return account;
+  },
+
+  async deleteBankAccount(userId, id) {
+    const accounts = bankAccounts.get(userId) || [];
+    bankAccounts.set(userId, accounts.filter(a => a.id !== id));
+  },
+
+  // AI functionality for development/testing
+  async createChatInteraction(userId, input) {
+    const interactions = chatInteractions.get(userId) || [];
+    const interaction = {
+      id: randomUUID(),
+      userId,
+      ...input,
+      createdAt: new Date().toISOString()
+    };
+    interactions.push(interaction);
+    chatInteractions.set(userId, interactions);
+    return interaction;
+  },
+
+  async listChatInteractions(userId, filters) {
+    const interactions = chatInteractions.get(userId) || [];
+    const limit = filters?.limit || 20;
+    const before = filters?.before ? new Date(filters.before) : undefined;
+    
+    let filtered = interactions;
+    if (before) {
+      filtered = filtered.filter(i => new Date(i.createdAt) < before);
+    }
+    
+    return filtered.slice(-limit);
+  },
+
+  async updateChatInteraction(userId, id, patch) {
+    const interactions = chatInteractions.get(userId) || [];
+    const idx = interactions.findIndex(i => i.id === id);
+    if (idx < 0) return null;
+    const next = { ...interactions[idx], ...patch, updatedAt: new Date().toISOString() };
+    interactions[idx] = next;
+    chatInteractions.set(userId, interactions);
+    return next;
+  }
 };
 

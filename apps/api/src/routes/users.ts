@@ -1,16 +1,16 @@
-import { Express, Request, Response } from 'express';
+import { Router, Request, Response } from 'express';
 import { store } from '../store';
 
 type User = { id: string; createdAt: string };
 
 function getUserId(req: Request) { return req.userId || (req.headers['x-sm-user-id'] as string) || ''; }
 
-export function registerUserRoutes(app: Express) {
-  app.post('/users/guest', (_req: Request, res: Response) => {
+export function registerUserRoutes(router: Router) {
+  router.post('/users/guest', (_req: Request, res: Response) => {
     store.createGuest().then((u) => res.status(201).json({ id: u.id })).catch((e) => res.status(500).json({ error: 'create_failed', detail: String(e) }));
   });
 
-  app.get('/me', (req: Request, res: Response) => {
+  router.get('/me', (req: Request, res: Response) => {
     const id = getUserId(req);
     if (!id) return res.status(401).json({ error: 'missing_user' });
     store.getUser(id).then((user) => {
@@ -20,7 +20,7 @@ export function registerUserRoutes(app: Express) {
   });
 
   // Auth info helper
-  app.get('/auth/me', (req: Request, res: Response) => {
+  router.get('/auth/me', (req: Request, res: Response) => {
     const id = req.userId || '';
     res.json({ userId: id, auth: req.auth || { provider: 'none' } });
   });

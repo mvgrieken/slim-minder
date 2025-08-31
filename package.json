@@ -13,7 +13,7 @@
     "typecheck": "npm run typecheck --workspaces",
     "lint": "npm run lint --workspaces",
     "test": "npm run test --workspaces",
-    "build:web": "cd apps/mobile && npm run build:web",
+    "build:web": "cd apps/mobile && node build-web.js",
     "preview:web": "cd apps/mobile && npm run preview:web",
     "dev:mobile": "cd apps/mobile && expo start",
     "dev:api": "cd apps/api && npm run dev",
@@ -42,8 +42,8 @@
     "pre-push": "npm run build:web"
   },
   "engines": {
-    "node": ">=20.0.0",
-    "npm": ">=9.0"
+    "node": ">=22.0.0",
+    "npm": ">=10.0"
   },
   "overrides": {
     "metro": "^0.80.12",

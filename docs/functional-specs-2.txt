@@ -1,0 +1,190 @@
+functional-specs.txt — Slim Minder
+Versie: 2025-08-31
+Status: MVP + aangevulde scope (conform marketing-tiering)
+Leidend bronbesluit: Marketingdocument v02 is leidend voor abonnements-tiering; technische documenten zijn gesynchroniseerd waar ze afweken.
+
+==============================
+1. DOEL & SCOPE
+==============================
+Doel
+- Vastleggen van de functionele specificaties voor de Slim Minder MVP, inclusief expliciete abonnements-tiering en geplande uitbreidingen.
+
+Scope (MVP)
+- Inzicht in inkomsten/uitgaven op basis van (voor Core/Premium) PSD2-bankkoppeling en automatische categorisatie.
+- Budgetten per categorie met real‑time nudges/waarschuwingen.
+- Doelen + basale gamification (badges) en eenvoudige challenges.
+- Dashboard met maandoverzicht en export naar PDF.
+- Week- én maandweergave in grafieken/overzichten.
+- AI‑coach (chat/spraak) voor Premium.
+- Basis toegankelijkheid en privacy‑instellingen.
+
+Out‑of‑scope (MVP)
+- Betalingsinitiaties (PIS), investeringsadvies, kredietverlening, fiscale aangiftes, open community/forum, externe rewards‑ecosysteem, Excel‑export (staat op roadmap), gezinsprofielen (roadmap), scenario‑planning (roadmap), proactieve/hybride coaching (roadmap), uitgebreide toeslagen‑catalogus (pilot na MVP).
+
+Assumpties (MVP)
+- NL‑markt, euro, Nederlandstalige UI.
+- Dataverwerking en hosting binnen EU, PSD2 via geaccrediteerde aggregator.
+- AI‑coach via externe AI‑API met NL‑ondersteuning (privacy‑maatregelen van toepassing).
+
+==============================
+2. ABONNEMENTEN & FEATURE‑TIERING  (LEIDEND)
+==============================
+Keuze: marketingvariant is leidend. Feature‑gating is bindend en technisch afdwingbaar.
+
+FREE (gratis)
+- PSD2 bankkoppeling: NIET beschikbaar (alleen handmatige invoer).
+- Transactie‑import: handmatig (uitgaven/inkomsten toevoegen/bewerken).
+- Categorisatie: handmatig of beperkte basisregels.
+- Budgetten: maximaal 2 categorie‑budgetten.
+- Grafieken/overzichten: basis; week/maand weergave beschikbaar met beperkte details.
+- Notificaties: in‑app waarschuwingen (geen push).
+- Doelen & badges: beschikbaar (basis).
+- Maandrapport: basis in‑app (geen PDF‑export).
+- AI‑coach: niet beschikbaar.
+
+CORE (€2,99 / maand)
+- PSD2 bankkoppeling: 1 rekening (AIS); automatische transactie‑import en categorisatie.
+- Budgetten: onbeperkt per categorie; week/maand weergave.
+- Notificaties: push + in‑app nudges (configureerbaar).
+- Maandrapport: volledig + PDF‑export.
+- Doelen & badges: volledig.
+- AI‑coach: niet inbegrepen (optionele teaser: 5 gratis vragen/maand, togglebaar in config; mag uitgeschakeld worden).
+
+PREMIUM (€4,99 / maand)
+- PSD2 bankkoppeling: meerdere rekeningen (consolidatie).
+- Alles van Core.
+- AI‑coach: inbegrepen (chat/spraak), onbeperkt fair‑use.
+- [Roadmap Premium+] Geavanceerde rapportages (kwartaal/jaar) en Excel‑export; proactieve AI‑coaching; (optioneel) menselijk coach‑kanaal; gezinsprofielen.
+
+NB: Prijsindicaties dienen als productankers; commercieel team kan prijzen wijzigen zonder functionele impact. Tier‑gating blijft identiek.
+
+==============================
+3. FUNCTIONELE EISEN (MVP) + ACCEPTATIECRITERIA
+==============================
+
+3.1 Onboarding & Account
+MUST
+- Gebruiker kan account aanmaken/inloggen (e‑mail + wachtwoord), e‑mailverificatie.
+- Profielinstellingen: naam, notificatie‑voorkeuren, privacyopties (AI‑toegang tot data aan/uit).
+AC
+- Succesvolle registratie + verificatie binnen 5 min; privacytoggle AI zichtbaar en werkend.
+
+3.2 Datatoegang (PSD2) & handmatige invoer
+MUST
+- Core/Premium: OAuth2‑gebaseerde PSD2‑flow met aggregator; toestemmingen tonen en logging.
+- Free/Core/Premium: handmatige invoer van transacties (incl. correcties).
+SHOULD
+- Fallback: CSV/MT940 import voor transacties (minimaal CSV).
+AC
+- Core/Premium kunnen binnen 3 min na koppeling eerste transacties zien; foutmeldingen bij storingen; Free kan volledige flow afronden zonder PSD2.
+
+3.3 Transactie‑categorisatie
+MUST
+- Automatische categorisatie (Core/Premium) met handmatige override en leereffect.
+- Standaard NL‑categorie‑set; eigen labels toevoegen.
+AC
+- ≥85% van nieuwe transacties automatisch gecategoriseerd; handmatige wijziging blijft behouden bij vergelijkbare vervolgtransacties.
+
+3.4 Budgetten per categorie
+MUST
+- Budget instellen per categorie (bedrag/maand of week), voortgangsbalk (groen/oranje/rood).
+- Overzicht “budgetten” met resterend bedrag/tijd.
+AC
+- Bij bereiken 90% drempel verschijnt nudge; overschrijding zichtbaar en gelogd.
+
+3.5 Dashboard & Rapportage
+MUST
+- Dashboard startscherm met: inkomsten, uitgaven, saldo‑opbouw, top‑3 categorieën, status vs. budgetten.
+- Maandrapport genereren (in‑app) + PDF‑export (Core/Premium).
+- Korte samenvatting in plain language naast cijfers.
+AC
+- PDF downloadt <10s en bevat: totalen, per‑categorie, overschrijdingen/nudges, doelvoortgang.
+
+3.6 Grafieken (week/maand)
+MUST
+- Schakelaar week↔maand voor uitgaven/budgetten.
+AC
+- Weergave wijzigt zonder herladen; waarden en assen passen correct aan.
+
+3.7 Notificaties & Nudges
+MUST
+- Configureerbare nudges bij (bijna) overschrijding en afwijkend patroon.
+- Push (Core/Premium) + in‑app inbox (alle tiers).
+AC
+- Latentie nudge ≤5 min na relevante transactie; frequentie‑limiter voorkomt spam.
+
+3.8 Doelen & Badges
+MUST
+- Bespaar-/spaardoelen aanmaken (bedrag, periode), voortgangsbalk, badge bij behalen.
+AC
+- Badge‑toekenning op het moment van behalen; doelhistorie zichtbaar.
+
+3.9 Challenges (basis)
+MUST
+- Bibliotheek met min. 2 templates (bv. “no‑spend weekend”, “20% minder bezorgmaaltijden deze maand”).
+- Deelname/voortgang per challenge.
+AC
+- Start/stop van challenge werkt; voortgang telt correct mee; badge bij afronden.
+
+3.10 AI‑coach (Premium)
+MUST
+- Chatinterface met contextuele antwoorden (op basis van categorie‑samenvattingen, niet ruwe persoonsdata als privacytoggle uit staat).
+- Beperkingen/veiligheidsfilters; NL‑taal.
+AC
+- Voorbeeldvragen (“Hoeveel gaf ik deze week uit aan boodschappen?”, “Waar kan ik €25 besparen?”) leveren <5s antwoord; feedbackknop werkt.
+
+3.11 Toegankelijkheid (functioneel)
+MUST
+- Grote‑letters/hoog‑contrast modus; schermlezers‑labels.
+AC
+- Screenreader leest kerncomponenten correct; contrast ≥ WCAG AA voor primaire UI.
+
+3.12 Privacy & Controle
+MUST
+- Privacydashboard: inzage gekoppelde rekeningen, AI‑toestemming, data‑verwijderen (account delete).
+AC
+- Data‑delete bevestigt en maakt account onbruikbaar; PSD2‑toestemming intrekbaar.
+
+==============================
+4. RANDGEVALLEN & Fallbacks
+==============================
+- PSD2‑storing: toon status + laatste bekende data; automatische retry.
+- Dubbele/tegenboekingen: detectie/markering.
+- Offline mode: laatste bekende dashboard lokaal; sync bij herstel.
+- Multi‑rekening consolidatie (Premium): dubbele categorie‑tellingen voorkomen.
+
+==============================
+5. ROADMAP (NIET‑MVP, opvolgende releases)
+==============================
+R1 (kort na MVP)
+- Spaarpotten & “pay yourself first” (automatische overschrijvingen).
+- Excel‑export (Premium) + kwartaal/jaaroverzichten.
+- Toeslagen-/regeling‑check (pilot: zorgtoeslag/huurtoeslag; disclaimers; geen advies).
+
+R2
+- Proactieve AI‑coaching (coach initieert tips/analyses).
+- Menselijk coach‑kanaal (Premium+), SLA & triage.
+- Gezinsfuncties: gedeelde budgetten, familieprofielen, rechten.
+
+R3
+- Scenario‑planning & voorspellingen (what‑ifs).
+- Gamification 2.0: punten + externe beloningen (partners).
+
+==============================
+6. KPI’s (functioneel, voor acceptatie)
+==============================
+- Nudge‑latentie p95 ≤5 min na relevante transactie (Core/Premium).
+- Auto‑categorisatie nauwkeurigheid ≥85% (Core/Premium).
+- PDF‑rapport p95 genereertijd ≤10s.
+- Crash‑free sessions ≥99,5% (30d).
+
+==============================
+7. GEMAAKTE KEUZES (traceability)
+==============================
+- Tiering conform marketingdocument: Free zonder PSD2; Core 1 rekening; Premium meerdere + AI‑coach.
+- AI‑coach exclusief in Premium (Core: optionele teaser max. 5 Q/maand, indien gewenst door product).
+- Dashboard + PDF‑export naar MVP gehaald; Excel pas op Premium (roadmap).
+- Weekweergave expliciet toegevoegd.
+- Challenges toegevoegd (basis).
+
+Einde bestand

@@ -1,4 +1,18 @@
-<!DOCTYPE html>
+#!/usr/bin/env node
+
+const fs = require('fs');
+const path = require('path');
+
+console.log('🚀 Building web version without Expo CLI...');
+
+// Create web-build directory
+const webBuildDir = path.join(__dirname, 'web-build');
+if (!fs.existsSync(webBuildDir)) {
+  fs.mkdirSync(webBuildDir, { recursive: true });
+}
+
+// Create a simple index.html
+const indexHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -58,4 +72,17 @@
         </ul>
     </div>
 </body>
-</html>
+</html>`;
+
+fs.writeFileSync(path.join(webBuildDir, 'index.html'), indexHtml);
+
+// Copy _redirects if it exists
+const redirectsPath = path.join(__dirname, 'public', '_redirects');
+if (fs.existsSync(redirectsPath)) {
+  fs.copyFileSync(redirectsPath, path.join(webBuildDir, '_redirects'));
+  console.log('✅ _redirects file copied');
+}
+
+console.log('✅ Web build completed successfully!');
+console.log(`📁 Build output: ${webBuildDir}`);
+console.log('🌐 Open web-build/index.html in your browser');

@@ -1,40 +1,29 @@
-import { prisma } from '../prisma';
-
 // Mock environment variables for testing
+process.env.NODE_ENV = 'test';
 process.env.SUPABASE_URL = 'https://test.supabase.co';
 process.env.SUPABASE_ANON_KEY = 'test-anon-key';
 process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test';
 process.env.JWT_SECRET = 'test-jwt-secret';
 process.env.OPENAI_API_KEY = 'test-openai-key';
+process.env.USE_DB = 'false';
+
+// PSD2/Tink configuration
+process.env.TINK_CLIENT_ID = 'test-client-id';
+process.env.TINK_CLIENT_SECRET = 'test-client-secret';
+process.env.TINK_REDIRECT_URI = 'http://localhost:3000/api/bank/callback';
+process.env.TINK_ENVIRONMENT = 'sandbox';
 
 beforeAll(async () => {
-  // Connect to test database
-  try {
-    await prisma.$connect();
-  } catch (error) {
-    console.warn('Could not connect to test database:', error);
-  }
+  // Skip database connection for development/testing
+  console.log('Test setup: Skipping database connection for development');
 });
 
 afterAll(async () => {
-  // Disconnect from test database
-  try {
-    await prisma.$disconnect();
-  } catch (error) {
-    console.warn('Could not disconnect from test database:', error);
-  }
+  // Skip database disconnection for development/testing
+  console.log('Test cleanup: Skipping database disconnection for development');
 });
 
 afterEach(async () => {
-  // Clean up test data
-  try {
-    // Delete test data in reverse order of dependencies
-    await prisma.chatInteraction.deleteMany();
-    await prisma.transaction.deleteMany();
-    await prisma.budget.deleteMany();
-    await prisma.category.deleteMany();
-    await prisma.user.deleteMany();
-  } catch (error) {
-    console.warn('Could not clean up test data:', error);
-  }
+  // Skip test data cleanup for development/testing
+  console.log('Test cleanup: Skipping data cleanup for development');
 });
