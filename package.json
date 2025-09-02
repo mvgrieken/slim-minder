@@ -61,6 +61,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-native": "^4.1.0",
     "lint-staged": "^15.2.2",
+    "netlify-cli": "^23.5.0",
     "prettier": "^3.3.3",
     "semver": "^7.6.0"
   },
