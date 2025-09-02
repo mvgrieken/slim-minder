@@ -1,61 +1,174 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Slim Minder</title>
+    <title>Slim Minder - Je Persoonlijke Budgetcoach</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            margin: 0;
-            padding: 20px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
         }
+        
         .container {
             background: white;
+            border-radius: 20px;
             padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             text-align: center;
             max-width: 500px;
+            width: 90%;
         }
-        h1 {
-            color: #333;
+        
+        .logo {
+            font-size: 48px;
             margin-bottom: 20px;
         }
-        p {
-            color: #666;
+        
+        h1 {
+            color: #1e293b;
+            font-size: 32px;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            color: #64748b;
+            font-size: 18px;
+            margin-bottom: 32px;
             line-height: 1.6;
         }
+        
+        .features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 32px 0;
+        }
+        
+        .feature {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .feature-icon {
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+        
+        .feature-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        
+        .feature-desc {
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .cta-button {
+            background: #3b82f6;
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            display: inline-block;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .cta-button:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+        }
+        
         .status {
-            background: #e8f5e8;
-            color: #2d5a2d;
-            padding: 15px;
+            background: #10b981;
+            color: white;
+            padding: 12px 24px;
             border-radius: 8px;
-            margin: 20px 0;
+            font-size: 14px;
+            margin-top: 24px;
+        }
+        
+        .github-link {
+            margin-top: 24px;
+        }
+        
+        .github-link a {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .github-link a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>💰 Slim Minder</h1>
-        <p>Een innovatieve gedragsgerichte budgetcoach-app die financieel kwetsbare huishoudens helpt om gezonder met geld om te gaan.</p>
-        <div class="status">
-            ✅ Web build succesvol gegenereerd!<br>
-            📱 Download de mobile app voor de volledige ervaring.
+        <div class="logo">💰</div>
+        <h1>Slim Minder</h1>
+        <p class="subtitle">
+            Je persoonlijke budgetcoach die je helpt om slimmer met je geld om te gaan. 
+            Track je uitgaven, stel doelen en krijg inzicht in je financiën.
+        </p>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">💳</div>
+                <div class="feature-title">Transacties</div>
+                <div class="feature-desc">Track al je uitgaven en inkomsten</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📊</div>
+                <div class="feature-title">Budgetten</div>
+                <div class="feature-desc">Stel limieten en houd je aan je budget</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🎯</div>
+                <div class="feature-title">Doelen</div>
+                <div class="feature-desc">Spaar voor je dromen en doelen</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🤖</div>
+                <div class="feature-title">AI Coach</div>
+                <div class="feature-desc">Krijg persoonlijk advies over je financiën</div>
+            </div>
         </div>
-        <p><strong>Features:</strong></p>
-        <ul style="text-align: left; display: inline-block;">
-            <li>Budget Management</li>
-            <li>PSD2 Bank Integratie</li>
-            <li>AI Coaching</li>
-            <li>Smart Categorization</li>
-            <li>Push Notifications</li>
-        </ul>
+        
+        <button class="cta-button" onclick="window.open('https://github.com/mvgrieken/slim-minder', '_blank')">
+            Bekijk op GitHub
+        </button>
+        
+        <div class="status">
+            ✅ App succesvol gedeployed naar Netlify
+        </div>
+        
+        <div class="github-link">
+            <a href="https://github.com/mvgrieken/slim-minder" target="_blank">
+                📁 Bekijk de volledige code op GitHub
+            </a>
+        </div>
     </div>
 </body>
 </html>
