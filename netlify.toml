@@ -4,11 +4,17 @@
 
 [build.environment]
   NODE_VERSION = "18.19.0"
+  NPM_FLAGS = "--no-optional --no-audit --no-fund"
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
+[dev]
+  command = "npm run dev:mobile"
+  port = 8081
+  publish = "apps/mobile/web-build"
 
 [dev]
   command = "npm run dev:mobile"
