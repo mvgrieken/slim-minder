@@ -1,11 +1,11 @@
-import { Router, Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 import { store } from '../store';
 
 type User = { id: string; createdAt: string };
 
 function getUserId(req: Request) { return req.userId || (req.headers['x-sm-user-id'] as string) || ''; }
 
-export function registerUserRoutes(router: Router) {
+const router = express.Router();
   router.post('/users/guest', (_req: Request, res: Response) => {
     store.createGuest().then((u) => res.status(201).json({ id: u.id })).catch((e) => res.status(500).json({ error: 'create_failed', detail: String(e) }));
   });
@@ -24,4 +24,5 @@ export function registerUserRoutes(router: Router) {
     const id = req.userId || '';
     res.json({ userId: id, auth: req.auth || { provider: 'none' } });
   });
-}
+
+export default router;

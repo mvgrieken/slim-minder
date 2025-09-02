@@ -1,13 +1,14 @@
 import { PrismaClient } from '@prisma/client';
 
-let prisma: PrismaClient | null = null;
+let prismaInstance: PrismaClient | null = null;
 
 export function getPrisma(): PrismaClient {
-  if (!prisma) {
-    prisma = new PrismaClient();
+  if (!prismaInstance) {
+    prismaInstance = new PrismaClient();
   }
-  return prisma;
+  return prismaInstance;
 }
 
-export { getPrisma as prisma };
+// Export the instance directly
+export const prisma = getPrisma();
 

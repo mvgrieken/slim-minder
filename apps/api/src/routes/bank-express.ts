@@ -22,7 +22,7 @@ const TransactionSyncSchema = z.object({
 function uid(req: Request) { return req.user?.id || (req.headers['x-sm-user-id'] as string) || ''; }
 
 export function registerBankRoutes(router: Router) {
-  // POST /bank/connect - Initiate PSD2 connection
+  // POST /bank/connect - Start bank connection process
   router.post('/bank/connect', async (req: Request, res: Response) => {
     try {
       const userId = uid(req);
@@ -63,8 +63,9 @@ export function registerBankRoutes(router: Router) {
         status: 'pending'
       });
     } catch (error) {
+      const err = error as any;
       logger.error('PSD2 connection failed', {
-        error: error.message,
+        error: err?.message || String(err),
         userId: uid(req)
       });
 
@@ -116,7 +117,8 @@ export function registerBankRoutes(router: Router) {
         connectionId: connection.id
       });
     } catch (error) {
-      logger.error('PSD2 callback failed', { error: error.message });
+      const err = error as any;
+      logger.error('PSD2 callback failed', { error: err?.message || String(err) });
       res.status(500).json({
         error: 'Internal Server Error',
         message: 'Failed to complete bank connection'
@@ -176,8 +178,9 @@ export function registerBankRoutes(router: Router) {
 
       res.json({ data: transformedAccounts });
     } catch (error) {
+      const err = error as any;
       logger.error('Failed to fetch bank accounts', {
-        error: error.message,
+        error: err?.message || String(err),
         userId: uid(req)
       });
 
@@ -302,8 +305,9 @@ export function registerBankRoutes(router: Router) {
         lastSync: new Date().toISOString()
       });
     } catch (error) {
+      const err = error as any;
       logger.error('Transaction sync failed', {
-        error: error.message,
+        error: err?.message || String(err),
         userId: uid(req)
       });
 
@@ -351,8 +355,9 @@ export function registerBankRoutes(router: Router) {
         message: 'Bank account disconnected successfully'
       });
     } catch (error) {
+      const err = error as any;
       logger.error('Failed to disconnect bank account', {
-        error: error.message,
+        error: err?.message || String(err),
         userId: uid(req)
       });
 
@@ -363,4 +368,9 @@ export function registerBankRoutes(router: Router) {
     }
   });
 }
+
+// Default export for compatibility
+const bankRouter = Router();
+registerBankRoutes(bankRouter);
+export default bankRouter;
 

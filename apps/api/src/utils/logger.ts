@@ -6,7 +6,7 @@ const structuredFormat = format.combine(
   format.errors({ stack: true }),
   format.json(),
   format.printf(({ timestamp, level, message, ...meta }) => {
-    const logEntry = {
+    const logEntry: any = {
       timestamp,
       level,
       message,
@@ -14,7 +14,7 @@ const structuredFormat = format.combine(
     };
     
     // Verwijder PII uit logs
-    if (meta.user) {
+    if (meta.user && typeof meta.user === 'object' && 'id' in meta.user) {
       logEntry.user = {
         id: meta.user.id,
         // Verwijder email, naam, etc.

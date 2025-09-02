@@ -1,4 +1,5 @@
-import { Budget, Transaction } from '../../../packages/types/src';
+// Import types from the types package
+import type { Budget, Transaction } from '@slim-minder/types';
 
 export function evaluateBudgetThresholds(
   budgets: Budget[],

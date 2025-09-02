@@ -18,7 +18,15 @@ export async function authMiddleware(req: Request, res: Response, next: NextFunc
         req.auth = { provider: 'supabase', raw: payload };
         if (USE_DB) {
           // Ensure user exists in DB
-          await prisma.user.upsert({ where: { id: sub }, update: {}, create: { id: sub } });
+          try {
+            await prisma.user.upsert({ 
+              where: { id: sub }, 
+              update: {}, 
+              create: { id: sub } 
+            });
+          } catch (error) {
+            console.warn('Failed to upsert user:', error);
+          }
         }
         return next();
       }

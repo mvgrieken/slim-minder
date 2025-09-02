@@ -1,4 +1,4 @@
-import { FastifyRequest, FastifyReply } from 'fastify';
+import { Request, Response, NextFunction } from 'express';
 import { z, ZodError } from 'zod';
 
 // Common validation schemas
@@ -79,13 +79,14 @@ export const UpdateGoalSchema = z.object({
 
 // Validation middleware factory
 export function createValidationMiddleware(schema: z.ZodSchema) {
-  return async (request: FastifyRequest, reply: FastifyReply) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const validatedData = await schema.parseAsync(request.body);
-      request.body = validatedData;
+      const validatedData = await schema.parseAsync(req.body);
+      req.body = validatedData;
+      next();
     } catch (error) {
       if (error instanceof ZodError) {
-        return reply.status(400).send({
+        return res.status(400).json({
           error: 'Validation Error',
           details: error.errors.map(err => ({
             field: err.path.join('.'),
@@ -93,7 +94,7 @@ export function createValidationMiddleware(schema: z.ZodSchema) {
           }))
         });
       }
-      return reply.status(500).send({
+      return res.status(500).json({
         error: 'Internal Server Error',
         message: 'Validation processing failed'
       });
@@ -103,13 +104,14 @@ export function createValidationMiddleware(schema: z.ZodSchema) {
 
 // Query parameter validation
 export function createQueryValidationMiddleware(schema: z.ZodSchema) {
-  return async (request: FastifyRequest, reply: FastifyReply) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const validatedData = await schema.parseAsync(request.query);
-      request.query = validatedData;
+      const validatedData = await schema.parseAsync(req.query);
+      req.query = validatedData;
+      next();
     } catch (error) {
       if (error instanceof ZodError) {
-        return reply.status(400).send({
+        return res.status(400).json({
           error: 'Validation Error',
           details: error.errors.map(err => ({
             field: err.path.join('.'),
@@ -117,7 +119,7 @@ export function createQueryValidationMiddleware(schema: z.ZodSchema) {
           }))
         });
       }
-      return reply.status(500).send({
+      return res.status(500).json({
         error: 'Internal Server Error',
         message: 'Query validation processing failed'
       });

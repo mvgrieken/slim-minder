@@ -50,19 +50,18 @@
     "metro-core": "^0.80.12"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2",
-    "eslint": "^8.57.0",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.57.0",
+    "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-react": "^7.34.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-native": "^4.1.0",
-    "eslint-plugin-import": "^2.29.1",
-    "prettier": "^3.3.3",
     "lint-staged": "^15.2.2",
+    "prettier": "^3.3.3",
     "semver": "^7.6.0"
   },
-
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "eslint --fix",
@@ -90,5 +89,8 @@
   "bugs": {
     "url": "https://github.com/slimminder/slim-minder/issues"
   },
-  "homepage": "https://slimminder.app"
+  "homepage": "https://slimminder.app",
+  "dependencies": {
+    "ansi-escapes": "^7.0.0"
+  }
 }

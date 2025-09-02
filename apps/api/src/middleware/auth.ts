@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { createClient } from '@supabase/supabase-js';
-import { CustomError } from './errorHandler';
+import { AppError } from './errorHandler';
 
 // Extend Request interface
 declare global {
@@ -46,7 +46,7 @@ export const authMiddleware = async (
     }
 
     if (!token) {
-      throw new CustomError('No token provided', 401);
+      throw new AppError(401, 'No token provided', 'no_token');
     }
 
     // Verify token with Supabase (only in production)
@@ -54,7 +54,7 @@ export const authMiddleware = async (
       const { data: { user }, error } = await supabase.auth.getUser(token);
 
       if (error || !user) {
-        throw new CustomError('Invalid or expired token', 401);
+        throw new AppError(401, 'Invalid or expired token', 'invalid_token');
       }
 
       // Add user info to request
@@ -71,7 +71,7 @@ export const authMiddleware = async (
 
     next();
   } catch (error) {
-    if (error instanceof CustomError) {
+    if (error instanceof AppError) {
       return res.status(error.statusCode).json({
         error: {
           message: error.message,

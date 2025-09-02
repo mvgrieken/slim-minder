@@ -13,8 +13,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSession } from '../session';
 import { budgetsProgress, BudgetProgress, listTransactions, Transaction } from '../api';
-import { formatCurrency } from '../../../packages/utils/src/currency';
-import { SMButton } from '../../../packages/ui/src/components/SMButton';
+import { formatCurrency } from '@slim-minder/utils';
+import { SMButton } from '@slim-minder/ui';
 import { format, startOfMonth, endOfMonth, isToday } from 'date-fns';
 import { nl } from 'date-fns/locale';
 

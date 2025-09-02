@@ -1,8 +1,12 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { evaluateBudgetThresholds } from './jobs/nudges';
-import { Budget, Transaction } from '../../packages/types/src';
+import { CronJob } from 'cron';
+import { logger } from './utils/logger';
+import { processNudges } from './jobs/nudges';
+
+// Import types from the types package
+import type { Budget, Transaction } from '@slim-minder/types';
 
 // Mock data for local dev
 const budgets: Budget[] = [
@@ -16,7 +20,7 @@ const txs: Transaction[] = [
 ];
 
 function tick() {
-  const alerts = evaluateBudgetThresholds(budgets, txs);
+  const alerts = processNudges(budgets, txs);
   if (alerts.length) {
     console.log(`[nudges] alerts:`, alerts);
   } else {

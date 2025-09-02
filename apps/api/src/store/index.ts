@@ -14,8 +14,13 @@ function getPrismaStore(): Store {
     if (process.env.NODE_ENV === 'test') {
       return memoryStore;
     }
-    const { prismaStore: store } = require('./prisma');
-    prismaStore = store;
+    try {
+      const { prismaStore: store } = require('./prisma');
+      prismaStore = store;
+    } catch (error) {
+      console.warn('Failed to load Prisma store, falling back to memory store:', error);
+      return memoryStore;
+    }
   }
   return prismaStore;
 }

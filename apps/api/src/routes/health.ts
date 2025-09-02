@@ -1,7 +1,7 @@
-import { Router } from 'express';
+import express from 'express';
 import { store } from '../store';
 
-export function registerHealthRoutes(router: Router) {
+const router = express.Router();
   // Basic health check
   router.get('/health', async (req, res) => {
     try {
@@ -97,5 +97,6 @@ export function registerHealthRoutes(router: Router) {
   router.get('/live', (req, res) => {
     res.json({ status: 'alive' });
   });
-}
+
+export default router;
 

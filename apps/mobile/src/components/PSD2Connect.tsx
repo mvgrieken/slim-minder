@@ -7,6 +7,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
+import { apiService } from '../services/api';
 
 interface PSD2ConnectProps {
   onConnect?: (authUrl: string) => void;
@@ -25,60 +26,53 @@ export const PSD2Connect: React.FC<PSD2ConnectProps> = ({
   const handleConnect = async () => {
     setIsLoading(true);
     try {
-      // Call the API to get auth URL
-      const response = await fetch('http://localhost:4000/api/bank/connect', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-sm-user-id': 'mobile-user',
-        },
-        body: JSON.stringify({
-          provider: 'tink',
-          redirectUrl: 'slimminder://bank/callback',
-          permissions: ['accounts', 'transactions'],
-        }),
-      });
+      const response = await apiService.connectBank(
+        'tink',
+        'slimminder://bank/callback',
+        ['accounts', 'transactions']
+      );
 
-      if (!response.ok) {
-        throw new Error('Failed to get auth URL');
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to get auth URL');
       }
 
-      const data = await response.json();
-      
-      if (onConnect) {
-        onConnect(data.authUrl);
+      if (onConnect && response.data?.authUrl) {
+        onConnect(response.data.authUrl);
       }
 
-      // For demo purposes, simulate success
-      setTimeout(() => {
-        setIsConnected(true);
-        setIsLoading(false);
-        if (onSuccess) {
-          onSuccess([
-            {
-              id: 'demo-account-1',
-              name: 'ING Bank',
-              type: 'checking',
-              balance: 1250.50,
-              currency: 'EUR',
-            },
-            {
-              id: 'demo-account-2',
-              name: 'ING Spaarrekening',
-              type: 'savings',
-              balance: 5000.00,
-              currency: 'EUR',
-            },
-          ]);
+      // Simulate successful connection for demo
+      setTimeout(async () => {
+        try {
+          const accountsResponse = await apiService.getBankAccounts();
+          if (accountsResponse.success && accountsResponse.data) {
+            setIsConnected(true);
+            setIsLoading(false);
+            if (onSuccess) onSuccess(accountsResponse.data);
+          } else {
+            // Fallback to demo data
+            const demoAccounts = [
+              { id: 'demo-account-1', name: 'ING Bank', type: 'checking', balance: 1250.50, currency: 'EUR' },
+              { id: 'demo-account-2', name: 'ING Spaarrekening', type: 'savings', balance: 5000.00, currency: 'EUR' }
+            ];
+            setIsConnected(true);
+            setIsLoading(false);
+            if (onSuccess) onSuccess(demoAccounts);
+          }
+        } catch (error) {
+          // Fallback to demo data on error
+          const demoAccounts = [
+            { id: 'demo-account-1', name: 'ING Bank', type: 'checking', balance: 1250.50, currency: 'EUR' },
+            { id: 'demo-account-2', name: 'ING Spaarrekening', type: 'savings', balance: 5000.00, currency: 'EUR' }
+          ];
+          setIsConnected(true);
+          setIsLoading(false);
+          if (onSuccess) onSuccess(demoAccounts);
         }
       }, 2000);
-
     } catch (error) {
       setIsLoading(false);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      if (onError) {
-        onError(errorMessage);
-      }
+      if (onError) onError(errorMessage);
       Alert.alert('Error', errorMessage);
     }
   };

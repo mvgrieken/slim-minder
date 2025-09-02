@@ -1,106 +1,81 @@
 import { Request, Response, NextFunction } from 'express';
 import { ZodError } from 'zod';
-import { Prisma } from '@prisma/client';
+import { logger } from '../utils/logger';
 
-export interface AppError extends Error {
-  statusCode?: number;
-  isOperational?: boolean;
-}
-
-export class CustomError extends Error implements AppError {
-  public statusCode: number;
-  public isOperational: boolean;
-
-  constructor(message: string, statusCode: number = 500) {
+export class AppError extends Error {
+  constructor(
+    public statusCode: number,
+    public message: string,
+    public code?: string
+  ) {
     super(message);
-    this.statusCode = statusCode;
-    this.isOperational = true;
-
-    Error.captureStackTrace(this, this.constructor);
+    this.name = 'AppError';
   }
 }
 
-export const errorHandler = (
-  error: AppError | ZodError | Prisma.PrismaClientKnownRequestError,
+// Define error interface for Prisma-like errors
+interface PrismaError extends Error {
+  code?: string;
+}
+
+export function errorHandler(
+  error: AppError | ZodError | PrismaError | Error,
   req: Request,
   res: Response,
   next: NextFunction
-) => {
-  let statusCode = 500;
-  let message = 'Internal Server Error';
-  let details: any = null;
+) {
+  logger.error('Error occurred', {
+    error: error.message,
+    stack: error.stack,
+    url: req.url,
+    method: req.method,
+    userId: req.user?.id || req.headers['x-sm-user-id']
+  });
 
   // Handle Zod validation errors
   if (error instanceof ZodError) {
-    statusCode = 400;
-    message = 'Validation Error';
-    details = error.errors.map(err => ({
-      field: err.path.join('.'),
-      message: err.message,
-      code: err.code
-    }));
-  }
-  // Handle Prisma errors
-  else if (error instanceof Prisma.PrismaClientKnownRequestError) {
-    switch (error.code) {
-      case 'P2002':
-        statusCode = 409;
-        message = 'Resource already exists';
-        break;
-      case 'P2025':
-        statusCode = 404;
-        message = 'Resource not found';
-        break;
-      case 'P2003':
-        statusCode = 400;
-        message = 'Invalid foreign key reference';
-        break;
-      default:
-        statusCode = 400;
-        message = 'Database operation failed';
-    }
-  }
-  // Handle custom errors
-  else if (error instanceof CustomError) {
-    statusCode = error.statusCode;
-    message = error.message;
-  }
-  // Handle JWT errors
-  else if (error.name === 'JsonWebTokenError') {
-    statusCode = 401;
-    message = 'Invalid token';
-  }
-  else if (error.name === 'TokenExpiredError') {
-    statusCode = 401;
-    message = 'Token expired';
-  }
-  // Handle other known errors
-  else if (error.statusCode) {
-    statusCode = error.statusCode;
-    message = error.message;
-  }
-
-  // Log error in development/test
-  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
-    console.error('Error details:', {
-      message: error.message,
-      stack: error.stack,
-      url: req.url,
-      method: req.method,
-      body: req.body,
-      params: req.params,
-      query: req.query,
-      user: (req as any).user?.id
+    return res.status(400).json({
+      error: 'validation_error',
+      message: 'Invalid request data',
+      issues: error.issues
     });
   }
 
-  // Send error response
-  res.status(statusCode).json({
-    error: {
-      message,
-      statusCode,
-      ...(details && { details }),
-      ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+  // Handle Prisma errors
+  else if (error && typeof error === 'object' && 'code' in error) {
+    const prismaError = error as PrismaError;
+    switch (prismaError.code) {
+      case 'P2002':
+        return res.status(409).json({
+          error: 'duplicate_entry',
+          message: 'Resource already exists'
+        });
+      case 'P2025':
+        return res.status(404).json({
+          error: 'not_found',
+          message: 'Resource not found'
+        });
+      default:
+        return res.status(500).json({
+          error: 'database_error',
+          message: 'Database operation failed'
+        });
     }
-  });
-};
+  }
+
+  // Handle custom app errors
+  else if (error instanceof AppError) {
+    return res.status(error.statusCode).json({
+      error: error.code || 'app_error',
+      message: error.message
+    });
+  }
+
+  // Handle generic errors
+  else {
+    return res.status(500).json({
+      error: 'internal_error',
+      message: 'Internal server error'
+    });
+  }
+}

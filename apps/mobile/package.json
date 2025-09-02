@@ -18,6 +18,7 @@
     "preview:web": "npx http-server web-build -p 4173",
     "build": "expo export --platform web --output-dir web-build && cp public/_redirects web-build/_redirects",
     "validate-deps": "node ../../scripts/validate-dependencies.js",
+    "typecheck": "tsc --noEmit",
     "eject": "expo eject"
   },
   "dependencies": {

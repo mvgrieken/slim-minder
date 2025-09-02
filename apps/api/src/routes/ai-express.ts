@@ -75,8 +75,9 @@ export function registerAIRoutes(router: Router) {
         }
       });
     } catch (error) {
+      const err = error as any;
       logger.error('AI chat failed', {
-        error: error.message,
+        error: err?.message || String(err),
         userId: uid(req)
       });
 
@@ -114,8 +115,9 @@ export function registerAIRoutes(router: Router) {
         }
       });
     } catch (error) {
+      const err = error as any;
       logger.error('Failed to fetch chat history', {
-        error: error.message,
+        error: err?.message || String(err),
         userId: uid(req)
       });
 
@@ -144,8 +146,9 @@ export function registerAIRoutes(router: Router) {
         }
       });
     } catch (error) {
+      const err = error as any;
       logger.error('Failed to build AI context', {
-        error: error.message,
+        error: err?.message || String(err),
         userId: uid(req)
       });
 
@@ -200,8 +203,9 @@ export function registerAIRoutes(router: Router) {
         message: 'Feedback recorded successfully'
       });
     } catch (error) {
+      const err = error as any;
       logger.error('Failed to record AI feedback', {
-        error: error.message,
+        error: err?.message || String(err),
         userId: uid(req)
       });
 
@@ -212,6 +216,11 @@ export function registerAIRoutes(router: Router) {
     }
   });
 }
+
+// Default export for compatibility
+const aiRouter = Router();
+registerAIRoutes(aiRouter);
+export default aiRouter;
 
 // Helper functions
 async function buildUserContext(userId: string, additionalContext?: any) {
