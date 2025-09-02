@@ -42,8 +42,8 @@
     "pre-push": "npm run build:web"
   },
   "engines": {
-    "node": ">=22.0.0",
-    "npm": ">=10.0"
+    "node": ">=18.0.0",
+    "npm": ">=8.0"
   },
   "overrides": {
     "metro": "^0.80.12",
