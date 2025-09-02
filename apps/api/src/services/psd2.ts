@@ -7,7 +7,7 @@ if (process.env.NODE_ENV !== 'test') {
     const tinkModule = require('@apiclient.xyz/tink');
     TinkApi = tinkModule.TinkApi;
   } catch (error) {
-    logger.warn('Tink API not available, using mock implementation', { error: error.message });
+    logger.warn('Tink API not available, using mock implementation', { error: error instanceof Error ? error.message : String(error) });
   }
 }
 
@@ -59,7 +59,7 @@ interface PSD2Transaction {
 
 class PSD2Service {
   private config: PSD2Config;
-  private tinkApi: TinkApi;
+  private tinkApi: any | null;
 
   constructor(config: PSD2Config) {
     this.config = config;
@@ -117,7 +117,7 @@ class PSD2Service {
       return { authUrl, state };
     } catch (error) {
       logger.error('Failed to generate PSD2 auth URL', {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         userId,
         provider: 'tink'
       });
@@ -170,7 +170,7 @@ class PSD2Service {
       };
     } catch (error) {
       logger.error('Failed to exchange PSD2 code for token', {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         state,
         provider: 'tink'
       });
@@ -220,7 +220,7 @@ class PSD2Service {
         accessToken
       });
 
-      const accounts: PSD2Account[] = accountsResponse.accounts.map(account => ({
+      const accounts: PSD2Account[] = accountsResponse.accounts.map((account: any) => ({
         id: account.id,
         name: account.name || 'Unknown Account',
         type: this.mapAccountType(account.type),
@@ -239,7 +239,7 @@ class PSD2Service {
       return accounts;
     } catch (error) {
       logger.error('Failed to get PSD2 accounts', {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         provider: 'tink'
       });
       throw new Error('Failed to retrieve bank accounts');
@@ -327,7 +327,7 @@ class PSD2Service {
         toDate: toDate?.toISOString()
       });
 
-      const transactions: PSD2Transaction[] = transactionsResponse.transactions.map(tx => ({
+      const transactions: PSD2Transaction[] = transactionsResponse.transactions.map((tx: any) => ({
         id: tx.id,
         accountId: tx.accountId,
         amount: Math.abs(tx.amount),
@@ -348,7 +348,7 @@ class PSD2Service {
       return transactions;
     } catch (error) {
       logger.error('Failed to get PSD2 transactions', {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         accountId,
         provider: 'tink'
       });
@@ -378,7 +378,7 @@ class PSD2Service {
       };
     } catch (error) {
       logger.error('Failed to refresh PSD2 token', {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         provider: 'tink'
       });
       throw new Error('Failed to refresh access token');
@@ -401,7 +401,7 @@ class PSD2Service {
       });
     } catch (error) {
       logger.error('Failed to revoke PSD2 token', {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         provider: 'tink'
       });
       throw new Error('Failed to revoke access token');

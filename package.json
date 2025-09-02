@@ -50,6 +50,8 @@
     "metro-core": "^0.80.12"
   },
   "devDependencies": {
+    "@esbuild/darwin-x64": "^0.25.9",
+    "@expo/cli": "^0.24.20",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "concurrently": "^8.2.2",

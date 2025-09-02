@@ -72,6 +72,7 @@ export function createApp() {
     console.log('✅ Routes loaded successfully');
   } catch (error) {
     console.error('❌ Failed to load routes:', error);
+    console.error('❌ Error stack:', error.stack);
     process.exit(1);
   }
   app.use('/api', authMiddleware, apiRouter);

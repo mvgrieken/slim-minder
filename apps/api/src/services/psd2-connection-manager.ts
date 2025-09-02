@@ -119,7 +119,7 @@ class PSD2ConnectionManager {
     } catch (error) {
       logger.error('Failed to refresh PSD2 connection token', {
         connectionId,
-        error: error.message
+        error: error instanceof Error ? error.message : String(error)
       });
       
       // Mark connection as expired
@@ -179,7 +179,7 @@ class PSD2ConnectionManager {
     } catch (error) {
       logger.error('Failed to revoke PSD2 connection', {
         connectionId,
-        error: error.message
+        error: error instanceof Error ? error.message : String(error)
       });
       return false;
     }

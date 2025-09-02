@@ -22,7 +22,7 @@ function getPrismaStore(): Store {
       return memoryStore;
     }
   }
-  return prismaStore;
+  return prismaStore || memoryStore;
 }
 
-export const store: Store = useDb ? getPrismaStore() : memoryStore;
+export const store: Store = useDb ? getPrismaStore() || memoryStore : memoryStore;
