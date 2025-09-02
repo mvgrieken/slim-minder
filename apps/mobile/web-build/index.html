@@ -100,25 +100,22 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            width: 100%;
-            margin-bottom: 16px;
+            text-decoration: none;
+            display: inline-block;
         }
         
         .btn:hover {
             background: #2563eb;
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
         }
         
         .btn-secondary {
-            background: #f1f5f9;
-            color: #64748b;
-            border: 2px solid #e2e8f0;
+            background: #64748b;
+            margin-left: 12px;
         }
         
         .btn-secondary:hover {
-            background: #e2e8f0;
-            color: #475569;
+            background: #475569;
         }
         
         .dashboard {
@@ -131,25 +128,30 @@
         
         .tabs {
             display: flex;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 4px;
             margin-bottom: 30px;
-            border-bottom: 2px solid #e2e8f0;
+            gap: 4px;
         }
         
         .tab {
-            padding: 16px 24px;
+            flex: 1;
+            padding: 16px;
+            text-align: center;
             cursor: pointer;
-            border-bottom: 2px solid transparent;
+            border-radius: 8px;
             transition: all 0.3s ease;
             font-weight: 500;
         }
         
-        .tab.active {
-            border-bottom-color: #3b82f6;
-            color: #3b82f6;
+        .tab:hover {
+            background: #e2e8f0;
         }
         
-        .tab:hover {
-            background: #f8fafc;
+        .tab.active {
+            background: #3b82f6;
+            color: white;
         }
         
         .tab-content {
@@ -161,16 +163,17 @@
         }
         
         .card {
-            background: #f8fafc;
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 20px;
+            background: white;
             border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
         
         .card h3 {
-            color: #1e293b;
             margin-bottom: 16px;
+            color: #1e293b;
             font-size: 20px;
         }
         
@@ -179,7 +182,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 16px 0;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid #f1f5f9;
         }
         
         .transaction-item:last-child {
@@ -187,8 +190,9 @@
         }
         
         .transaction-info h4 {
-            color: #1e293b;
             margin-bottom: 4px;
+            color: #1e293b;
+            font-weight: 600;
         }
         
         .transaction-info p {
@@ -250,6 +254,52 @@
         
         .logout-btn:hover {
             background: #dc2626;
+        }
+        
+        /* Switch Toggle Styles */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #3b82f6;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
         }
         
         .status-bar {
@@ -343,6 +393,41 @@
                         <p style="font-size: 32px; font-weight: 700; color: #1e293b;">€2.750,50</p>
                     </div>
                     
+                    <!-- PSD2 Bankkoppeling -->
+                    <div class="card" id="bankConnectionCard">
+                        <h3>🏦 Bankkoppeling</h3>
+                        <div id="bankConnectionStatus">
+                            <p style="color: #64748b; margin-bottom: 16px;">Koppel je bankrekening voor automatische transacties</p>
+                            <button class="btn" onclick="showBankSelection()">Bank Koppelen</button>
+                        </div>
+                        <div id="bankSelection" style="display: none;">
+                            <div style="margin-bottom: 16px;">
+                                <label for="bankSelect" style="display: block; margin-bottom: 8px; font-weight: 600;">Kies je bank:</label>
+                                <select id="bankSelect" style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; margin-bottom: 16px;">
+                                    <option value="">Selecteer bank...</option>
+                                    <option value="ing">ING Bank</option>
+                                    <option value="rabobank">Rabobank</option>
+                                    <option value="abnamro">ABN AMRO</option>
+                                    <option value="bunq">Bunq</option>
+                                    <option value="revolut">Revolut</option>
+                                </select>
+                                <button class="btn" onclick="connectBank()">Verbind</button>
+                                <button class="btn btn-secondary" onclick="cancelBankConnection()">Annuleren</button>
+                            </div>
+                        </div>
+                        <div id="bankConnected" style="display: none;">
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                                <span style="color: #10b981; font-size: 24px;">✅</span>
+                                <div>
+                                    <p style="font-weight: 600; color: #10b981;">ING Bank gekoppeld</p>
+                                    <p style="color: #64748b; font-size: 14px;">Laatste update: vandaag 14:30</p>
+                                </div>
+                            </div>
+                            <button class="btn btn-secondary" onclick="refreshTransactions()">🔄 Transacties Vernieuwen</button>
+                            <button class="btn btn-secondary" onclick="disconnectBank()">❌ Ontkoppelen</button>
+                        </div>
+                    </div>
+                    
                     <div class="card">
                         <h3>📈 Deze Maand</h3>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
@@ -431,6 +516,33 @@
                             <p style="color: #64748b; font-size: 14px;">Deadline: 31 december 2025</p>
                         </div>
                     </div>
+                    
+                    <!-- AI Coach Chat -->
+                    <div class="card">
+                        <h3>🤖 AI Budgetcoach</h3>
+                        <div id="aiChatContainer">
+                            <div id="aiChatMessages" style="max-height: 300px; overflow-y: auto; margin-bottom: 16px; padding: 16px; background: #f8fafc; border-radius: 8px;">
+                                <div style="margin-bottom: 12px;">
+                                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                        <span style="color: #3b82f6; font-weight: 600;">🤖 Slim Minder:</span>
+                                    </div>
+                                    <p style="color: #1e293b; background: white; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">Hallo! Ik ben je persoonlijke budgetcoach. Stel me gerust vragen over je financiën, budgetten of spaardoelen. Ik help je graag verder!</p>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="aiChatInput" placeholder="Stel je vraag..." style="flex: 1; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px;">
+                                <button class="btn" onclick="sendAIMessage()">Verstuur</button>
+                            </div>
+                            <div style="margin-top: 12px;">
+                                <p style="color: #64748b; font-size: 14px; margin-bottom: 8px;">💡 Voorbeeldvragen:</p>
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                    <button class="btn btn-secondary" style="font-size: 12px; padding: 8px 12px;" onclick="askAIQuestion('Hoeveel heb ik deze week aan boodschappen uitgegeven?')">Boodschappen deze week?</button>
+                                    <button class="btn btn-secondary" style="font-size: 12px; padding: 8px 12px;" onclick="askAIQuestion('Kan ik deze maand nog uit eten?')">Uit eten deze maand?</button>
+                                    <button class="btn btn-secondary" style="font-size: 12px; padding: 8px 12px;" onclick="askAIQuestion('Hoe kan ik sneller sparen?')">Sneller sparen tips?</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <div id="profile" class="tab-content">
@@ -439,6 +551,56 @@
                         <p style="margin-bottom: 16px;"><strong>Email:</strong> gebruiker@slimminder.nl</p>
                         <p style="margin-bottom: 16px;"><strong>Lid sinds:</strong> September 2025</p>
                         <p style="margin-bottom: 16px;"><strong>Status:</strong> <span style="color: #10b981;">Actief</span></p>
+                    </div>
+                    
+                    <!-- Notificaties & Nudges -->
+                    <div class="card">
+                        <h3>🔔 Notificaties & Nudges</h3>
+                        <div style="margin-bottom: 16px;">
+                            <p style="color: #64748b; margin-bottom: 12px;">Beheer je notificatievoorkeuren</p>
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                                <span>Budget waarschuwingen (90% drempel)</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="budgetNotifications" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                                <span>Doel herinneringen</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="goalNotifications" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                                <span>Weekelijkse rapporten</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="weeklyReports">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Actieve Notificaties -->
+                        <div>
+                            <h4 style="margin-bottom: 12px; color: #1e293b;">Actieve Notificaties</h4>
+                            <div id="activeNotifications">
+                                <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 12px; margin-bottom: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                        <span style="color: #f59e0b;">⚠️</span>
+                                        <span style="font-weight: 600; color: #92400e;">Budget Waarschuwing</span>
+                                    </div>
+                                    <p style="color: #92400e; font-size: 14px;">Je boodschappenbudget is 86% opgebruikt (€345,67 van €400)</p>
+                                </div>
+                                <div style="background: #dbeafe; border: 1px solid #3b82f6; border-radius: 8px; padding: 12px; margin-bottom: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                        <span style="color: #3b82f6;">🎯</span>
+                                        <span style="font-weight: 600; color: #1e40af;">Doel Update</span>
+                                    </div>
+                                    <p style="color: #1e40af; font-size: 14px;">Je bent 37,5% op weg naar je laptop spaardoel!</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -509,6 +671,112 @@
             setTimeout(() => {
                 statusBar.classList.remove('show');
             }, 3000);
+        }
+        
+        // PSD2 Bankkoppeling Functions
+        function showBankSelection() {
+            document.getElementById('bankConnectionStatus').style.display = 'none';
+            document.getElementById('bankSelection').style.display = 'block';
+        }
+        
+        function cancelBankConnection() {
+            document.getElementById('bankSelection').style.display = 'none';
+            document.getElementById('bankConnectionStatus').style.display = 'block';
+        }
+        
+        function connectBank() {
+            const bankSelect = document.getElementById('bankSelect');
+            if (!bankSelect.value) {
+                alert('Selecteer eerst een bank');
+                return;
+            }
+            
+            // Simulate PSD2 connection
+            document.getElementById('bankSelection').style.display = 'none';
+            document.getElementById('bankConnected').style.display = 'block';
+            showStatus('🏦 Bank succesvol gekoppeld!');
+        }
+        
+        function disconnectBank() {
+            document.getElementById('bankConnected').style.display = 'none';
+            document.getElementById('bankConnectionStatus').style.display = 'block';
+            showStatus('❌ Bank ontkoppeld');
+        }
+        
+        function refreshTransactions() {
+            showStatus('🔄 Transacties worden vernieuwd...');
+            setTimeout(() => {
+                showStatus('✅ Transacties bijgewerkt!');
+            }, 2000);
+        }
+        
+        // AI Coach Functions
+        function sendAIMessage() {
+            const input = document.getElementById('aiChatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            addUserMessage(message);
+            input.value = '';
+            
+            // Simulate AI response
+            setTimeout(() => {
+                const aiResponse = generateAIResponse(message);
+                addAIMessage(aiResponse);
+            }, 1000);
+        }
+        
+        function askAIQuestion(question) {
+            addUserMessage(question);
+            
+            setTimeout(() => {
+                const aiResponse = generateAIResponse(question);
+                addAIMessage(aiResponse);
+            }, 1000);
+        }
+        
+        function addUserMessage(message) {
+            const chatMessages = document.getElementById('aiChatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.style.marginBottom = '12px';
+            messageDiv.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                    <span style="color: #10b981; font-weight: 600;">👤 Jij:</span>
+                </div>
+                <p style="color: #1e293b; background: #dbeafe; padding: 12px; border-radius: 8px; border: 1px solid #3b82f6;">${message}</p>
+            `;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        function addAIMessage(message) {
+            const chatMessages = document.getElementById('aiChatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.style.marginBottom = '12px';
+            messageDiv.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                    <span style="color: #3b82f6; font-weight: 600;">🤖 Slim Minder:</span>
+                </div>
+                <p style="color: #1e293b; background: white; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">${message}</p>
+            `;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        function generateAIResponse(question) {
+            const responses = {
+                'boodschappen': 'Deze week heb je €345,67 uitgegeven aan boodschappen. Dat is 86% van je budget van €400. Je hebt nog €54,33 over voor de rest van de maand.',
+                'uit eten': 'Op basis van je huidige uitgaven en budgetten, kun je deze maand nog ongeveer €200 uitgeven aan uit eten. Ik raad aan om dit te beperken tot €150 om ruimte te houden voor onverwachte uitgaven.',
+                'sparen': 'Om sneller te sparen, probeer:\n1. Je boodschappenbudget te verlagen van €400 naar €350\n2. Automatisch €100 per maand naar je spaardoel over te maken\n3. Kleine uitgaven te verminderen (koffie, lunches)',
+                'default': 'Ik zie dat je een vraag hebt over je financiën. Laat me je helpen! Kun je je vraag specifieker maken?'
+            };
+            
+            const lowerQuestion = question.toLowerCase();
+            if (lowerQuestion.includes('boodschappen')) return responses.boodschappen;
+            if (lowerQuestion.includes('uit eten')) return responses.uitEten;
+            if (lowerQuestion.includes('sparen')) return responses.sparen;
+            return responses.default;
         }
         
         // Auto-login for demo purposes
