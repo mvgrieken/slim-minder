@@ -1,15 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
 
-// 🔧 VERVANG DIT DOOR JE ECHTE SUPABASE CREDENTIALS
-// Ga naar je Supabase project dashboard → Settings → API
-// Kopieer de Project URL en anon public key
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://your-project-id.supabase.co';
-const supabaseAnon = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'your-anon-key';
-
-// ⚠️  ZET JE ECHTE CREDENTIALS HIER IN VOOR TESTING
-// const supabaseUrl = 'https://jouw-project-id.supabase.co';
-// const supabaseAnon = 'jouw-anon-key-hier';
+// Supabase credentials
+const supabaseUrl = 'https://aenhydmyyneunvhunxjz.supabase.co';
+const supabaseAnon = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFlbmh5ZG15eW5ldW52aHVueGp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMTYyMjcsImV4cCI6MjA3MTg5MjIyN30.P1rtifcC3BzqZFNojeS96pThMSP2HYmUh2YX-9UfdhM';
 
 export const supabase = createClient(supabaseUrl, supabaseAnon, {
   auth: {

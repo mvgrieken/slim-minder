@@ -11,6 +11,8 @@ import {
   Platform,
 } from 'react-native';
 import { supabase } from '../supabase';
+import { handleAuthError, handleValidationError } from '../utils/errorHandler';
+import { useAuthRateLimit } from '../hooks/useRateLimit';
 
 interface LoginProps {
   onLoginSuccess: () => void;
@@ -22,9 +24,40 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
 
-  const handleAuth = async () => {
+  // Rate limiting for authentication
+  const rateLimit = useAuthRateLimit();
+
+  const validateInputs = (): boolean => {
     if (!email || !password) {
-      Alert.alert('Fout', 'Vul alle velden in');
+      handleValidationError(new Error('Vul alle velden in'));
+      return false;
+    }
+
+    if (!email.includes('@')) {
+      handleValidationError(new Error('Voer een geldig email adres in'));
+      return false;
+    }
+
+    if (password.length < 6) {
+      handleValidationError(new Error('Wachtwoord moet minimaal 6 karakters bevatten'));
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleAuth = async () => {
+    if (!validateInputs()) {
+      return;
+    }
+
+    // Check rate limiting
+    if (rateLimit.isRateLimited()) {
+      const remainingTime = Math.ceil(rateLimit.getRemainingBlockTime() / 1000 / 60);
+      Alert.alert(
+        'Te veel pogingen',
+        `Je hebt te veel pogingen gedaan. Probeer het over ${remainingTime} minuten opnieuw.`
+      );
       return;
     }
 
@@ -46,6 +79,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
             'We hebben een bevestigingslink gestuurd naar je email adres.'
           );
         } else if (data.session) {
+          rateLimit.resetAttempts(); // Reset on success
           onLoginSuccess();
         }
       } else {
@@ -58,11 +92,13 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         if (error) throw error;
 
         if (data.session) {
+          rateLimit.resetAttempts(); // Reset on success
           onLoginSuccess();
         }
       }
-    } catch (error: any) {
-      Alert.alert('Fout', error.message || 'Er is een fout opgetreden');
+    } catch (error: unknown) {
+      rateLimit.incrementAttempts(); // Increment on failure
+      handleAuthError(error);
     } finally {
       setIsLoading(false);
     }
@@ -80,6 +116,9 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     );
   };
 
+  const remainingAttempts = rateLimit.getRemainingAttempts();
+  const isBlocked = rateLimit.isRateLimited();
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -91,53 +130,73 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           <Text style={styles.subtitle}>Je persoonlijke budgetcoach</Text>
         </View>
 
+        {isBlocked && (
+          <View style={styles.rateLimitWarning}>
+            <Text style={styles.rateLimitText}>
+              ⚠️ Te veel pogingen. Probeer het later opnieuw.
+            </Text>
+          </View>
+        )}
+
         <View style={styles.form}>
           <TextInput
-            style={styles.input}
+            style={[styles.input, isBlocked && styles.inputDisabled]}
             placeholder="Email adres"
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
+            editable={!isBlocked}
           />
 
           <TextInput
-            style={styles.input}
+            style={[styles.input, isBlocked && styles.inputDisabled]}
             placeholder="Wachtwoord"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
             autoCapitalize="none"
+            editable={!isBlocked}
           />
 
           <TouchableOpacity
-            style={[styles.button, isLoading && styles.buttonDisabled]}
+            style={[styles.button, (isLoading || isBlocked) && styles.buttonDisabled]}
             onPress={handleAuth}
-            disabled={isLoading}
+            disabled={isLoading || isBlocked}
           >
             <Text style={styles.buttonText}>
               {isLoading ? 'Bezig...' : (isSignUp ? 'Account aanmaken' : 'Inloggen')}
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.switchButton}
-            onPress={() => setIsSignUp(!isSignUp)}
-          >
-            <Text style={styles.switchButtonText}>
-              {isSignUp ? 'Al een account? Log in' : 'Nog geen account? Maak er een aan'}
-            </Text>
-          </TouchableOpacity>
+          {!isBlocked && (
+            <>
+              <TouchableOpacity
+                style={styles.switchButton}
+                onPress={() => setIsSignUp(!isSignUp)}
+              >
+                <Text style={styles.switchButtonText}>
+                  {isSignUp ? 'Al een account? Log in' : 'Nog geen account? Maak er een aan'}
+                </Text>
+              </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.guestButton}
-            onPress={handleGuestLogin}
-          >
-            <Text style={styles.guestButtonText}>
-              🧪 Gast Login (Development)
+              <TouchableOpacity
+                style={styles.guestButton}
+                onPress={handleGuestLogin}
+              >
+                <Text style={styles.guestButtonText}>
+                  🧪 Gast Login (Development)
+                </Text>
+              </TouchableOpacity>
+            </>
+          )}
+
+          {!isBlocked && remainingAttempts < 3 && (
+            <Text style={styles.attemptsWarning}>
+              Nog {remainingAttempts} pogingen over
             </Text>
-          </TouchableOpacity>
+          )}
         </View>
 
         <View style={styles.footer}>
@@ -193,6 +252,10 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
+  inputDisabled: {
+    backgroundColor: '#e2e8f0',
+    color: '#94a3b8',
+  },
   button: {
     backgroundColor: '#3b82f6',
     borderRadius: 12,
@@ -241,5 +304,31 @@ const styles = StyleSheet.create({
     color: '#94a3b8',
     fontSize: 12,
     textAlign: 'center',
+  },
+  rateLimitWarning: {
+    backgroundColor: '#fef3c7',
+    borderWidth: 1,
+    borderColor: '#fcd34d',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  rateLimitText: {
+    color: '#d97706',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  attemptsWarning: {
+    color: '#64748b',
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: 16,
   },
 });

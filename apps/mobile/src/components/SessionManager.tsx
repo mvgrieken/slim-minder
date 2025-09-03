@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { supabase } from '../supabase';
 import { Login } from './Login';
-import { Navigation } from './Navigation';
+import { MainApp } from './MainApp';
 
 export const SessionManager: React.FC = () => {
   const [session, setSession] = useState<any>(null);
@@ -50,7 +50,7 @@ export const SessionManager: React.FC = () => {
     return <Login onLoginSuccess={handleLoginSuccess} />;
   }
 
-  return <Navigation onLogout={handleLogout} />;
+  return <MainApp onLogout={handleLogout} />;
 };
 
 const styles = StyleSheet.create({

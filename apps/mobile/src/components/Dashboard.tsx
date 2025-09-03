@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  RefreshControl,
 } from 'react-native';
 
 interface Transaction {
@@ -22,7 +23,7 @@ interface Budget {
   category: string;
   limit: number;
   spent: number;
-  period: 'month' | 'week';
+  period: string;
 }
 
 interface DashboardProps {
@@ -31,6 +32,8 @@ interface DashboardProps {
   totalBalance: number;
   monthlyIncome: number;
   monthlyExpenses: number;
+  onRefresh?: () => void;
+  refreshing?: boolean;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
@@ -39,6 +42,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
   totalBalance,
   monthlyIncome,
   monthlyExpenses,
+  onRefresh,
+  refreshing = false,
 }) => {
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month'>('month');
 
@@ -69,7 +74,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView 
+      style={styles.container}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={['#3b82f6']}
+          tintColor="#3b82f6"
+        />
+      }
+    >
       {/* Balance Overview */}
       <View style={styles.balanceCard}>
         <Text style={styles.balanceTitle}>Totaal Saldo</Text>

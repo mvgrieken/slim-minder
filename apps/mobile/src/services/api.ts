@@ -106,6 +106,14 @@ class ApiService {
       body: JSON.stringify({ message }),
     });
   }
+
+  // Bank connection
+  async connectBank(provider: string, redirectUri: string, permissions: string[]): Promise<ApiResponse<any>> {
+    return this.request('/api/bank/connect', {
+      method: 'POST',
+      body: JSON.stringify({ provider, redirectUri, permissions }),
+    });
+  }
 }
 
 export const apiService = new ApiService();

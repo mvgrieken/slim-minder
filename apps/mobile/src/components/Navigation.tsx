@@ -9,11 +9,13 @@ import {
 interface NavigationProps {
   activeTab: string;
   onTabPress: (tab: string) => void;
+  onLogout?: () => void;
 }
 
 export const Navigation: React.FC<NavigationProps> = ({
   activeTab,
   onTabPress,
+  onLogout,
 }) => {
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: '📊' },
