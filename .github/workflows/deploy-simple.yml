@@ -1,9 +1,7 @@
-name: Deploy to Netlify
+name: Deploy to Netlify (Simple)
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
     branches: [ main ]
 
 jobs:
@@ -35,11 +33,7 @@ jobs:
         publish-dir: './apps/mobile/web-build'
         production-branch: main
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        deploy-message: "Deploy from GitHub Actions - Verbeterde Slim Minder App"
-        enable-pull-request-comment: true
-        enable-commit-comment: true
-        overwrites-pull-request-comment: true
-      env:
-        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-        NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        deploy-message: "Auto-deploy verbeterde Slim Minder App"
+        enable-pull-request-comment: false
+        enable-commit-comment: false
       timeout-minutes: 5
