@@ -19,11 +19,11 @@ Voeg je API keys toe aan `apps/api/.env`:
 
 ```env
 # OpenAI Configuration
-OPENAI_API_KEY=sk-your-openai-api-key
+OPENAI_API_KEY=your-openai-api-key-here
 OPENAI_MODEL=gpt-4
 
 # Anthropic Configuration (optioneel)
-ANTHROPIC_API_KEY=sk-ant-your-anthropic-api-key
+ANTHROPIC_API_KEY=your-anthropic-api-key-here
 ANTHROPIC_MODEL=claude-3-sonnet-20240229
 ```
 
