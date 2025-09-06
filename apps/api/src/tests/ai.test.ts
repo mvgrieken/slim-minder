@@ -22,6 +22,24 @@ jest.mock('../prisma', () => ({
     user: {
       findUnique: jest.fn(),
     },
+    budget: {
+      findMany: jest.fn(),
+    },
+    transaction: {
+      findMany: jest.fn(),
+      groupBy: jest.fn(),
+    },
+    goal: {
+      findMany: jest.fn(),
+    },
+  }
+}));
+
+// Mock AI Service
+jest.mock('../services/ai', () => ({
+  aiService: {
+    generateResponse: jest.fn(),
+    getProviderStatus: jest.fn(),
   }
 }));
 
@@ -34,6 +52,22 @@ describe('AI Routes', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    
+    // Setup default AI service mock
+    const { aiService } = require('../services/ai');
+    aiService.generateResponse.mockResolvedValue({
+      message: 'Hier zijn enkele tips om geld te besparen...',
+      suggestions: ['Tip 1', 'Tip 2'],
+      tokensUsed: 150,
+      model: 'gpt-4',
+      provider: 'openai'
+    });
+    
+    aiService.getProviderStatus.mockReturnValue({
+      provider: 'openai',
+      available: true,
+      hasApiKey: true
+    });
   });
 
   describe('POST /api/ai/chat', () => {
@@ -161,6 +195,32 @@ describe('AI Routes', () => {
           feedback: 'Test feedback'
         })
         .expect(400);
+
+      expect(response.body).toHaveProperty('error');
+    });
+  });
+
+  describe('GET /api/ai/status', () => {
+    it('should return AI provider status', async () => {
+      const response = await request(app)
+        .get('/api/ai/status')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('status', 'ok');
+      expect(response.body).toHaveProperty('provider');
+      expect(response.body).toHaveProperty('available');
+      expect(response.body).toHaveProperty('hasApiKey');
+    });
+
+    it('should handle AI service errors gracefully', async () => {
+      const { aiService } = require('../services/ai');
+      aiService.getProviderStatus.mockImplementation(() => {
+        throw new Error('AI service error');
+      });
+
+      const response = await request(app)
+        .get('/api/ai/status')
+        .expect(500);
 
       expect(response.body).toHaveProperty('error');
     });

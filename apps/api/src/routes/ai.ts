@@ -3,6 +3,7 @@ import { prisma } from '../prisma';
 import { authMiddleware } from '../auth';
 import { logger } from '../utils/logger';
 import { z } from 'zod';
+import { aiService } from '../services/ai';
 
 // AI Chat schemas
 const ChatMessageSchema = z.object({
@@ -41,8 +42,8 @@ export async function aiRoutes(fastify: FastifyInstance) {
         // Get user context for AI
         const userContext = await buildUserContext(user.id, context);
 
-        // Generate AI response
-        const aiResponse = await generateAIResponse(message, userContext);
+        // Generate AI response using AI service
+        const aiResponse = await aiService.generateResponse(message, userContext);
 
         // Store chat interaction
         const chatInteraction = await prisma.chatInteraction.create({
@@ -53,7 +54,8 @@ export async function aiRoutes(fastify: FastifyInstance) {
             context: userContext,
             metadata: {
               tokensUsed: aiResponse.tokensUsed,
-              model: aiResponse.model
+              model: aiResponse.model,
+              provider: aiResponse.provider
             }
           }
         });
@@ -70,7 +72,8 @@ export async function aiRoutes(fastify: FastifyInstance) {
           suggestions: aiResponse.suggestions,
           metadata: {
             tokensUsed: aiResponse.tokensUsed,
-            model: aiResponse.model
+            model: aiResponse.model,
+            provider: aiResponse.provider
           }
         });
       } catch (error) {
@@ -294,42 +297,27 @@ async function buildUserContext(userId: string, additionalContext?: any) {
   };
 }
 
-async function generateAIResponse(message: string, context: any) {
-  // TODO: Implement actual OpenAI/Claude integration
-  const prompt = buildAIPrompt(message, context);
-  
-  // Placeholder response
-  const response = {
-    message: `Ik zie dat je vraagt: "${message}". Gebaseerd op je financiële situatie kan ik je helpen met budgettering en besparingstips.`,
-    suggestions: [
-      'Wil je een overzicht van je huidige budgetten?',
-      'Zal ik je helpen met het instellen van nieuwe doelen?',
-      'Kan ik je adviseren over besparingsmogelijkheden?'
-    ],
-    tokensUsed: 150,
-    model: 'gpt-4'
-  };
+  // GET /ai/status - Get AI provider status
+  fastify.get('/ai/status', {
+    handler: async (request, reply) => {
+      try {
+        const status = aiService.getProviderStatus();
+        
+        return reply.send({
+          status: 'ok',
+          provider: status.provider,
+          available: status.available,
+          hasApiKey: status.hasApiKey
+        });
+      } catch (error) {
+        logger.error('Failed to get AI status', {
+          error: error.message
+        });
 
-  logger.info('AI response generated', {
-    messageLength: message.length,
-    responseLength: response.message.length,
-    tokensUsed: response.tokensUsed
+        return reply.status(500).send({
+          error: 'Internal Server Error',
+          message: 'Failed to get AI status'
+        });
+      }
+    }
   });
-
-  return response;
-}
-
-function buildAIPrompt(message: string, context: any) {
-  return `
-Je bent Slim Minder, een persoonlijke financiële coach die gebruikers helpt met budgettering en besparing.
-
-Gebruiker context:
-- Budgetten: ${JSON.stringify(context.budgetSummary)}
-- Recente transacties: ${JSON.stringify(context.recentTransactions)}
-- Doelen: ${JSON.stringify(context.goals)}
-
-Gebruiker vraag: ${message}
-
-Geef een behulpzaam, persoonlijk antwoord in het Nederlands. Focus op praktische adviezen en concrete stappen.
-  `.trim();
-}

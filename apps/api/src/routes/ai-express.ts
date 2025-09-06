@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { store } from '../store';
 import { logger } from '../utils/logger';
+import { aiService } from '../services/ai';
 
 // AI Chat schemas
 const ChatMessageSchema = z.object({
@@ -45,8 +46,8 @@ export function registerAIRoutes(router: Router) {
       // Get user context for AI
       const userContext = await buildUserContext(userId, context);
 
-      // Generate AI response
-      const aiResponse = await generateAIResponse(message, userContext);
+      // Generate AI response using AI service
+      const aiResponse = await aiService.generateResponse(message, userContext);
 
       // Store chat interaction using store
       const chatInteraction = await store.createChatInteraction(userId, {
@@ -55,7 +56,8 @@ export function registerAIRoutes(router: Router) {
         context: userContext,
         metadata: {
           tokensUsed: aiResponse.tokensUsed,
-          model: aiResponse.model
+          model: aiResponse.model,
+          provider: aiResponse.provider
         }
       });
 
@@ -71,7 +73,8 @@ export function registerAIRoutes(router: Router) {
         suggestions: aiResponse.suggestions,
         metadata: {
           tokensUsed: aiResponse.tokensUsed,
-          model: aiResponse.model
+          model: aiResponse.model,
+          provider: aiResponse.provider
         }
       });
     } catch (error) {
@@ -215,6 +218,30 @@ export function registerAIRoutes(router: Router) {
       });
     }
   });
+
+  // GET /ai/status - Get AI provider status
+  router.get('/ai/status', async (req: Request, res: Response) => {
+    try {
+      const status = aiService.getProviderStatus();
+      
+      res.json({
+        status: 'ok',
+        provider: status.provider,
+        available: status.available,
+        hasApiKey: status.hasApiKey
+      });
+    } catch (error) {
+      const err = error as any;
+      logger.error('Failed to get AI status', {
+        error: err?.message || String(err)
+      });
+
+      res.status(500).json({
+        error: 'Internal Server Error',
+        message: 'Failed to get AI status'
+      });
+    }
+  });
 }
 
 // Default export for compatibility
@@ -268,27 +295,5 @@ async function buildUserContext(userId: string, additionalContext?: any) {
     }),
     ...additionalContext
   };
-}
-
-async function generateAIResponse(message: string, context: any) {
-  // Mock AI response for development/testing
-  const response = {
-    message: `Ik zie dat je vraagt: "${message}". Gebaseerd op je financiële situatie kan ik je helpen met budgettering en besparingstips.`,
-    suggestions: [
-      'Wil je een overzicht van je huidige budgetten?',
-      'Zal ik je helpen met het instellen van nieuwe doelen?',
-      'Kan ik je adviseren over besparingsmogelijkheden?'
-    ],
-    tokensUsed: 150,
-    model: 'gpt-4'
-  };
-
-  logger.info('AI response generated', {
-    messageLength: message.length,
-    responseLength: response.message.length,
-    tokensUsed: response.tokensUsed
-  });
-
-  return response;
 }
 
